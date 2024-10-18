@@ -33,9 +33,6 @@
             <router-link class="nav-link" to="/admin/financial">Tài Chính</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/room-property">Phòng & Tài Sản</router-link>
-          </li>
-          <li class="nav-item" v-if="userRole === 'admin'">
             <router-link class="nav-link" to="/admin/maintenance-service">BT & DV</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">

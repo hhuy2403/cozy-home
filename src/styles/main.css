@@ -75,6 +75,11 @@ body {
     -webkit-background-clip: text;
     color: transparent;
     animation: fadeIn 2s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
 }
 
 @keyframes fadeIn {
@@ -119,6 +124,10 @@ body {
     color: var(--primary-color);
 }
 
+.cozyhome-header-links{
+    margin-top: 20px;
+}
+
 .header-link {
     color: var(--white-color);
     margin: 0 15px;
@@ -135,7 +144,7 @@ body {
 
 /* Main Content */
 .cozyhome-main {
-    padding: 80px 20px;
+    padding: 50px 20px;
     background-color: #f9f9f9;
     animation: fadeInUp 1.5s ease-in-out;
 }
@@ -357,6 +366,18 @@ img{
         align-items: center;
     }
 
+    .cozyhome-header-links {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        margin-top: 40px;
+    }
+
+    .cozyhome-header-links .header-link{
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
 
     .cozyhome-about-content,
     .cozyhome-pricing-cards,

@@ -8,7 +8,7 @@ import AdminReportManagement from '@/views/admin/AdminReportManagement.vue';
 import AdminUserManagement from '@/views/admin/AdminUserManagement.vue';
 import AdminFinancialManagement from "@/views/admin/AdminFinancialManagement.vue";
 import AdminMaintenanceServiceManagement from "@/views/admin/AdminMaintenanceServiceManagement.vue";
-import AdminRoomPropertyManagement from "@/views/admin/AdminRoomPropertyManagement.vue";
+
 import AdminFeedbackManagement from "@/views/admin/AdminFeedbackManagement.vue";
 import AdminNotificationManagement from "@/views/admin/AdminNotificationManagement.vue";
 import AdminSettings from '@/views/admin/AdminSettings.vue';
@@ -73,7 +73,6 @@ const routes = [
             { path: 'users', component: AdminUserManagement },
             { path: 'financial', component: AdminFinancialManagement },
             { path: 'maintenance-service', component: AdminMaintenanceServiceManagement },
-            { path: 'room-property', component: AdminRoomPropertyManagement },
             { path: 'feedback', component: AdminFeedbackManagement },
             { path: 'notification', component: AdminNotificationManagement },
             { path: 'settings', component: AdminSettings }
