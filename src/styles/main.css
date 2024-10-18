@@ -5,7 +5,7 @@
     --primary-color: #2a3f54;
     --accent-color: #ff9800;
     --white-color: #fff;
-    --background-blur: rgba(255, 255, 255, 0.1); /* Màu nền trong suốt cho hiệu ứng Glassmorphism */
+    --background-blur: rgba(255, 255, 255, 0.1);
 }
 
 /* Body Setup */
@@ -243,9 +243,8 @@ img{
 
 .glass {
     backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.1); /* Hiệu ứng kính mờ */
+    background: #fff;
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-    border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.18);
 }
 

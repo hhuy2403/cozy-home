@@ -10,7 +10,7 @@ import AdminFinancialManagement from "@/views/admin/AdminFinancialManagement.vue
 import AdminMaintenanceServiceManagement from "@/views/admin/AdminMaintenanceServiceManagement.vue";
 import AdminRoomPropertyManagement from "@/views/admin/AdminRoomPropertyManagement.vue";
 import AdminFeedbackManagement from "@/views/admin/AdminFeedbackManagement.vue";
-import AdminNotificationManagemnt from "@/views/admin/AdminNotificationManagemnt.vue";
+import AdminNotificationManagement from "@/views/admin/AdminNotificationManagement.vue";
 import AdminSettings from '@/views/admin/AdminSettings.vue';
 
 // Import cho Tenant
@@ -41,6 +41,7 @@ import LandlordLayout from '@/layouts/LandlordLayout.vue';
 import LoginPage from "@/views/auth/LoginPage.vue";
 import RegisterPage from "@/views/auth/RegisterPage.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
+
 
 // Định nghĩa các routes
 const routes = [
@@ -74,7 +75,7 @@ const routes = [
             { path: 'maintenance-service', component: AdminMaintenanceServiceManagement },
             { path: 'room-property', component: AdminRoomPropertyManagement },
             { path: 'feedback', component: AdminFeedbackManagement },
-            { path: 'notification', component: AdminNotificationManagemnt },
+            { path: 'notification', component: AdminNotificationManagement },
             { path: 'settings', component: AdminSettings }
         ]
     },

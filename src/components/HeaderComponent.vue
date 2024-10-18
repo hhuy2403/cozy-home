@@ -8,17 +8,13 @@
       <button
           class="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          @click="toggleNavbar"
       >
         <span class="navbar-toggler-icon"><i class="fas fa-bars"></i></span>
       </button>
 
       <!-- Navigation Links -->
-      <div class="collapse navbar-collapse" id="navbarNav">
+      <div :class="['collapse', 'navbar-collapse', { 'show': isNavbarOpen }]" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <!-- Menu cho Admin -->
           <li class="nav-item" v-if="userRole === 'admin'">
@@ -31,22 +27,22 @@
             <router-link class="nav-link" to="/admin/reports">Báo cáo</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/users">Người Dùng </router-link>
+            <router-link class="nav-link" to="/admin/users">Người Dùng</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/financial">Tài Chính </router-link>
+            <router-link class="nav-link" to="/admin/financial">Tài Chính</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/room-property">Phòng & Tài Sản </router-link>
+            <router-link class="nav-link" to="/admin/room-property">Phòng & Tài Sản</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/maintenance-service">BT & DV </router-link>
+            <router-link class="nav-link" to="/admin/maintenance-service">BT & DV</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/feedback">Feedback </router-link>
+            <router-link class="nav-link" to="/admin/feedback">Feedback</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/notification">Notification </router-link>
+            <router-link class="nav-link" to="/admin/notification">Notification</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
             <router-link class="nav-link" to="/admin/settings">Cài Đặt</router-link>
@@ -92,20 +88,19 @@ export default {
   name: 'HeaderComponent',
   data() {
     return {
-      userRole: '' // Lưu vai trò người dùng từ localStorage hoặc xác thực API
+      userRole: '', // Lưu vai trò người dùng từ localStorage hoặc xác thực API
+      isNavbarOpen: false // Biến để quản lý trạng thái toggle
     };
   },
   created() {
     // Lấy vai trò người dùng từ localStorage hoặc mặc định là 'guest'
     this.userRole = localStorage.getItem('userRole') || 'guest';
   },
-  watch: {
-    // Theo dõi nếu vai trò người dùng thay đổi, và cập nhật lại
-    '$route': function() {
-      this.userRole = localStorage.getItem('userRole') || 'guest';
-    }
-  },
   methods: {
+    toggleNavbar() {
+      // Chuyển đổi trạng thái navbar mở/đóng
+      this.isNavbarOpen = !this.isNavbarOpen;
+    },
     logout() {
       // Xóa vai trò người dùng và thông tin đăng nhập khỏi localStorage
       localStorage.removeItem('userRole');
@@ -158,6 +153,15 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Styles to handle the collapse and show behavior */
+.collapse {
+  display: none;
+}
+
+.collapse.show {
+  display: block;
 }
 
 .btn-outline-light {
