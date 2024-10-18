@@ -185,7 +185,7 @@ body {
 }
 
 .cozyhome-about-image img{
-    width: 100%;
+    width: 80%;
     border-radius: 5%;
 }
 
@@ -251,6 +251,7 @@ img{
 }
 
 .glass {
+    border-radius: 0;
     backdrop-filter: blur(8px);
     background: #fff;
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
