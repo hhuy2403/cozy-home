@@ -36,8 +36,8 @@ export default {
   data() {
     return {
       meters: [
-        { id: 1, roomName: 'Room A', electricity: 120, water: 15, date: '2023-09-01' },
-        { id: 2, roomName: 'Room B', electricity: 150, water: 18, date: '2023-09-01' }
+        { id: 1, roomName: 'room A', electricity: 120, water: 15, date: '2023-09-01' },
+        { id: 2, roomName: 'room B', electricity: 150, water: 18, date: '2023-09-01' }
       ]
     };
   },

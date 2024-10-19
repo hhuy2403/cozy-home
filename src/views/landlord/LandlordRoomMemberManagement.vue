@@ -31,7 +31,7 @@ export default {
   props: ['roomId'], // Nhận roomId từ route params
   data() {
     return {
-      roomName: 'Sample Room Name', // Thay bằng dữ liệu thực tế
+      roomName: 'Sample room Name', // Thay bằng dữ liệu thực tế
       members: [
         { id: 1, name: 'John Doe', joinDate: '2023-08-01' },
         { id: 2, name: 'Jane Smith', joinDate: '2023-09-01' }
@@ -51,7 +51,7 @@ export default {
   },
   created() {
     // Logic để lấy tên phòng và danh sách thành viên từ roomId
-    this.roomName = 'Room 101'; // Ví dụ tạm thời
+    this.roomName = 'room 101'; // Ví dụ tạm thời
   }
 }
 </script>

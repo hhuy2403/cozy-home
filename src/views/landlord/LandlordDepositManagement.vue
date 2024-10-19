@@ -38,8 +38,8 @@ export default {
   data() {
     return {
       deposits: [
-        { id: 1, roomName: 'Room A', tenantName: 'John Doe', amount: '500 USD', date: '2023-09-01', status: 'Pending' },
-        { id: 2, roomName: 'Room B', tenantName: 'Jane Smith', amount: '300 USD', date: '2023-09-02', status: 'Confirmed' }
+        { id: 1, roomName: 'room A', tenantName: 'John Doe', amount: '500 USD', date: '2023-09-01', status: 'Pending' },
+        { id: 2, roomName: 'room B', tenantName: 'Jane Smith', amount: '300 USD', date: '2023-09-02', status: 'Confirmed' }
       ]
     };
   },

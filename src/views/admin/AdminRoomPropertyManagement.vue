@@ -283,7 +283,7 @@ export default {
       }
     },
 
-    // Room Methods
+    // room Methods
     addRoom() {
       if (this.roomForm.name && this.roomForm.area && this.roomForm.rent) {
         const newRoom = { ...this.roomForm, id: Date.now() };

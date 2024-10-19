@@ -42,7 +42,7 @@ export default {
   data() {
     return {
       tenantName: 'John Doe', // Tên người thuê (lấy từ dữ liệu thực tế)
-      roomName: 'Sample Room Name', // Thay bằng dữ liệu thực tế từ roomId
+      roomName: 'Sample room Name', // Thay bằng dữ liệu thực tế từ roomId
       rent: 500, // Tiền thuê phòng
       serviceFee: 50, // Tiền dịch vụ
       electricityUsage: 120, // kWh
@@ -64,7 +64,7 @@ export default {
   },
   created() {
     // Logic để lấy tên phòng và tên người thuê từ roomId
-    this.roomName = 'Room 101'; // Ví dụ tạm thời
+    this.roomName = 'room 101'; // Ví dụ tạm thời
     this.tenantName = 'John Doe'; // Ví dụ tạm thời
   }
 }

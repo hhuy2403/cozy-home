@@ -23,6 +23,15 @@ import TenantPayments from '@/views/tenant/TenantPayments.vue';
 import TenantProfile from '@/views/tenant/TenantProfile.vue';
 
 // Import cho Landlord
+import RoomIndex from "@/views/landlord/room/RoomIndex.vue";
+import CreateHome from "@/views/landlord/area/CreateHome.vue";
+import CreateRoom from "@/views/landlord/room/CreateRoom.vue";
+import EditHome from "@/views/landlord/area/EditHome.vue";
+import CreateRoomFast from "@/views/landlord/room/CreateRoomFast.vue";
+import EditRoom from "@/views/landlord/room/EditRoom.vue";
+import ListRoom from "@/views/landlord/room/ListRoom.vue";
+
+
 import LandlordProperties from "@/views/landlord/LandlordProperties.vue";
 import LandlordDashboard from '@/views/landlord/LandlordDashboard.vue';
 import LandlordContracts from '@/views/landlord/LandlordContracts.vue';
@@ -41,6 +50,7 @@ import LandlordLayout from '@/layouts/LandlordLayout.vue';
 import LoginPage from "@/views/auth/LoginPage.vue";
 import RegisterPage from "@/views/auth/RegisterPage.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
+
 
 
 // Định nghĩa các routes
@@ -98,6 +108,16 @@ const routes = [
         meta: { requiresLandlord: true },  // Đánh dấu yêu cầu quyền landlord
         children: [
             { path: 'dashboard', component: LandlordDashboard },
+            { path: 'room-index', component: RoomIndex },
+            { path: 'create-home', component: CreateHome },
+            { path: 'create-room', component: CreateRoom },
+            { path: 'edit-home', component: EditHome},
+            { path: 'create-room-fast', component: CreateRoomFast},
+            { path: 'edit-room', component: EditRoom},
+            {path: 'list-room', component: ListRoom},
+
+
+
             { path: 'contracts', component: LandlordContracts },
             { path: 'properties', component: LandlordProperties },
             { path: 'deposit-management', component: LandlordDepositManagement },

@@ -1,34 +1,35 @@
 <template>
-  <div class="landlord-layout">
-    <LandlordSidebar /> <!-- Sidebar riêng cho landlord -->
-    <div class="content">
-      <router-view />    <!-- Nội dung của từng trang -->
+  <div class="layout">
+    <LandlordSidebar />
+
+    <div class="main-content">
+      <LandlordHeader/>
+      <router-view />
     </div>
   </div>
 </template>
 
 <script>
 import LandlordSidebar from '@/components/LandlordSidebar.vue';
-
+import LandlordHeader from '@/components/LandlordHeader.vue';
 export default {
-  name: 'LandlordLayout',
   components: {
-    LandlordSidebar
+    LandlordSidebar,
+    LandlordHeader
   }
-}
+};
 </script>
 
 <style scoped>
-.landlord-layout {
-  display: flex; /* Bố cục flex để sidebar và nội dung có thể nằm ngang */
-  height: 100vh;
+.layout {
+  display: flex;
+  min-height: 100vh;
 }
 
-.content {
-  flex-grow: 1;
+.main-content {
+  flex: 1;
   padding: 20px;
-  background-color: #f0f2f5;
   overflow-y: auto;
-  margin-left: 250px; /* Điều chỉnh khoảng cách để phù hợp với sidebar */
+  background-color: #f4f7f9;
 }
 </style>

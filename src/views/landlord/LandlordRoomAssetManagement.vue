@@ -34,7 +34,7 @@ export default {
   props: ['roomId'], // Nhận roomId từ router params hoặc prop
   data() {
     return {
-      roomName: 'Sample Room Name', // Thay bằng dữ liệu thực tế từ roomId
+      roomName: 'Sample room Name', // Thay bằng dữ liệu thực tế từ roomId
       assets: [
         { id: 1, name: 'Bed', condition: 'Good', quantity: 2 },
         { id: 2, name: 'Air Conditioner', condition: 'Average', quantity: 1 },
@@ -59,7 +59,7 @@ export default {
   },
   created() {
     // Logic để lấy tên phòng từ roomId hoặc tải dữ liệu tài sản từ server
-    this.roomName = 'Room 101'; // Ví dụ tạm thời
+    this.roomName = 'room 101'; // Ví dụ tạm thời
   }
 }
 </script>
