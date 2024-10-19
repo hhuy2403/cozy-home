@@ -24,8 +24,13 @@
       </ul>
     </div>
 
+    <!-- Hiển thị danh sách phòng rỗng nếu không tìm thấy -->
+    <div v-if="filteredRooms.length === 0" class="alert alert-warning">
+      Không tìm thấy phòng nào phù hợp với từ khóa "{{ searchQuery }}".
+    </div>
+
     <!-- Bảng hiển thị danh sách phòng -->
-    <table class="table table-bordered">
+    <table class="table table-bordered" v-if="filteredRooms.length > 0">
       <thead class="thead-light">
       <tr>
         <th>Tên phòng</th>
@@ -79,7 +84,7 @@ export default {
     filteredRooms() {
       return this.rooms.filter((room) => {
         // Ép kiểu roomNumber thành chuỗi để tránh lỗi
-        return String(room.roomNumber).toLowerCase().includes(this.searchQuery.toLowerCase());
+        return String(room.roomNumber).toLowerCase().includes(this.searchQuery.toLowerCase().trim());
       });
     }
   },
@@ -102,13 +107,22 @@ export default {
       const roomOrders = new Set();
 
       this.rooms.forEach((room) => {
-        if (roomNumbers.has(room.roomNumber)) {
-          this.errors.push(`Tên phòng "${room.roomNumber}" bị trùng lặp!`);
+        // Kiểm tra rỗng hoặc trùng lặp tên phòng
+        const roomNumber = room.roomNumber.trim();
+        if (!roomNumber) {
+          this.errors.push(`Tên phòng không được để trống.`);
+        } else if (roomNumbers.has(roomNumber)) {
+          this.errors.push(`Tên phòng "${roomNumber}" bị trùng lặp!`);
         }
-        if (roomOrders.has(room.order)) {
+
+        // Kiểm tra trùng lặp thứ tự
+        if (!room.order || room.order <= 0) {
+          this.errors.push(`Thứ tự phòng không hợp lệ!`);
+        } else if (roomOrders.has(room.order)) {
           this.errors.push(`Thứ tự "${room.order}" bị trùng lặp!`);
         }
-        roomNumbers.add(room.roomNumber);
+
+        roomNumbers.add(roomNumber);
         roomOrders.add(room.order);
       });
 
@@ -123,7 +137,9 @@ export default {
     },
     // Hàm xóa phòng
     deleteRoom(index) {
-      this.rooms.splice(index, 1);
+      if (confirm("Bạn có chắc chắn muốn xóa phòng này không?")) {
+        this.rooms.splice(index, 1);
+      }
     },
     // Hàm xuất danh sách phòng ra file Excel
     exportToExcel() {

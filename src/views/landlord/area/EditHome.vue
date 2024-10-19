@@ -30,10 +30,12 @@
               placeholder="Nhập tên nhà"
               required
           />
-          <div class="invalid-feedback" v-if="errors.name">Vui lòng nhập tên nhà hợp lệ, không trùng với tên nhà khác</div>
+          <div class="invalid-feedback" v-if="errors.name">
+            {{ errors.name }}
+          </div>
         </div>
 
-        <!-- Các trường khác tương tự như thành phố, quận/huyện... -->
+        <!-- Các trường khác -->
         <div class="col-md-6">
           <label for="city" class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
           <input
@@ -115,8 +117,8 @@ export default {
         ward: "",
         address: ""
       },
-      originalName: "", // Giữ tên gốc để kiểm tra xem tên có được thay đổi không
-      errors: {} // Object to store validation errors
+      originalName: "", // Lưu tên ban đầu để kiểm tra xem tên có thay đổi không
+      errors: {} // Object để lưu lỗi validate
     };
   },
   mounted() {
@@ -143,19 +145,19 @@ export default {
       // Kiểm tra trùng tên nhà
       const storedHomes = JSON.parse(localStorage.getItem("homes")) || [];
       if (!this.home.name) {
-        this.errors.name = true;
+        this.errors.name = "Vui lòng nhập tên nhà";
       } else if (
           this.home.name !== this.originalName && // Kiểm tra nếu tên đã thay đổi
           storedHomes.some(home => home.name === this.home.name)
       ) {
-        this.errors.name = true;
+        this.errors.name = "Tên nhà đã tồn tại, vui lòng nhập tên khác";
       }
 
       // Kiểm tra các trường bắt buộc khác
-      if (!this.home.city) this.errors.city = true;
-      if (!this.home.district) this.errors.district = true;
-      if (!this.home.ward) this.errors.ward = true;
-      if (!this.home.address) this.errors.address = true;
+      if (!this.home.city) this.errors.city = "Vui lòng nhập Tỉnh/Thành phố";
+      if (!this.home.district) this.errors.district = "Vui lòng nhập Quận/Huyện";
+      if (!this.home.ward) this.errors.ward = "Vui lòng nhập Phường/Xã";
+      if (!this.home.address) this.errors.address = "Vui lòng nhập địa chỉ";
 
       // Nếu không có lỗi, lưu nhà
       if (Object.keys(this.errors).length === 0) {
@@ -199,12 +201,9 @@ export default {
   padding: 20px;
 }
 
-
 .form-label {
   font-weight: 600;
 }
-
-
 
 button {
   border-radius: 5px;

@@ -146,11 +146,12 @@ export default {
         description: "",
         image: null
       },
-      houses: [],
+      houses: [], // List of houses
       errors: {} // Object to store validation errors
     };
   },
   mounted() {
+    // Load houses from localStorage
     const storedHouses = localStorage.getItem("homes");
     if (storedHouses) {
       this.houses = JSON.parse(storedHouses);
@@ -202,7 +203,7 @@ export default {
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.room.image = e.target.result;
+          this.room.image = e.target.result; // Save image as base64 data
         };
         reader.readAsDataURL(file);
       }
@@ -215,11 +216,6 @@ export default {
 .create-room {
   margin-top: 30px;
   padding: 20px;
-}
-
-.header {
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
 }
 
 .form-label {

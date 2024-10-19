@@ -2,10 +2,7 @@
   <div class="edit-room">
     <!-- Header với H2 bên trái và các nút bên phải -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <!-- Tiêu đề h2 -->
       <h2>Sửa Phòng</h2>
-
-      <!-- Nút Quay về và Lưu bên phải -->
       <div>
         <router-link to="/landlord/room-index">
           <button type="button" class="btn btn-warning me-2">
@@ -150,24 +147,26 @@ export default {
     };
   },
   mounted() {
-    const storedRooms = JSON.parse(localStorage.getItem('rooms')) || [];
-    const roomNumber = this.$route.query.roomNumber;
-
-    // Lấy danh sách nhà từ localStorage
-    const storedHouses = JSON.parse(localStorage.getItem('homes')) || [];
-    this.houses = storedHouses;
-
-    // Tìm phòng dựa trên roomNumber để hiển thị
-    const room = storedRooms.find(room => room.roomNumber === roomNumber);
-    if (room) {
-      this.room = {...room}; // Sao chép dữ liệu của phòng vào form
-    } else {
-      alert("Không tìm thấy phòng!");
-      this.$router.push('/landlord/room-index'); // Chuyển hướng về danh sách phòng nếu không tìm thấy phòng
-    }
-  }
-  ,
+    this.loadRoomData(); // Tải dữ liệu phòng khi trang được tải
+  },
   methods: {
+    loadRoomData() {
+      const storedRooms = JSON.parse(localStorage.getItem('rooms')) || [];
+      const roomNumber = this.$route.query.roomNumber;
+
+      // Lấy danh sách nhà từ localStorage
+      const storedHouses = JSON.parse(localStorage.getItem('homes')) || [];
+      this.houses = storedHouses;
+
+      // Tìm phòng dựa trên roomNumber để hiển thị
+      const room = storedRooms.find(room => room.roomNumber === roomNumber);
+      if (room) {
+        this.room = {...room}; // Sao chép dữ liệu của phòng vào form
+      } else {
+        alert("Không tìm thấy phòng!");
+        this.$router.push('/landlord/room-index'); // Chuyển hướng về danh sách phòng nếu không tìm thấy phòng
+      }
+    },
     validateAndSave() {
       this.errors = {}; // Xóa lỗi trước đó
 

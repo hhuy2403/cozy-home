@@ -95,10 +95,10 @@ export default {
         this.errors.name = "Tên nhà đã tồn tại, vui lòng nhập tên khác";
       }
 
-      if (!this.home.city) this.errors.city = true;
-      if (!this.home.district) this.errors.district = true;
-      if (!this.home.ward) this.errors.ward = true;
-      if (!this.home.address) this.errors.address = true;
+      if (!this.home.city) this.errors.city = "Vui lòng nhập Tỉnh/Thành phố";
+      if (!this.home.district) this.errors.district = "Vui lòng nhập Quận/Huyện";
+      if (!this.home.ward) this.errors.ward = "Vui lòng nhập Phường/Xã";
+      if (!this.home.address) this.errors.address = "Vui lòng nhập địa chỉ";
 
       // Nếu không có lỗi, thực hiện lưu
       if (Object.keys(this.errors).length === 0) {

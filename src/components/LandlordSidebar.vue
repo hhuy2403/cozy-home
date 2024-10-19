@@ -47,7 +47,7 @@ export default {
       menuItems: [
         { label: 'Trang chủ', route: '/landlord/dashboard', icon: 'fas fa-home' },
         { label: 'Phòng', route: '/landlord/room-index', icon: 'fas fa-door-open' },
-        { label: 'Dịch vụ', route: '/landlord/service-management', icon: 'fas fa-concierge-bell' },
+        { label: 'Dịch vụ', route: '/landlord/service-index', icon: 'fas fa-concierge-bell' },
         { label: 'Chỉ số điện', route: '/landlord/electricity-meter', icon: 'fas fa-bolt' },
         { label: 'Chỉ số nước', route: '/landlord/water-meter', icon: 'fas fa-tint' },
         { label: 'Phát sinh', route: '/landlord/generate-invoice', icon: 'fas fa-file-invoice-dollar' },

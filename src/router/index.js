@@ -30,6 +30,9 @@ import EditHome from "@/views/landlord/area/EditHome.vue";
 import CreateRoomFast from "@/views/landlord/room/CreateRoomFast.vue";
 import EditRoom from "@/views/landlord/room/EditRoom.vue";
 import ListRoom from "@/views/landlord/room/ListRoom.vue";
+import CreateCustomer from "@/views/landlord/customer/CreateCustomer.vue";
+import ServiceIndex from "@/views/landlord/Service/ServiceIndex.vue";
+import CreateService from "@/views/landlord/Service/CreateService.vue";
 
 
 import LandlordProperties from "@/views/landlord/LandlordProperties.vue";
@@ -114,7 +117,10 @@ const routes = [
             { path: 'edit-home', component: EditHome},
             { path: 'create-room-fast', component: CreateRoomFast},
             { path: 'edit-room', component: EditRoom},
-            {path: 'list-room', component: ListRoom},
+            { path: 'list-room', component: ListRoom},
+            { path: 'create-customer', component: CreateCustomer},
+            { path: 'service-index', component: ServiceIndex },
+            { path: 'create-service', component: CreateService},
 
 
 

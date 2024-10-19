@@ -21,13 +21,17 @@
         <!-- Từ phòng -->
         <div class="col-md-6">
           <label for="startRoomNumber" class="form-label">Từ phòng <span class="text-danger">*</span></label>
-          <input type="number" v-model="startRoomNumber" id="startRoomNumber" class="form-control" placeholder="Nhập số phòng bắt đầu" required />
+          <input type="number" v-model="startRoomNumber" id="startRoomNumber" class="form-control"
+                 :class="{'is-invalid': errors.startRoomNumber}" placeholder="Nhập số phòng bắt đầu" required />
+          <div class="invalid-feedback" v-if="errors.startRoomNumber">{{ errors.startRoomNumber }}</div>
         </div>
 
         <!-- Đến phòng -->
         <div class="col-md-6">
           <label for="endRoomNumber" class="form-label">Đến phòng <span class="text-danger">*</span></label>
-          <input type="number" v-model="endRoomNumber" id="endRoomNumber" class="form-control" placeholder="Nhập số phòng kết thúc" required />
+          <input type="number" v-model="endRoomNumber" id="endRoomNumber" class="form-control"
+                 :class="{'is-invalid': errors.endRoomNumber}" placeholder="Nhập số phòng kết thúc" required />
+          <div class="invalid-feedback" v-if="errors.endRoomNumber">{{ errors.endRoomNumber }}</div>
         </div>
       </div>
 
@@ -35,9 +39,10 @@
       <div class="row mb-3">
         <div class="col-md-6">
           <label for="house" class="form-label">Nhà <span class="text-danger">*</span></label>
-          <select id="house" v-model="house" class="form-select" required>
+          <select id="house" v-model="house" class="form-select" :class="{'is-invalid': errors.house}" required>
             <option v-for="house in houses" :key="house.name" :value="house.name">{{ house.name }}</option>
           </select>
+          <div class="invalid-feedback" v-if="errors.house">Vui lòng chọn nhà.</div>
         </div>
       </div>
 
@@ -45,13 +50,15 @@
       <div class="row mb-3">
         <div class="col-md-6">
           <label for="price" class="form-label">Đơn giá <span class="text-danger">*</span></label>
-          <input type="number" v-model="price" id="price" class="form-control" placeholder="0 VNĐ" required />
+          <input type="number" v-model="price" id="price" class="form-control" :class="{'is-invalid': errors.price}" placeholder="0 VNĐ" required />
+          <div class="invalid-feedback" v-if="errors.price">Vui lòng nhập đơn giá hợp lệ.</div>
         </div>
         <div class="col-md-6">
           <label for="length" class="form-label">Dài <span class="text-danger">*</span></label>
           <div class="input-group">
-            <input type="number" v-model="length" id="length" class="form-control" placeholder="0" required />
+            <input type="number" v-model="length" id="length" class="form-control" :class="{'is-invalid': errors.length}" placeholder="0" required />
             <span class="input-group-text">M</span>
+            <div class="invalid-feedback" v-if="errors.length">Vui lòng nhập chiều dài hợp lệ.</div>
           </div>
         </div>
       </div>
@@ -61,8 +68,9 @@
         <div class="col-md-6">
           <label for="width" class="form-label">Rộng <span class="text-danger">*</span></label>
           <div class="input-group">
-            <input type="number" v-model="width" id="width" class="form-control" placeholder="0" required />
+            <input type="number" v-model="width" id="width" class="form-control" :class="{'is-invalid': errors.width}" placeholder="0" required />
             <span class="input-group-text">M</span>
+            <div class="invalid-feedback" v-if="errors.width">Vui lòng nhập chiều rộng hợp lệ.</div>
           </div>
         </div>
 
@@ -70,8 +78,9 @@
         <div class="col-md-6">
           <label for="maxPeople" class="form-label">Số lượng người tối đa <span class="text-danger">*</span></label>
           <div class="input-group">
-            <input type="number" v-model="maxPeople" id="maxPeople" class="form-control" placeholder="0" required />
+            <input type="number" v-model="maxPeople" id="maxPeople" class="form-control" :class="{'is-invalid': errors.maxPeople}" placeholder="0" required />
             <span class="input-group-text">Người</span>
+            <div class="invalid-feedback" v-if="errors.maxPeople">Vui lòng nhập số người hợp lệ.</div>
           </div>
         </div>
       </div>
@@ -123,11 +132,11 @@ export default {
       description: "",
       houses: [],
       existingRooms: [], // To store existing rooms
-      errors: {}
+      errors: {} // To store validation errors
     };
   },
   mounted() {
-    // Fetch house data from localStorage
+    // Fetch house and room data from localStorage
     const storedHouses = localStorage.getItem("homes");
     const storedRooms = localStorage.getItem("rooms");
 
@@ -145,16 +154,25 @@ export default {
 
       // Validation logic
       if (!this.startRoomNumber || !this.endRoomNumber || this.startRoomNumber > this.endRoomNumber) {
-        this.errors.roomNumber = true;
-        alert("Số phòng bắt đầu phải nhỏ hơn hoặc bằng số phòng kết thúc.");
+        this.errors.startRoomNumber = "Số phòng bắt đầu phải nhỏ hơn hoặc bằng số phòng kết thúc.";
         return;
       }
 
-      if (!this.house) this.errors.house = true;
-      if (!this.price || this.price <= 0) this.errors.price = true;
-      if (!this.length || this.length <= 0) this.errors.length = true;
-      if (!this.width || this.width <= 0) this.errors.width = true;
-      if (!this.maxPeople || this.maxPeople <= 0) this.errors.maxPeople = true;
+      if (!this.house) {
+        this.errors.house = "Vui lòng chọn nhà.";
+      }
+      if (!this.price || this.price <= 0) {
+        this.errors.price = "Vui lòng nhập đơn giá hợp lệ.";
+      }
+      if (!this.length || this.length <= 0) {
+        this.errors.length = "Vui lòng nhập chiều dài hợp lệ.";
+      }
+      if (!this.width || this.width <= 0) {
+        this.errors.width = "Vui lòng nhập chiều rộng hợp lệ.";
+      }
+      if (!this.maxPeople || this.maxPeople <= 0) {
+        this.errors.maxPeople = "Vui lòng nhập số người hợp lệ.";
+      }
 
       // Check if room number already exists
       for (let roomNumber = this.startRoomNumber; roomNumber <= this.endRoomNumber; roomNumber++) {
@@ -162,8 +180,8 @@ export default {
             (room) => room.roomNumber === roomNumber.toString() && room.house === this.house
         );
         if (roomExists) {
-          this.errors.roomExists = true;
-          alert(`Phòng số ${roomNumber} đã tồn tại trong ${this.house}. Vui lòng kiểm tra lại.`);
+          this.errors.roomExists = `Phòng số ${roomNumber} đã tồn tại trong ${this.house}.`;
+          alert(this.errors.roomExists);
           return;
         }
       }
@@ -210,11 +228,6 @@ export default {
 .create-room-fast {
   margin-top: 30px;
   padding: 20px;
-}
-
-.header {
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 10px;
 }
 
 .form-label {

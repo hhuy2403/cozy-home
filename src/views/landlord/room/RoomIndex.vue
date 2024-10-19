@@ -1,25 +1,23 @@
 <template>
   <div class="room-index">
-
     <!-- Filters and Search -->
     <div class="row mb-4 align-items-center">
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <select class="form-select">
-          <option value="" disabled selected>- Trạng thái phòng -</option>
+        <select class="form-select" v-model="filterStatus">
+          <option value="">- Trạng thái phòng -</option>
+          <option value="available">Còn trống</option>
+          <option value="rented">Đã cho thuê</option>
         </select>
       </div>
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <select class="form-select">
-          <option value="" disabled selected>- Trạng thái phí -</option>
+        <select class="form-select" v-model="filterFeeStatus">
+          <option value="">- Trạng thái phí -</option>
+          <option value="unpaid">Chưa thu phí</option>
+          <option value="paid">Đã thu phí</option>
         </select>
       </div>
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <input type="text" class="form-control" placeholder="Tìm phòng"/>
-      </div>
-      <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <button class="btn btn-primary w-100">
-          <i class="fa fa-search"></i> Tìm kiếm
-        </button>
+        <input type="text" class="form-control" placeholder="Tìm phòng" v-model="searchQuery" />
       </div>
     </div>
 
@@ -49,13 +47,9 @@
       <li class="nav-item" v-for="(house, index) in houses" :key="index">
         <a
             class="nav-link"
-            :class="{ active: index === 0 }"
-            :id="'house-tab-' + index"
-            data-bs-toggle="tab"
-            :href="'#house-' + index"
+            :class="{ active: activeTab === index }"
+            @click="setActiveTab(index)"
             role="tab"
-            :aria-controls="'house-' + index"
-            :aria-selected="index === 0"
         >
           {{ house.name }}
         </a>
@@ -66,10 +60,9 @@
     <div class="tab-content">
       <div
           class="tab-pane fade"
-          v-for="(house, index) in houses"
+          v-for="(house, index) in filteredHouses"
           :key="index"
-          :class="{ show: index === 0, active: index === 0 }"
-          :id="'house-' + index"
+          :class="{ show: activeTab === index, active: activeTab === index }"
           role="tabpanel"
       >
         <div class="floor-section bg-light p-4 rounded shadow-sm">
@@ -115,7 +108,10 @@
                   <h5 class="card-title text-primary d-flex align-items-center">
                     <i class="fa fa-home me-2"></i> {{ room.roomNumber }}
                   </h5>
-                  <button class="btn btn-sm btn-info w-100 mb-3">Thêm khách</button>
+                  <!-- Button to navigate to CreateCustomer.vue -->
+                  <button class="btn btn-sm btn-info w-100 mb-3" @click="goToCreateCustomer(room.roomNumber, house.name)">
+                    Thêm khách
+                  </button>
                   <p class="card-text text-danger fw-bold">
                     <i class="fa fa-money-bill me-2"></i>{{ formatCurrency(room.price) }}
                   </p>
@@ -151,12 +147,52 @@ export default {
     return {
       houses: [],
       rooms: [],
-      validationErrors: []
+      searchQuery: "", // Từ khóa tìm kiếm
+      filterStatus: "", // Lọc trạng thái phòng
+      filterFeeStatus: "", // Lọc trạng thái phí
+      validationErrors: [],
+      activeTab: 0 // Tab đang chọn
     };
   },
   mounted() {
     this.loadDataFromLocalStorage();
   },
+  computed: {
+    filteredHouses() {
+      let filteredHouses = [...this.houses]; // Sao chép mảng houses
+
+      // Lọc theo trạng thái phòng và phí
+      if (this.filterStatus || this.filterFeeStatus) {
+        filteredHouses = filteredHouses.map(house => {
+          let filteredRooms = house.rooms;
+
+          if (this.filterStatus) {
+            filteredRooms = filteredRooms.filter(room => {
+              return this.filterStatus === 'rented' ? room.isAvailable : !room.isAvailable;
+            });
+          }
+
+          if (this.filterFeeStatus) {
+            filteredRooms = filteredRooms.filter(room => {
+              return this.filterFeeStatus === 'paid' ? room.isUnpaid : !room.isUnpaid;
+            });
+          }
+
+          return { ...house, rooms: filteredRooms };
+        });
+      }
+
+      // Lọc theo từ khóa tìm kiếm, chỉ tìm trong phòng của nhà ở tab hiện tại
+      if (this.searchQuery.trim()) {
+        filteredHouses[this.activeTab].rooms = filteredHouses[this.activeTab].rooms.filter(room =>
+            room.roomNumber.toString().includes(this.searchQuery.trim())
+        );
+      }
+
+      return filteredHouses;
+    }
+  }
+  ,
   methods: {
     loadDataFromLocalStorage() {
       const storedHouses = localStorage.getItem("homes");
@@ -169,7 +205,6 @@ export default {
       if (storedRooms) {
         this.rooms = JSON.parse(storedRooms);
 
-        // Gắn phòng vào các nhà tương ứng
         this.houses.forEach((house) => {
           house.rooms = this.rooms.filter((room) => room.house === house.name);
         });
@@ -184,7 +219,7 @@ export default {
 
       reader.onload = (e) => {
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
+        const workbook = XLSX.read(data, { type: 'array' });
 
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
@@ -207,12 +242,13 @@ export default {
           width: room['Rộng'],
           maxPeople: room['Số lượng người tối đa'],
           description: room['Mô tả'],
-          rentableToMale: room['Cho thuê Nam'] === 'Yes' ? true : false,
-          rentableToFemale: room['Cho thuê Nữ'] === 'Yes' ? true : false,
-          order: room['Thứ tự']
+          rentableToMale: room['Cho thuê Nam'] === 'Yes',
+          rentableToFemale: room['Cho thuê Nữ'] === 'Yes',
+          order: room['Thứ tự'],
+          isAvailable: true, // Set mặc định là còn trống
+          isUnpaid: true     // Set mặc định là chưa thu phí
         };
 
-        // Kiểm tra hợp lệ
         const houseExists = this.houses.some(h => h.name === newRoom.house);
         if (!houseExists) {
           this.validationErrors.push(`Nhà "${newRoom.house}" không tồn tại.`);
@@ -229,24 +265,6 @@ export default {
           return;
         }
 
-        // Validate giá trị số
-        if (isNaN(newRoom.price) || newRoom.price <= 0) {
-          this.validationErrors.push(`Đơn giá của phòng "${newRoom.roomNumber}" không hợp lệ.`);
-          return;
-        }
-        if (isNaN(newRoom.length) || newRoom.length <= 0) {
-          this.validationErrors.push(`Dài của phòng "${newRoom.roomNumber}" không hợp lệ.`);
-          return;
-        }
-        if (isNaN(newRoom.width) || newRoom.width <= 0) {
-          this.validationErrors.push(`Rộng của phòng "${newRoom.roomNumber}" không hợp lệ.`);
-          return;
-        }
-        if (isNaN(newRoom.order) || newRoom.order <= 0) {
-          this.validationErrors.push(`Thứ tự của phòng "${newRoom.roomNumber}" không hợp lệ.`);
-          return;
-        }
-
         this.rooms.push(newRoom);
       });
 
@@ -257,6 +275,20 @@ export default {
       } else {
         alert('Có lỗi xảy ra khi nhập phòng từ Excel:\n' + this.validationErrors.join('\n'));
       }
+    },
+    setActiveTab(index) {
+      this.activeTab = index; // Cập nhật tab hiện tại
+      this.searchQuery = ""; // Xóa từ khóa tìm kiếm khi chuyển tab
+    },
+    goToCreateCustomer(roomNumber, houseName) {
+      // Navigate to CreateCustomer page with query parameters for roomNumber and houseName
+      this.$router.push({
+        path: '/landlord/create-customer',
+        query: {
+          roomNumber: roomNumber,
+          houseName: houseName
+        }
+      });
     },
     availableRooms(houseName) {
       const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
