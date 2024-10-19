@@ -74,19 +74,6 @@
 }
 
 /* Nút đăng ký */
-.d-grid .btn-primary {
-    background-color: #2a3f54;
-    border: none;
-    padding: 15px 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    border-radius: 6px;
-    width: 100%;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-    color: #ffffff;
-}
 
 .d-grid .btn-primary:hover {
     background-color: #1e2d3b;
@@ -113,6 +100,10 @@
 
 /* Responsive cho màn hình nhỏ */
 @media (max-width: 576px) {
+    .register-page{
+        height: 100vh;
+    }
+
     .register-box {
         padding: 20px;
     }

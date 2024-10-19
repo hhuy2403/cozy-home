@@ -180,33 +180,4 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Custom styles for Register Page */
-.register-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
 
-.register-container {
-  width: 100%;
-  max-width: 400px;
-}
-
-.register-box {
-  background: #fff;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-}
-
-.register-title {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.text-danger {
-  color: #dc3545;
-}
-</style>

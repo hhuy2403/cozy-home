@@ -143,6 +143,10 @@
 
 /* Responsive for small screens */
 @media (max-width: 576px) {
+    .login-page{
+        height: 100vh;
+    }
+
     .login-box {
         padding: 20px;
     }
