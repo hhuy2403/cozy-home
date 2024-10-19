@@ -2,9 +2,10 @@
   <div class="system-settings container">
     <h1 class="my-4">Quản Lý Thông Tin Hệ Thống</h1>
 
+    <!-- Cấu Hình Email -->
     <div class="mb-4">
       <h3>Cấu Hình Email</h3>
-      <form @submit.prevent="updateEmailSettings">
+      <form @submit.prevent="updateEmailSettings" class="form-settings">
         <div class="mb-3">
           <label for="emailService" class="form-label">Dịch Vụ Email</label>
           <select v-model="emailSettings.service" class="form-select" required>
@@ -25,9 +26,10 @@
       </form>
     </div>
 
+    <!-- Cài Đặt Phương Thức Thanh Toán -->
     <div class="mb-4">
       <h3>Cài Đặt Phương Thức Thanh Toán</h3>
-      <form @submit.prevent="updatePaymentSettings">
+      <form @submit.prevent="updatePaymentSettings" class="form-settings">
         <div class="mb-3">
           <label for="paymentMethod" class="form-label">Phương Thức Thanh Toán</label>
           <select v-model="paymentSettings.method" class="form-select" required>
@@ -40,22 +42,18 @@
       </form>
     </div>
 
+    <!-- Sao Lưu và Khôi Phục Dữ Liệu -->
     <div class="mb-4">
       <h3>Sao Lưu và Khôi Phục Dữ Liệu</h3>
       <button class="btn btn-warning" @click="backupData">Sao Lưu Dữ Liệu</button>
       <button class="btn btn-info" @click="restoreData">Khôi Phục Dữ Liệu</button>
     </div>
-
-    <div v-if="backupMessage" class="alert alert-success">
-      {{ backupMessage }}
-    </div>
-    <div v-if="restoreMessage" class="alert alert-success">
-      {{ restoreMessage }}
-    </div>
   </div>
 </template>
 
 <script>
+import Swal from 'sweetalert2';
+import "@/styles/admin/setting-management.css"
 export default {
   name: 'SystemSettings',
   data() {
@@ -68,41 +66,42 @@ export default {
       paymentSettings: {
         method: 'credit-card',
       },
-      backupMessage: '',
-      restoreMessage: '',
     };
   },
   methods: {
     updateEmailSettings() {
-      // Logic to save email settings (e.g., call an API)
-      alert('Cài đặt email đã được cập nhật!');
+      Swal.fire({
+        icon: 'success',
+        title: 'Cài đặt email đã được cập nhật!',
+        showConfirmButton: false,
+        timer: 1500
+      });
     },
     updatePaymentSettings() {
-      // Logic to save payment settings (e.g., call an API)
-      alert('Cài đặt phương thức thanh toán đã được cập nhật!');
+      Swal.fire({
+        icon: 'success',
+        title: 'Cài đặt phương thức thanh toán đã được cập nhật!',
+        showConfirmButton: false,
+        timer: 1500
+      });
     },
     backupData() {
-      // Logic to perform data backup (e.g., call an API)
-      this.backupMessage = 'Dữ liệu đã được sao lưu thành công!';
+      Swal.fire({
+        icon: 'success',
+        title: 'Dữ liệu đã được sao lưu thành công!',
+        showConfirmButton: false,
+        timer: 1500
+      });
     },
     restoreData() {
-      // Logic to perform data restore (e.g., call an API)
-      this.restoreMessage = 'Dữ liệu đã được khôi phục thành công!';
+      Swal.fire({
+        icon: 'success',
+        title: 'Dữ liệu đã được khôi phục thành công!',
+        showConfirmButton: false,
+        timer: 1500
+      });
     },
   },
 };
 </script>
 
-<style scoped>
-.system-settings {
-  padding: 20px;
-}
-
-.mb-4 {
-  margin-bottom: 20px;
-}
-
-.btn {
-  margin-right: 10px;
-}
-</style>

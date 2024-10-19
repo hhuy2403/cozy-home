@@ -2,7 +2,7 @@
   <header class="header navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <!-- Logo -->
-      <router-link class="navbar-brand" to="/"><i class="fas fa-home-alt"></i> CozyHome</router-link>
+      <router-link class="navbar-brand" to="/" @click="closeNavbar"><i class="fas fa-home-alt"></i> CozyHome</router-link>
 
       <!-- Toggler for mobile view -->
       <button
@@ -18,61 +18,61 @@
         <ul class="navbar-nav ms-auto">
           <!-- Menu cho Admin -->
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/dashboard">Trang Chủ</router-link>
+            <router-link class="nav-link" to="/admin/dashboard" @click="closeNavbar">Trang Chủ</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/contracts">Hợp Đồng</router-link>
+            <router-link class="nav-link" to="/admin/users" @click="closeNavbar">Người Dùng</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/reports">Báo cáo</router-link>
+            <router-link class="nav-link" to="/admin/financial" @click="closeNavbar">Tài Chính</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/users">Người Dùng</router-link>
+            <router-link class="nav-link" to="/admin/service" @click="closeNavbar">Dịch Vụ</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/financial">Tài Chính</router-link>
+            <router-link class="nav-link" to="/admin/contracts" @click="closeNavbar">Hợp Đồng</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/maintenance-service">BT & DV</router-link>
+            <router-link class="nav-link" to="/admin/reports" @click="closeNavbar">Báo Cáo</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/feedback">Feedback</router-link>
+            <router-link class="nav-link" to="/admin/feedback" @click="closeNavbar">Phản Hồi</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/notification">Notification</router-link>
+            <router-link class="nav-link" to="/admin/notification" @click="closeNavbar">Thông Báo</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'admin'">
-            <router-link class="nav-link" to="/admin/settings">Cài Đặt</router-link>
+            <router-link class="nav-link" to="/admin/settings" @click="closeNavbar">Cài Đặt</router-link>
           </li>
 
           <!-- Menu cho Tenant -->
           <li class="nav-item" v-if="userRole === 'tenant'">
-            <router-link class="nav-link" to="/tenant/dashboard">Dashboard</router-link>
+            <router-link class="nav-link" to="/tenant/dashboard" @click="closeNavbar">Dashboard</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'tenant'">
-            <router-link class="nav-link" to="/tenant/contracts">My Contracts</router-link>
+            <router-link class="nav-link" to="/tenant/contracts" @click="closeNavbar">My Contracts</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'tenant'">
-            <router-link class="nav-link" to="/tenant/payment-history">Payment History</router-link>
+            <router-link class="nav-link" to="/tenant/payment-history" @click="closeNavbar">Payment History</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'tenant'">
-            <router-link class="nav-link" to="/tenant/payments">Payments</router-link>
+            <router-link class="nav-link" to="/tenant/payments" @click="closeNavbar">Payments</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'tenant'">
-            <router-link class="nav-link" to="/tenant/profile">Profile</router-link>
+            <router-link class="nav-link" to="/tenant/profile" @click="closeNavbar">Profile</router-link>
           </li>
 
           <!-- Menu cho Guest -->
           <li class="nav-item" v-if="userRole === 'guest'">
-            <router-link class="nav-link" to="/login"><i class="fas fa-sign-in"></i> Đăng Nhập</router-link>
+            <router-link class="nav-link" to="/login" @click="closeNavbar"><i class="fas fa-sign-in"></i> Đăng Nhập</router-link>
           </li>
           <li class="nav-item" v-if="userRole === 'guest'">
-            <router-link class="nav-link" to="/register"><i class="fas fa-user-plus"></i> Đăng Ký</router-link>
+            <router-link class="nav-link" to="/register" @click="closeNavbar"><i class="fas fa-user-plus"></i> Đăng Ký</router-link>
           </li>
 
           <!-- Logout Button -->
           <li class="nav-item" v-if="userRole !== 'guest'">
-            <button class="btn btn-outline-light" @click="logout">Logout</button>
+            <button class="btn btn-outline-light" @click="confirmLogout">Logout</button>
           </li>
         </ul>
       </div>
@@ -81,6 +81,8 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'; // Import SweetAlert2
+
 export default {
   name: 'HeaderComponent',
   data() {
@@ -97,6 +99,27 @@ export default {
     toggleNavbar() {
       // Chuyển đổi trạng thái navbar mở/đóng
       this.isNavbarOpen = !this.isNavbarOpen;
+    },
+    closeNavbar() {
+      // Đóng navbar sau khi chọn một mục
+      this.isNavbarOpen = false;
+    },
+    confirmLogout() {
+      // Hiển thị hộp thoại xác nhận đăng xuất với SweetAlert2
+      Swal.fire({
+        title: 'Bạn có chắc chắn muốn đăng xuất?',
+        text: "Bạn sẽ cần đăng nhập lại nếu muốn truy cập hệ thống.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Đăng xuất',
+        cancelButtonText: 'Hủy'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.logout(); // Gọi hàm logout nếu người dùng xác nhận
+        }
+      });
     },
     logout() {
       // Xóa vai trò người dùng và thông tin đăng nhập khỏi localStorage

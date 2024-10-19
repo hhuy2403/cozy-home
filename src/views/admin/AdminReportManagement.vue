@@ -1,32 +1,55 @@
 <template>
   <div class="analytics-reporting container">
-    <h1 class="my-4">Báo Cáo Phân Tích và Thống Kê</h1>
+    <h1 class="my-4 text-center">Báo Cáo Phân Tích và Thống Kê</h1>
 
-    <div class="mb-4">
-      <h3>Thống Kê Số Phòng</h3>
-      <p>Tổng số phòng trọ: {{ totalRooms }}</p>
-      <p>Số phòng còn trống: {{ availableRooms }}</p>
-    </div>
+    <div class="row">
+      <!-- Thống Kê Số Phòng -->
+      <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card shadow-sm border-primary">
+          <div class="card-body">
+            <h5 class="card-title text-primary">Thống Kê Số Phòng</h5>
+            <p class="card-text">Tổng số phòng trọ: <strong>{{ totalRooms }}</strong></p>
+            <p class="card-text">Số phòng còn trống: <strong>{{ availableRooms }}</strong></p>
+          </div>
+        </div>
+      </div>
 
-    <div class="mb-4">
-      <h3>Báo Cáo Doanh Thu</h3>
-      <p>Tổng doanh thu từ việc cho thuê: {{ formatCurrency(totalRevenue) }}</p>
-    </div>
+      <!-- Báo Cáo Doanh Thu -->
+      <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card shadow-sm border-success">
+          <div class="card-body">
+            <h5 class="card-title text-success">Báo Cáo Doanh Thu</h5>
+            <p class="card-text">Tổng doanh thu từ việc cho thuê: <strong>{{ formatCurrency(totalRevenue) }}</strong></p>
+          </div>
+        </div>
+      </div>
 
-    <div class="mb-4">
-      <h3>Thống Kê Hợp Đồng</h3>
-      <p>Số lượng hợp đồng theo thời gian: {{ totalContracts }} hợp đồng</p>
-    </div>
+      <!-- Thống Kê Hợp Đồng -->
+      <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card shadow-sm border-info">
+          <div class="card-body">
+            <h5 class="card-title text-info">Thống Kê Hợp Đồng</h5>
+            <p class="card-text">Số lượng hợp đồng theo thời gian: <strong>{{ totalContracts }}</strong> hợp đồng</p>
+          </div>
+        </div>
+      </div>
 
-    <div class="mb-4">
-      <h3>Báo Cáo Khiếu Nại và Phản Hồi</h3>
-      <p>Số lượng khiếu nại đã xử lý: {{ resolvedComplaints }}</p>
-      <p>Số lượng phản hồi đã xử lý: {{ resolvedFeedbacks }}</p>
+      <!-- Báo Cáo Khiếu Nại và Phản Hồi -->
+      <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card shadow-sm border-warning">
+          <div class="card-body">
+            <h5 class="card-title text-warning">Báo Cáo Khiếu Nại và Phản Hồi</h5>
+            <p class="card-text">Số lượng khiếu nại đã xử lý: <strong>{{ resolvedComplaints }}</strong></p>
+            <p class="card-text">Số lượng phản hồi đã xử lý: <strong>{{ resolvedFeedbacks }}</strong></p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import "@/styles/admin/report-management.css"
 export default {
   name: 'AnalyticsReporting',
   data() {
@@ -35,12 +58,10 @@ export default {
         { id: 1, name: 'Phòng 101', status: 'rented' },
         { id: 2, name: 'Phòng 102', status: 'available' },
         { id: 3, name: 'Phòng 103', status: 'rented' },
-        // Thêm các phòng khác nếu cần
       ],
       leases: [
         { id: 1, revenue: 5000000 },
         { id: 2, revenue: 4500000 },
-        // Thêm các hợp đồng cho thuê khác nếu cần
       ],
       complaints: [
         { id: 1, resolved: true },
@@ -81,13 +102,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.analytics-reporting {
-  padding: 20px;
-}
-
-.mb-4 {
-  margin-bottom: 20px;
-}
-</style>

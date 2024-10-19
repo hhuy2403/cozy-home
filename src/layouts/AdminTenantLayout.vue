@@ -8,14 +8,18 @@
       <router-view />
     </main>
   </div>
+
+  <FooterComponent />
 </template>
 
 <script>
 import HeaderComponent from '@/components/HeaderComponent.vue';
+import FooterComponent from "@/components/FooterComponent.vue";
 
 export default {
   name: 'AdminTenantLayout',
   components: {
+    FooterComponent,
     HeaderComponent
   }
 };
@@ -25,7 +29,7 @@ export default {
 .admin-tenant-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: auto;
 }
 
 .main-content {

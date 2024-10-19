@@ -72,7 +72,7 @@ const routes = [
             { path: 'reports', component: AdminReportManagement },
             { path: 'users', component: AdminUserManagement },
             { path: 'financial', component: AdminFinancialManagement },
-            { path: 'maintenance-service', component: AdminMaintenanceServiceManagement },
+            { path: 'service', component: AdminMaintenanceServiceManagement },
             { path: 'feedback', component: AdminFeedbackManagement },
             { path: 'notification', component: AdminNotificationManagement },
             { path: 'settings', component: AdminSettings }
