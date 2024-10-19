@@ -80,7 +80,35 @@ export default {
       passwordError: '',
     };
   },
+  created() {
+    // Thêm tài khoản quản trị viên mặc định nếu chưa có trong localStorage
+    this.addDefaultAdmin();
+  },
   methods: {
+    addDefaultAdmin() {
+      // Lấy danh sách người dùng từ localStorage
+      let users = JSON.parse(localStorage.getItem('users')) || [];
+
+      // Kiểm tra xem tài khoản quản trị viên đã tồn tại chưa
+      const adminUser = users.find(user => user.email === 'admin@gmail.com');
+      if (!adminUser) {
+        // Nếu chưa có, thêm tài khoản quản trị viên mặc định
+        const newAdmin = {
+          id: Date.now(), // ID duy nhất cho tài khoản admin
+          name: 'Admin',
+          email: 'admin@gmail.com',
+          password: 'admin123',
+          role: 'admin',
+          status: 'active'
+        };
+
+        // Thêm tài khoản vào danh sách người dùng
+        users.push(newAdmin);
+
+        // Cập nhật lại danh sách người dùng trong localStorage
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+    },
     togglePassword() {
       this.showPassword = !this.showPassword; // Thay đổi trạng thái hiển thị mật khẩu
     },
@@ -150,3 +178,48 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Custom styles for Login Page */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-box {
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+</style>

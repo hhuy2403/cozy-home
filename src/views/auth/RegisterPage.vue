@@ -19,6 +19,7 @@
                 placeholder="Nhập tên của bạn"
                 required
             />
+            <p v-if="errors.name" class="text-danger">{{ errors.name }}</p>
           </div>
 
           <!-- Email -->
@@ -32,6 +33,7 @@
                 placeholder="Nhập email"
                 required
             />
+            <p v-if="errors.email" class="text-danger">{{ errors.email }}</p>
           </div>
 
           <!-- Password -->
@@ -45,6 +47,7 @@
                 placeholder="Nhập mật khẩu"
                 required
             />
+            <p v-if="errors.password" class="text-danger">{{ errors.password }}</p>
           </div>
 
           <!-- Role -->
@@ -76,6 +79,7 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2';
 import HeaderComponent from "@/components/HeaderComponent.vue";
 import FooterComponent from "@/components/FooterComponent.vue";
 import "@/styles/auth/register.css";
@@ -90,12 +94,46 @@ export default {
         email: '',
         password: '',
         role: 'tenant',
+        status: 'active' // Trạng thái mặc định là active
       },
+      errors: {}, // Lưu trữ các lỗi validation
       errorMessage: '', // Thông báo lỗi nếu có
     };
   },
   methods: {
+    validateForm() {
+      // Reset lỗi
+      this.errors = {};
+
+      // Kiểm tra tên
+      if (!this.user.name) {
+        this.errors.name = 'Vui lòng nhập tên.';
+      }
+
+      // Kiểm tra email (định dạng và trùng lặp)
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!this.user.email) {
+        this.errors.email = 'Vui lòng nhập email.';
+      } else if (!emailPattern.test(this.user.email)) {
+        this.errors.email = 'Email không hợp lệ.';
+      }
+
+      // Kiểm tra mật khẩu
+      if (!this.user.password) {
+        this.errors.password = 'Vui lòng nhập mật khẩu.';
+      } else if (this.user.password.length < 6) {
+        this.errors.password = 'Mật khẩu phải có ít nhất 6 ký tự.';
+      }
+
+      // Trả về true nếu không có lỗi
+      return Object.keys(this.errors).length === 0;
+    },
     registerUser() {
+      // Validate form trước khi tiếp tục
+      if (!this.validateForm()) {
+        return;
+      }
+
       // Lấy danh sách người dùng từ localStorage (nếu có)
       let users = JSON.parse(localStorage.getItem('users')) || [];
 
@@ -106,17 +144,69 @@ export default {
         return;
       }
 
-      // Nếu email chưa tồn tại, thêm người dùng vào danh sách
-      users.push(this.user);
+      // Tạo ID duy nhất cho người dùng mới
+      const newUserId = Date.now();
+
+      // Thêm ID vào thông tin người dùng
+      const newUser = {
+        id: newUserId,
+        name: this.user.name,
+        email: this.user.email,
+        password: this.user.password,
+        role: this.user.role,
+        status: this.user.status,
+      };
+
+      // Thêm người dùng vào danh sách
+      users.push(newUser);
 
       // Lưu danh sách người dùng mới vào localStorage
       localStorage.setItem('users', JSON.stringify(users));
 
-      // Hiển thị thông báo đăng ký thành công và chuyển hướng đến trang login
-      alert('Đăng ký thành công! Bạn có thể đăng nhập bây giờ.');
-      this.$router.push('/login');
+      // Sử dụng SweetAlert2 để hiển thị thông báo đăng ký thành công
+      Swal.fire({
+        icon: 'success',
+        title: 'Đăng ký thành công!',
+        text: `ID của bạn là ${newUserId}. Bạn có thể đăng nhập bây giờ.`,
+        confirmButtonText: 'OK',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: true
+      }).then(() => {
+        this.$router.push('/login');
+      });
     }
   }
 };
 </script>
 
+<style scoped>
+/* Custom styles for Register Page */
+.register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.register-box {
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+.register-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+</style>
