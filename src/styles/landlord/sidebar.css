@@ -38,6 +38,7 @@
     margin: 5px 0 20px;
     font-size: 0.85em;
     color: #a1a1a1;
+    text-transform: uppercase;
 }
 
 .toggle-sidebar {
@@ -52,6 +53,7 @@
     top: 5px;
     left: 270px;
     z-index: 100;
+    transition: left 0.3s ease-in-out;
 }
 
 .sidebar.collapsed .nav-list{
@@ -113,6 +115,36 @@
     background-color: #ff6f61;
     color: #fff;
 }
+
+.nav-item {
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.nav-link {
+    color: #b8c7ce;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link i {
+    margin-right: 10px;
+}
+
+.nav-link:hover {
+    background-color: #4b6a85;
+    color: #fff;
+}
+
+.nav-link.active {
+    background-color: #ff6f61;
+    color: #fff;
+}
+
 
 .bottom-icons {
     display: flex;

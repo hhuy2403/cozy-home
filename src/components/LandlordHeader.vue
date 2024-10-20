@@ -33,8 +33,6 @@ export default {
   right: 0;
 }
 
-
-
 .action-buttons {
   display: flex;
   gap: 10px;

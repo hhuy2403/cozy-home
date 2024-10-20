@@ -23,6 +23,7 @@ import TenantPayments from '@/views/tenant/TenantPayments.vue';
 import TenantProfile from '@/views/tenant/TenantProfile.vue';
 
 // Import cho Landlord
+import LandlordDashboard from '@/views/landlord/LandlordDashboard.vue';
 import RoomIndex from "@/views/landlord/room/RoomIndex.vue";
 import CreateHome from "@/views/landlord/area/CreateHome.vue";
 import CreateRoom from "@/views/landlord/room/CreateRoom.vue";
@@ -33,19 +34,8 @@ import ListRoom from "@/views/landlord/room/ListRoom.vue";
 import CreateCustomer from "@/views/landlord/customer/CreateCustomer.vue";
 import ServiceIndex from "@/views/landlord/service/ServiceIndex.vue";
 import CreateService from "@/views/landlord/service/CreateService.vue";
+import CustomerList from "@/views/landlord/room/CustomerList.vue";
 
-
-import LandlordProperties from "@/views/landlord/LandlordProperties.vue";
-import LandlordDashboard from '@/views/landlord/LandlordDashboard.vue';
-import LandlordContracts from '@/views/landlord/LandlordContracts.vue';
-import LandlordDepositManagement from '@/views/landlord/LandlordDepositManagement.vue';
-import LandlordExpenseManagement from '@/views/landlord/LandlordExpenseManagement.vue';
-import LandlordInvoiceSummary from '@/views/landlord/LandlordInvoiceSummary.vue';
-import LandlordMeterManagement from '@/views/landlord/LandlordMeterManagement.vue';
-import LandlordRoomManagement from '@/views/landlord/LandlordRoomManagement.vue';
-import LandlordRoomAssetManagement from '@/views/landlord/LandlordRoomAssetManagement.vue';
-import LandlordRoomMemberManagement from '@/views/landlord/LandlordRoomMemberManagement.vue';
-import LandlordServiceManagement from '@/views/landlord/LandlordServiceManagement.vue';
 
 // Import Layouts
 import AdminTenantLayout from '@/layouts/AdminTenantLayout.vue';
@@ -53,6 +43,7 @@ import LandlordLayout from '@/layouts/LandlordLayout.vue';
 import LoginPage from "@/views/auth/LoginPage.vue";
 import RegisterPage from "@/views/auth/RegisterPage.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
+
 
 
 
@@ -121,19 +112,11 @@ const routes = [
             { path: 'create-customer', component: CreateCustomer},
             { path: 'service-index', component: ServiceIndex },
             { path: 'create-service', component: CreateService},
+            { path: 'customer', component: CustomerList},
 
 
 
-            { path: 'contracts', component: LandlordContracts },
-            { path: 'properties', component: LandlordProperties },
-            { path: 'deposit-management', component: LandlordDepositManagement },
-            { path: 'expense-management', component: LandlordExpenseManagement },
-            { path: 'invoice-summary', component: LandlordInvoiceSummary },
-            { path: 'meter-management', component: LandlordMeterManagement },
-            { path: 'room-management', component: LandlordRoomManagement },
-            { path: 'room-asset-management', component: LandlordRoomAssetManagement },
-            { path: 'room-member-management', component: LandlordRoomMemberManagement },
-            { path: 'service-management', component: LandlordServiceManagement }
+
         ]
     }
 ];

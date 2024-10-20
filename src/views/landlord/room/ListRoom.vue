@@ -154,12 +154,20 @@ export default {
 
 <style scoped>
 .list-room {
-  margin-top: 30px;
+  margin-top: 3em !important;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .table {
   margin-top: 20px;
+}
+
+.table th {
+  background-color: #2a3f54;
+  color: #fff;
 }
 
 thead {

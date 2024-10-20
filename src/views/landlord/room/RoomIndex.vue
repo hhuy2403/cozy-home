@@ -31,9 +31,11 @@
         <i class="fa fa-upload"></i> Nhập phòng từ excel
       </button>
       <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none;"/>
-      <button class="btn btn-primary me-3 mb-2" :disabled="!houses.length">
-        <i class="fa fa-users"></i> Khách thuê
-      </button>
+      <router-link to="/landlord/customer">
+        <button class="btn btn-primary me-3 mb-2" :disabled="!houses.length">
+          <i class="fa fa-users"></i> Khách thuê
+        </button>
+      </router-link>
       <router-link to="/landlord/list-room">
         <button class="btn btn-info me-3 mb-2" :disabled="!houses.length">
           <i class="fa fa-list"></i> Phòng
