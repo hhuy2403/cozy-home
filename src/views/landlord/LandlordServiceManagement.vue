@@ -32,8 +32,8 @@ export default {
   data() {
     return {
       services: [
-        { id: 1, name: 'Cleaning Service', description: 'Weekly cleaning service' },
-        { id: 2, name: 'Repair Service', description: 'On-call repair service' }
+        { id: 1, name: 'Cleaning service', description: 'Weekly cleaning service' },
+        { id: 2, name: 'Repair service', description: 'On-call repair service' }
       ]
     };
   },

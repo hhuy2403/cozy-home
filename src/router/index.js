@@ -31,8 +31,8 @@ import CreateRoomFast from "@/views/landlord/room/CreateRoomFast.vue";
 import EditRoom from "@/views/landlord/room/EditRoom.vue";
 import ListRoom from "@/views/landlord/room/ListRoom.vue";
 import CreateCustomer from "@/views/landlord/customer/CreateCustomer.vue";
-import ServiceIndex from "@/views/landlord/Service/ServiceIndex.vue";
-import CreateService from "@/views/landlord/Service/CreateService.vue";
+import ServiceIndex from "@/views/landlord/service/ServiceIndex.vue";
+import CreateService from "@/views/landlord/service/CreateService.vue";
 
 
 import LandlordProperties from "@/views/landlord/LandlordProperties.vue";

@@ -53,10 +53,11 @@
           <!-- Role -->
           <div class="mb-3">
             <label for="role" class="form-label">Vai trò</label>
-            <select v-model="user.role" id="role" class="form-control">
+            <select v-model="user.role" id="role" class="form-control" required>
               <option value="tenant">Người thuê</option>
               <option value="landlord">Chủ nhà</option>
             </select>
+            <p v-if="errors.role" class="text-danger">{{ errors.role }}</p>
           </div>
 
           <!-- Nút đăng ký -->
@@ -125,8 +126,17 @@ export default {
         this.errors.password = 'Mật khẩu phải có ít nhất 6 ký tự.';
       }
 
+      // Kiểm tra vai trò
+      if (!this.user.role) {
+        this.errors.role = 'Vui lòng chọn vai trò.';
+      }
+
       // Trả về true nếu không có lỗi
       return Object.keys(this.errors).length === 0;
+    },
+    hashPassword(password) {
+      // Simple hash simulation (for demo purposes only)
+      return btoa(password); // Encode to Base64
     },
     registerUser() {
       // Validate form trước khi tiếp tục
@@ -152,7 +162,7 @@ export default {
         id: newUserId,
         name: this.user.name,
         email: this.user.email,
-        password: this.user.password,
+        password: this.hashPassword(this.user.password), // Mã hóa mật khẩu trước khi lưu
         role: this.user.role,
         status: this.user.status,
       };
@@ -170,8 +180,7 @@ export default {
         text: `ID của bạn là ${newUserId}. Bạn có thể đăng nhập bây giờ.`,
         confirmButtonText: 'OK',
         timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: true
+        timerProgressBar: true
       }).then(() => {
         this.$router.push('/login');
       });
@@ -179,5 +188,3 @@ export default {
   }
 };
 </script>
-
-

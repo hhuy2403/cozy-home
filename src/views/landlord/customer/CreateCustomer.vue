@@ -72,10 +72,12 @@
             <div class="col-md-6">
               <label for="fullName" class="form-label">Họ và tên *</label>
               <input type="text" v-model="customer.fullName" id="fullName" class="form-control" />
+              <div v-if="validationErrors.fullName" class="text-danger">Vui lòng nhập họ và tên</div>
             </div>
             <div class="col-md-6">
-              <label for="identityCard" class="form-label">CMND/CCCD</label>
+              <label for="identityCard" class="form-label">CMND/CCCD *</label>
               <input type="text" v-model="customer.identityCard" id="identityCard" class="form-control" />
+              <div v-if="validationErrors.identityCard" class="text-danger">Vui lòng nhập CMND/CCCD</div>
             </div>
           </div>
 
@@ -93,6 +95,7 @@
             <div class="col-md-6">
               <label for="phoneNumber1" class="form-label">Điện thoại 1 *</label>
               <input type="text" v-model="customer.phoneNumber1" id="phoneNumber1" class="form-control" />
+              <div v-if="validationErrors.phoneNumber1" class="text-danger">Vui lòng nhập số điện thoại 1</div>
             </div>
           </div>
 
@@ -124,11 +127,12 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="roomNumber" class="form-label">Thuê phòng số *</label>
-              <input type="text" v-model="customer.roomNumber" id="roomNumber" class="form-control" readonly/>
+              <input type="text" v-model="customer.roomNumber" id="roomNumber" class="form-control" readonly />
             </div>
             <div class="col-md-6">
               <label for="startDate" class="form-label">Ngày bắt đầu *</label>
               <input type="date" v-model="customer.startDate" id="startDate" class="form-control" />
+              <div v-if="validationErrors.startDate" class="text-danger">Vui lòng nhập ngày bắt đầu</div>
             </div>
           </div>
 
@@ -142,12 +146,12 @@
                     v-model="customer.rentalCost"
                     id="rentalCost"
                     class="form-control"
-                    @input="formatCurrency('rentalCost')"
-                    @blur="updateValue('rentalCost')"
+                    readonly
                 />
                 <span class="input-group-text">VNĐ</span>
               </div>
             </div>
+
             <div class="col-md-6">
               <label for="deposit" class="form-label">Đặt cọc *</label>
               <div class="input-group">
@@ -161,6 +165,7 @@
                 />
                 <span class="input-group-text">VNĐ</span>
               </div>
+              <div v-if="validationErrors.deposit" class="text-danger">Vui lòng nhập tiền đặt cọc</div>
             </div>
           </div>
 
@@ -170,7 +175,7 @@
               <label for="paymentCycle" class="form-label">Kỳ thanh toán *</label>
               <select v-model="customer.paymentCycle" id="paymentCycle" class="form-select">
                 <option value="Kỳ 30">Kỳ 30</option>
-                <option value="Kỳ 60">Kỳ 60</option>
+                <option value="Kỳ 15">Kỳ 15</option>
               </select>
             </div>
             <div class="col-md-6">
@@ -288,10 +293,12 @@
             <div class="col-md-6">
               <label for="contractNumber" class="form-label">Số hợp đồng</label>
               <input type="text" v-model="contract.contractNumber" id="contractNumber" class="form-control" />
+              <div v-if="validationErrors.contractNumber" class="text-danger">Vui lòng nhập số hợp đồng</div>
             </div>
             <div class="col-md-6">
               <label for="contractDate" class="form-label">Ngày hợp đồng</label>
               <input type="date" v-model="contract.contractDate" id="contractDate" class="form-control" />
+              <div v-if="validationErrors.contractDate" class="text-danger">Vui lòng nhập ngày hợp đồng</div>
             </div>
           </div>
 
@@ -344,12 +351,7 @@ export default {
         contractDuration: 0,
         contractEndDate: '',
       },
-      services: [
-        { name: 'Điện', price: 3000, quantity: 1, selected: true },
-        { name: 'Nước', price: 20000, quantity: 1, selected: true },
-        { name: 'Gửi xe máy', price: 80000, quantity: 1, selected: true },
-        { name: 'Rác', price: 50000, quantity: 1, selected: true },
-      ],
+      services: [],
       members: [
         {
           fullName: '',
@@ -362,9 +364,43 @@ export default {
           registrationDate: '',
         },
       ],
+      validationErrors: {},
     };
   },
   mounted() {
+    // Lấy roomNumber từ route query hoặc sử dụng một giá trị mặc định
+    const roomNumber = this.$route.query.roomNumber || "101"; // Giả sử roomNumber mặc định là 101
+    this.customer.roomNumber = roomNumber;
+
+    // Lấy dữ liệu phòng từ localStorage
+    const storedRooms = localStorage.getItem("rooms");
+    if (storedRooms) {
+      const rooms = JSON.parse(storedRooms); // Parse dữ liệu JSON từ localStorage
+      const currentRoom = rooms.find((room) => room.roomNumber === roomNumber); // Tìm phòng có roomNumber khớp
+
+      if (currentRoom) {
+        this.customer.rentalCost = currentRoom.price; // Gán giá tiền phòng vào rentalCost
+      } else {
+        console.error(`Không tìm thấy phòng số ${roomNumber} trong dữ liệu.`);
+      }
+    } else {
+      console.error("Không tìm thấy dữ liệu rooms trong localStorage.");
+    }
+
+    // Lấy thông tin khách thuê từ localStorage
+    const roomKey = `room_${roomNumber}`;
+    const storedRoomData = localStorage.getItem(roomKey);
+
+    // Nếu dữ liệu phòng đã có trong localStorage, khôi phục thông tin phòng
+    if (storedRoomData) {
+      const roomData = JSON.parse(storedRoomData);
+      this.customer = roomData.customer || this.customer;
+      this.services = roomData.services || this.services;
+      this.members = roomData.members || this.members;
+      this.contract = roomData.contract || this.contract;
+    }
+
+    // Kiểm tra và tải dịch vụ mặc định nếu chưa có trong localStorage
     const storedServices = localStorage.getItem('services');
     if (!storedServices) {
       // Lưu danh sách dịch vụ mặc định vào localStorage nếu chưa có
@@ -376,10 +412,11 @@ export default {
       ];
       localStorage.setItem('services', JSON.stringify(defaultServices));
     }
-    this.customer.roomNumber = this.$route.query.roomNumber || "NAN";
+
     this.loadServices();
-    this.customer.roomNumber = this.$route.query.roomNumber || "NAN";
   },
+
+
   methods: {
     loadServices() {
       const storedServices = localStorage.getItem('services');
@@ -391,8 +428,36 @@ export default {
       this.$router.push('/landlord/room-index');
     },
     saveCustomer() {
-      console.log(this.customer, this.contract, this.services, this.members);
+      // Validate dữ liệu
+      if (!this.validateCustomer()) return;
+
+      const roomKey = `room_${this.customer.roomNumber}`;
+      const roomData = {
+        customer: this.customer,
+        services: this.services,
+        members: this.members,
+        contract: this.contract
+      };
+
+      // Lưu thông tin phòng vào localStorage
+      localStorage.setItem(roomKey, JSON.stringify(roomData));
+
       alert('Lưu thành công!');
+    },
+    validateCustomer() {
+      this.validationErrors = {};
+
+      // Validate thông tin khách thuê
+      if (!this.customer.fullName) this.validationErrors.fullName = true;
+      if (!this.customer.identityCard) this.validationErrors.identityCard = true;
+      if (!this.customer.phoneNumber1) this.validationErrors.phoneNumber1 = true;
+      if (!this.customer.startDate) this.validationErrors.startDate = true;
+      if (!this.customer.rentalCost) this.validationErrors.rentalCost = true;
+      if (!this.customer.deposit) this.validationErrors.deposit = true;
+      if (!this.contract.contractNumber) this.validationErrors.contractNumber = true;
+      if (!this.contract.contractDate) this.validationErrors.contractDate = true;
+
+      return Object.keys(this.validationErrors).length === 0;
     },
     addMember() {
       this.members.push({
@@ -408,9 +473,6 @@ export default {
     },
     removeMember(index) {
       this.members.splice(index, 1);
-    },
-    saveServiceChanges() {
-      localStorage.setItem('services', JSON.stringify(this.services));
     },
     formatCurrency(field) {
       const value = this.customer[field];

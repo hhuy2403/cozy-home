@@ -61,7 +61,7 @@ export default {
   },
   methods: {
     goToCreateService() {
-      this.$router.push('/landlord/service-create');
+      this.$router.push('/landlord/create-service');
     },
     editService(index) {
       const service = this.services[index];

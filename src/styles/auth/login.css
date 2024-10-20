@@ -1,5 +1,5 @@
-/* General Page Settings */
 .login-page {
+    margin-top: -20px;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -29,7 +29,6 @@
     transform: translateY(-10px);
 }
 
-/* Title */
 .login-title {
     margin-bottom: 25px;
     color: #2a3f54;
@@ -56,11 +55,13 @@
     display: flex;
     color: #2a3f54;
     font-weight: 500;
-    margin-bottom: 10px;
-    font-size: 1rem;
+    margin-bottom: 5px;
 }
 
-/* Input fields */
+.mb-3 {
+    margin-bottom: 20px;
+}
+
 .form-control {
     padding: 12px;
     border-radius: 6px;
@@ -137,14 +138,18 @@
 /* Error Messages */
 .text-danger {
     color: #ff4d4d;
+    background-color: #f8d7da;
+    padding: 5px;
+    border-radius: 4px;
     font-size: 0.9rem;
     margin-top: 5px;
 }
 
 /* Responsive for small screens */
 @media (max-width: 576px) {
-    .login-page{
-        height: 100vh;
+    .login-container {
+        width: 100%;
+        padding: 0 15px;
     }
 
     .login-box {

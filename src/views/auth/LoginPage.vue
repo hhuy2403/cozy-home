@@ -86,31 +86,27 @@ export default {
   },
   methods: {
     addDefaultAdmin() {
-      // Lấy danh sách người dùng từ localStorage
       let users = JSON.parse(localStorage.getItem('users')) || [];
-
-      // Kiểm tra xem tài khoản quản trị viên đã tồn tại chưa
       const adminUser = users.find(user => user.email === 'admin@gmail.com');
       if (!adminUser) {
-        // Nếu chưa có, thêm tài khoản quản trị viên mặc định
         const newAdmin = {
-          id: Date.now(), // ID duy nhất cho tài khoản admin
+          id: Date.now(),
           name: 'Admin',
           email: 'admin@gmail.com',
-          password: 'admin123',
+          password: this.hashPassword('admin123'),
           role: 'admin',
           status: 'active'
         };
-
-        // Thêm tài khoản vào danh sách người dùng
         users.push(newAdmin);
-
-        // Cập nhật lại danh sách người dùng trong localStorage
         localStorage.setItem('users', JSON.stringify(users));
       }
     },
+    hashPassword(password) {
+      // Simple hash simulation (for demo purposes only)
+      return btoa(password); // Encode to Base64
+    },
     togglePassword() {
-      this.showPassword = !this.showPassword; // Thay đổi trạng thái hiển thị mật khẩu
+      this.showPassword = !this.showPassword;
     },
     validateEmail() {
       if (!this.email) {
@@ -137,42 +133,39 @@ export default {
       this.passwordError = '';
       return true;
     },
+    validateForm() {
+      return this.validateEmail() && this.validatePassword();
+    },
     login() {
-      // Kiểm tra email và mật khẩu trước khi đăng nhập
-      const isEmailValid = this.validateEmail();
-      const isPasswordValid = this.validatePassword();
+      if (!this.validateForm()) return;
 
-      if (!isEmailValid || !isPasswordValid) {
-        return;
-      }
-
-      // Xử lý đăng nhập giả lập
       const users = JSON.parse(localStorage.getItem('users')) || [];
+      const hashedPassword = this.hashPassword(this.password);
       const user = users.find(
-          (u) => u.email === this.email && u.password === this.password
+          (u) => u.email === this.email && u.password === hashedPassword
       );
 
       if (user) {
-        // Kiểm tra trạng thái của tài khoản
         if (user.status === 'inactive') {
           this.error = 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.';
           return;
         }
 
-        // Nếu tài khoản còn hoạt động, tiến hành đăng nhập
         localStorage.setItem('currentUser', JSON.stringify(user));
-        if (user.role === 'admin') {
-          this.$router.push('/admin/dashboard');
-          localStorage.setItem('userRole', user.role);
-        } else if (user.role === 'landlord') {
-          localStorage.setItem('userRole', user.role);
-          this.$router.push('/landlord/dashboard');
-        } else if (user.role === 'tenant') {
-          localStorage.setItem('userRole', user.role);
-          this.$router.push('/tenant/dashboard');
+        localStorage.setItem('userRole', user.role);
+        switch (user.role) {
+          case 'admin':
+            this.$router.push('/admin/dashboard');
+            break;
+          case 'landlord':
+            this.$router.push('/landlord/dashboard');
+            break;
+          case 'tenant':
+            this.$router.push('/tenant/dashboard');
+            break;
         }
       } else {
-        this.error = 'Email hoặc mật khẩu không chính xác.';
+        this.error = 'Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra hoặc đăng ký nếu bạn chưa có tài khoản.';
       }
     }
   },

@@ -1,4 +1,5 @@
 .register-page {
+    margin-top: -20px;
     height: 120vh;
     display: flex;
     justify-content: center;
