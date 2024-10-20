@@ -119,4 +119,9 @@ table td {
 .table-hover tbody tr:hover {
   background-color: #f1f1f1;
 }
+
+.table th {
+  background-color: #2a3f54;
+  color: #fff;
+}
 </style>

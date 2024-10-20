@@ -802,4 +802,14 @@ h2 {
 .tab-content > .tab-pane.active {
   display: block;
 }
+
+.nav-tabs .nav-link:hover{
+  color: #1e2d3b;
+  background-color: #fff;
+}
+
+.table th {
+  background-color: #2a3f54;
+  color: #fff;
+}
 </style>

@@ -35,6 +35,8 @@ import CreateCustomer from "@/views/landlord/customer/CreateCustomer.vue";
 import ServiceIndex from "@/views/landlord/service/ServiceIndex.vue";
 import CreateService from "@/views/landlord/service/CreateService.vue";
 import CustomerList from "@/views/landlord/room/CustomerList.vue";
+import DataPower from "@/views/landlord/datapower/DataPower.vue";
+import DataWater from "@/views/landlord/datapower/DataWater.vue";
 
 
 // Import Layouts
@@ -113,6 +115,8 @@ const routes = [
             { path: 'service-index', component: ServiceIndex },
             { path: 'create-service', component: CreateService},
             { path: 'customer', component: CustomerList},
+            { path: 'data-power', component: DataPower},
+            { path: 'data-water', component: DataWater},
 
 
 
