@@ -364,7 +364,8 @@ export default {
     };
   },
   mounted() {
-    const roomNumber = this.$route.query.roomNumber || "101"; // Default roomNumber
+    const roomNumber = this.$route.query.roomNumber || "101";
+    const houseName = this.$route.query.houseName || "HomeA";
     this.customer.roomNumber = roomNumber;
 
     const storedRooms = localStorage.getItem("rooms");
@@ -377,7 +378,7 @@ export default {
       }
     }
 
-    const roomKey = `room_${roomNumber}`;
+    const roomKey = `${houseName}_room_${roomNumber}`;
     const storedRoomData = localStorage.getItem(roomKey);
 
     if (storedRoomData) {
@@ -414,7 +415,8 @@ export default {
     saveCustomer() {
       if (!this.validateCustomer()) return;
 
-      const roomKey = `room_${this.customer.roomNumber}`;
+      const houseName = this.$route.query.houseName || "HomeA";
+      const roomKey = `${houseName}_room_${this.customer.roomNumber}`;
       const roomData = {
         customer: this.customer,
         services: this.services,

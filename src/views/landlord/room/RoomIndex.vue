@@ -79,11 +79,12 @@
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4>{{ house.name }}</h4>
             <span class="status-summary">
-              Còn trống {{ availableRooms(house.name) }} | Đã cho thuê {{
+                Còn trống {{ availableRooms(house.name) }} | Đã cho thuê {{
                 rentedRooms(house.name)
               }} | Chưa thu phí {{ unpaidRooms(house.name) }}
-            </span>
+              </span>
           </div>
+
 
           <!-- Action Buttons for Managing Rooms -->
           <div class="mb-3 d-flex flex-wrap">
@@ -120,7 +121,6 @@
 
                   <!-- Kiểm tra xem phòng đã có khách thuê hay chưa -->
                   <div v-if="room.customer && room.customer.fullName">
-                    <!-- Nếu phòng đã có khách thuê, hiển thị 4 nút -->
                     <div class="btn-group w-100 mb-3">
                       <button class="btn btn-sm btn-outline-danger" @click="releaseRoom(room.roomNumber, house.name)">
                         <i class="fa fa-sign-out-alt"></i> Trả
@@ -135,11 +135,11 @@
                         <i class="fa fa-edit"></i> Sửa
                       </button>
                     </div>
-                    <!-- Hiển thị tên khách thuê -->
                     <p class="card-text text-success">
                       <i class="fa fa-user me-2"></i>{{ room.customer.fullName }}
                     </p>
                   </div>
+
                   <div v-else>
                     <!-- Nếu chưa có khách thuê, hiển thị nút Thêm khách -->
                     <button class="btn btn-sm btn-info w-100 mb-3"
@@ -206,17 +206,17 @@ export default {
 
           if (this.filterStatus) {
             filteredRooms = filteredRooms.filter(room => {
-              return this.filterStatus === 'rented' ? room.isAvailable : !room.isAvailable;
+              return this.filterStatus === 'available' ? room.isAvailable : !room.isAvailable;
             });
           }
 
           if (this.filterFeeStatus) {
             filteredRooms = filteredRooms.filter(room => {
-              return this.filterFeeStatus === 'paid' ? room.isUnpaid : !room.isUnpaid;
+              return this.filterFeeStatus === 'unpaid' ? room.isUnpaid : !room.isUnpaid;
             });
           }
 
-          return { ...house, rooms: filteredRooms };
+          return {...house, rooms: filteredRooms};
         });
       }
 
@@ -251,13 +251,17 @@ export default {
           house.rooms = this.rooms.filter((room) => room.house === house.name);
 
           house.rooms.forEach((room) => {
-            const roomKey = `room_${room.roomNumber}`;
+            const roomKey = `${house.name}_room_${room.roomNumber}`;
             const roomData = localStorage.getItem(roomKey);
+
             if (roomData) {
               const roomDetails = JSON.parse(roomData);
               room.customer = roomDetails.customer || null;
+              room.isAvailable = !room.customer;  // Phòng trống nếu không có khách
+              room.isUnpaid = true;  // Bạn có thể thay đổi logic nếu cần
             } else {
               room.customer = null;
+              room.isAvailable = true;  // Không có khách nên phòng trống
             }
           });
         });
@@ -367,13 +371,17 @@ export default {
     },
     availableRooms(houseName) {
       const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
-      return roomsInHouse.length;
+      return roomsInHouse.filter(room => room.isAvailable).length;
     },
-    rentedRooms() {
-      return 0;
+
+    rentedRooms(houseName) {
+      const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
+      return roomsInHouse.filter(room => !room.isAvailable).length;
     },
-    unpaidRooms() {
-      return 0;
+
+    unpaidRooms(houseName) {
+      const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
+      return roomsInHouse.filter(room => room.isUnpaid).length;
     },
     formatCurrency(value) {
       if (!value) return "0 VNĐ";
@@ -416,7 +424,7 @@ h3 {
   color: #2a3f54;
 }
 
-.mt-4{
+.mt-4 {
   margin-top: 3em !important;
 }
 
