@@ -405,12 +405,16 @@ export default {
       alert(`Khách thuê phòng ${roomNumber} trong nhà ${houseName} muốn đổi phòng.`);
     },
     viewCustomer(roomNumber, houseName) {
-      alert(`Xem thông tin khách thuê phòng ${roomNumber} trong nhà ${houseName}`);
+      this.$router.push({
+        path: '/landlord/create-customer',
+        query: { roomNumber: roomNumber, houseName: houseName, viewOnly: true }  // Truyền thêm trạng thái xem
+      });
     },
+
     editCustomer(roomNumber, houseName) {
       this.$router.push({
-        path: '/landlord/edit-customer',
-        query: {roomNumber: roomNumber, houseName: houseName}
+        path: '/landlord/create-customer',
+        query: { roomNumber: roomNumber, houseName: houseName, editMode: true }  // Truyền thêm trạng thái sửa
       });
     },
     availableRooms(houseName) {

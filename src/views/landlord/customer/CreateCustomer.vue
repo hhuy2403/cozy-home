@@ -2,16 +2,19 @@
   <div class="create-customer">
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Thêm khách thuê phòng</h2>
+      <h2 v-if="isViewOnly">Xem thông tin khách thuê phòng</h2>
+      <h2 v-else-if="isEditMode">Sửa thông tin khách thuê phòng</h2>
+      <h2 v-else>Thêm khách thuê phòng</h2>
       <div>
         <button class="btn btn-warning me-2" @click="goBack">
           <i class="fa fa-undo"></i> Quay về
         </button>
-        <button class="btn btn-success" @click="saveCustomer">
+        <button v-if="!isViewOnly" class="btn btn-success" @click="saveCustomer">
           <i class="fa fa-check"></i> Lưu
         </button>
       </div>
     </div>
+
 
     <form>
       <!-- Tabs for Navigation -->
@@ -71,13 +74,29 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="fullName" class="form-label">Họ và tên *</label>
-              <input type="text" v-model="customer.fullName" id="fullName" class="form-control" />
-              <div v-if="validationErrors.fullName" class="text-danger">Vui lòng nhập họ và tên</div>
+              <input
+                  type="text"
+                  v-model="customer.fullName"
+                  id="fullName"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <div v-if="validationErrors.fullName" class="text-danger">
+                Vui lòng nhập họ và tên
+              </div>
             </div>
             <div class="col-md-6">
               <label for="identityCard" class="form-label">CMND/CCCD *</label>
-              <input type="text" v-model="customer.identityCard" id="identityCard" class="form-control" />
-              <div v-if="validationErrors.identityCard" class="text-danger">Vui lòng nhập CMND/CCCD</div>
+              <input
+                  type="text"
+                  v-model="customer.identityCard"
+                  id="identityCard"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <div v-if="validationErrors.identityCard" class="text-danger">
+                Vui lòng nhập CMND/CCCD
+              </div>
             </div>
           </div>
 
@@ -86,16 +105,38 @@
             <div class="col-md-6">
               <label class="form-label">Giới tính *</label>
               <div>
-                <input type="radio" v-model="customer.gender" id="male" value="Nam" />
+                <input
+                    type="radio"
+                    v-model="customer.gender"
+                    id="male"
+                    value="Nam"
+                    :readonly="isViewOnly"
+                />
                 <label for="male" class="me-3">Nam</label>
-                <input type="radio" v-model="customer.gender" id="female" value="Nữ" />
+                <input
+                    type="radio"
+                    v-model="customer.gender"
+                    id="female"
+                    value="Nữ"
+                    :readonly="isViewOnly"
+                />
                 <label for="female">Nữ</label>
               </div>
             </div>
             <div class="col-md-6">
-              <label for="phoneNumber1" class="form-label">Điện thoại 1 *</label>
-              <input type="text" v-model="customer.phoneNumber1" id="phoneNumber1" class="form-control" />
-              <div v-if="validationErrors.phoneNumber1" class="text-danger">Vui lòng nhập số điện thoại 1</div>
+              <label for="phoneNumber1" class="form-label"
+              >Điện thoại 1 *</label
+              >
+              <input
+                  type="text"
+                  v-model="customer.phoneNumber1"
+                  id="phoneNumber1"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <div v-if="validationErrors.phoneNumber1" class="text-danger">
+                Vui lòng nhập số điện thoại 1
+              </div>
             </div>
           </div>
 
@@ -103,23 +144,49 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="phoneNumber2" class="form-label">Điện thoại 2</label>
-              <input type="text" v-model="customer.phoneNumber2" id="phoneNumber2" class="form-control" />
+              <input
+                  type="text"
+                  v-model="customer.phoneNumber2"
+                  id="phoneNumber2"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
             <div class="col-md-6">
               <label for="address" class="form-label">Địa chỉ thường trú</label>
-              <input type="text" v-model="customer.address" id="address" class="form-control" />
+              <input
+                  type="text"
+                  v-model="customer.address"
+                  id="address"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
           </div>
 
           <!-- Date of Birth and Email -->
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="birthDate" class="form-label">Ngày sinh (dd/MM/yyyy)</label>
-              <input type="date" v-model="customer.birthDate" id="birthDate" class="form-control" />
+              <label for="birthDate" class="form-label"
+              >Ngày sinh (dd/MM/yyyy)</label
+              >
+              <input
+                  type="date"
+                  v-model="customer.birthDate"
+                  id="birthDate"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
             <div class="col-md-6">
               <label for="email" class="form-label">Email</label>
-              <input type="email" v-model="customer.email" id="email" class="form-control" />
+              <input
+                  type="email"
+                  v-model="customer.email"
+                  id="email"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
           </div>
 
@@ -127,12 +194,26 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="roomNumber" class="form-label">Thuê phòng số *</label>
-              <input type="text" v-model="customer.roomNumber" id="roomNumber" class="form-control" readonly />
+              <input
+                  type="text"
+                  v-model="customer.roomNumber"
+                  id="roomNumber"
+                  class="form-control"
+                  readonly
+              />
             </div>
             <div class="col-md-6">
               <label for="startDate" class="form-label">Ngày bắt đầu *</label>
-              <input type="date" v-model="customer.startDate" id="startDate" class="form-control" />
-              <div v-if="validationErrors.startDate" class="text-danger">Vui lòng nhập ngày bắt đầu</div>
+              <input
+                  type="date"
+                  v-model="customer.startDate"
+                  id="startDate"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <div v-if="validationErrors.startDate" class="text-danger">
+                Vui lòng nhập ngày bắt đầu
+              </div>
             </div>
           </div>
 
@@ -141,7 +222,13 @@
             <div class="col-md-6">
               <label for="rentalCost" class="form-label">Tiền phòng *</label>
               <div class="input-group">
-                <input type="text" v-model="customer.rentalCost" id="rentalCost" class="form-control" readonly />
+                <input
+                    type="text"
+                    v-model="customer.rentalCost"
+                    id="rentalCost"
+                    class="form-control"
+                    readonly
+                />
                 <span class="input-group-text">VNĐ</span>
               </div>
             </div>
@@ -149,26 +236,48 @@
             <div class="col-md-6">
               <label for="deposit" class="form-label">Đặt cọc *</label>
               <div class="input-group">
-                <input type="text" v-model="customer.deposit" id="deposit" class="form-control" />
+                <input
+                    type="text"
+                    v-model="customer.deposit"
+                    id="deposit"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
                 <span class="input-group-text">VNĐ</span>
               </div>
-              <div v-if="validationErrors.deposit" class="text-danger">Vui lòng nhập tiền đặt cọc</div>
+              <div v-if="validationErrors.deposit" class="text-danger">
+                Vui lòng nhập tiền đặt cọc
+              </div>
             </div>
           </div>
 
           <!-- Payment Cycle and Payment Frequency -->
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="paymentCycle" class="form-label">Kỳ thanh toán *</label>
-              <select v-model="customer.paymentCycle" id="paymentCycle" class="form-select">
+              <label for="paymentCycle" class="form-label"
+              >Kỳ thanh toán *</label
+              >
+              <select
+                  v-model="customer.paymentCycle"
+                  id="paymentCycle"
+                  class="form-select"
+              >
                 <option value="Kỳ 30">Kỳ 30</option>
                 <option value="Kỳ 15">Kỳ 15</option>
               </select>
             </div>
             <div class="col-md-6">
-              <label for="paymentFrequency" class="form-label">Thanh toán mỗi lần *</label>
+              <label for="paymentFrequency" class="form-label"
+              >Thanh toán mỗi lần *</label
+              >
               <div class="input-group">
-                <input type="number" v-model="customer.paymentFrequency" id="paymentFrequency" class="form-control" />
+                <input
+                    type="number"
+                    v-model="customer.paymentFrequency"
+                    id="paymentFrequency"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
                 <span class="input-group-text">Tháng</span>
               </div>
             </div>
@@ -178,11 +287,23 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="licensePlate" class="form-label">Số xe</label>
-              <input type="text" v-model="customer.licensePlate" id="licensePlate" class="form-control" />
+              <input
+                  type="text"
+                  v-model="customer.licensePlate"
+                  id="licensePlate"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
             <div class="col-md-6">
               <label for="referral" class="form-label">Người giới thiệu</label>
-              <input type="text" v-model="customer.referral" id="referral" class="form-control" />
+              <input
+                  type="text"
+                  v-model="customer.referral"
+                  id="referral"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
           </div>
 
@@ -190,12 +311,27 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="notes" class="form-label">Ghi chú khác</label>
-              <textarea v-model="customer.notes" id="notes" class="form-control"></textarea>
+              <textarea
+                  v-model="customer.notes"
+                  id="notes"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              ></textarea>
             </div>
             <div class="col-md-6">
               <label for="image" class="form-label">Hình ảnh</label>
-              <input type="file" @change="onFileChange" class="form-control" />
-              <img v-if="customer.image" :src="customer.image" class="img-thumbnail mt-2" alt="" />
+              <input
+                  type="file"
+                  @change="onFileChange"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <img
+                  v-if="customer.image"
+                  :src="customer.image"
+                  class="img-thumbnail mt-2"
+                  alt=""
+              />
             </div>
           </div>
 
@@ -206,7 +342,12 @@
         </div>
 
         <!-- Service Tab -->
-        <div class="tab-pane fade" :class="{ active: activeTab === 'service', show: activeTab === 'service' }" id="service" role="tabpanel">
+        <div
+            class="tab-pane fade"
+            :class="{ active: activeTab === 'service', show: activeTab === 'service' }"
+            id="service"
+            role="tabpanel"
+        >
           <div class="alert alert-info">
             <strong>Lưu ý:</strong> Vui lòng chọn dịch vụ cho khách thuê.
           </div>
@@ -225,18 +366,36 @@
               <td>{{ service.name }}</td>
               <td>
                 <div class="input-group">
-                  <input type="text" v-model="services[index].price" class="form-control" />
+                  <input
+                      type="text"
+                      v-model="services[index].price"
+                      class="form-control"
+                      :readonly="isViewOnly"
+                  />
                   <span class="input-group-text">VNĐ</span>
                 </div>
               </td>
-              <td><input type="number" v-model="service.quantity" class="form-control" min="1" /></td>
+              <td>
+                <input
+                    type="number"
+                    v-model="service.quantity"
+                    class="form-control"
+                    min="1"
+                    :readonly="isViewOnly"
+                />
+              </td>
             </tr>
             </tbody>
           </table>
         </div>
 
         <!-- Member Tab -->
-        <div class="tab-pane fade" :class="{ active: activeTab === 'member', show: activeTab === 'member' }" id="member" role="tabpanel">
+        <div
+            class="tab-pane fade"
+            :class="{ active: activeTab === 'member', show: activeTab === 'member' }"
+            id="member"
+            role="tabpanel"
+        >
           <table class="table table-bordered">
             <thead>
             <tr>
@@ -253,24 +412,91 @@
             </thead>
             <tbody>
             <tr v-for="(member, index) in members" :key="index">
-              <td><input type="text" v-model="member.fullName" class="form-control" /></td>
-              <td><input type="date" v-model="member.birthDate" class="form-control" /></td>
+              <td>
+                <input
+                    type="text"
+                    v-model="member.fullName"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
+              <td>
+                <input
+                    type="date"
+                    v-model="member.birthDate"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
               <td>
                 <div>
-                  <input type="radio" v-model="member.gender" :value="'Nam'" /> Nam
-                  <input type="radio" v-model="member.gender" :value="'Nữ'" /> Nữ
+                  <input
+                      type="radio"
+                      v-model="member.gender"
+                      :value="'Nam'"
+                      :readonly="isViewOnly"
+                  />
+                  Nam
+                  <input
+                      type="radio"
+                      v-model="member.gender"
+                      :value="'Nữ'"
+                      :readonly="isViewOnly"
+                  />
+                  Nữ
                 </div>
               </td>
-              <td><input type="text" v-model="member.identityCard" class="form-control" /></td>
-              <td><input type="text" v-model="member.address" class="form-control" /></td>
-              <td><input type="text" v-model="member.phoneNumber" class="form-control" /></td>
-              <td><input type="text" v-model="member.licensePlate" class="form-control" /></td>
-              <td><input type="date" v-model="member.registrationDate" class="form-control" /></td>
-              <td><button class="btn btn-danger" @click="removeMember(index)">Xóa</button></td>
+              <td>
+                <input
+                    type="text"
+                    v-model="member.identityCard"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
+              <td>
+                <input
+                    type="text"
+                    v-model="member.address"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
+              <td>
+                <input
+                    type="text"
+                    v-model="member.phoneNumber"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
+              <td>
+                <input
+                    type="text"
+                    v-model="member.licensePlate"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
+              <td>
+                <input
+                    type="date"
+                    v-model="member.registrationDate"
+                    class="form-control"
+                    :readonly="isViewOnly"
+                />
+              </td>
+              <td>
+                <button class="btn btn-danger" @click="removeMember(index)">
+                  Xóa
+                </button>
+              </td>
             </tr>
             </tbody>
           </table>
-          <button class="btn btn-success" @click.prevent="addMember">Thêm thành viên</button>
+          <button class="btn btn-success" @click.prevent="addMember">
+            Thêm thành viên
+          </button>
         </div>
 
         <!-- Contract Tab -->
@@ -280,31 +506,71 @@
             id="contract"
             role="tabpanel"
         >
-          <div class="alert alert-info">Các thông tin nhập ở đây sẽ được sử dụng cho việc xuất/in hợp đồng thuê phòng.</div>
+          <div class="alert alert-info">
+            Các thông tin nhập ở đây sẽ được sử dụng cho việc xuất/in hợp đồng
+            thuê phòng.
+          </div>
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="contractNumber" class="form-label">Số hợp đồng *</label>
-              <input type="text" v-model="contract.contractNumber" id="contractNumber" class="form-control" />
-              <div v-if="validationErrors.contractNumber" class="text-danger">Vui lòng nhập số hợp đồng</div>
+              <label for="contractNumber" class="form-label"
+              >Số hợp đồng *</label
+              >
+              <input
+                  type="text"
+                  v-model="contract.contractNumber"
+                  id="contractNumber"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <div v-if="validationErrors.contractNumber" class="text-danger">
+                Vui lòng nhập số hợp đồng
+              </div>
             </div>
             <div class="col-md-6">
-              <label for="contractDate" class="form-label">Ngày hợp đồng *</label>
-              <input type="date" v-model="contract.contractDate" id="contractDate" class="form-control" />
-              <div v-if="validationErrors.contractDate" class="text-danger">Vui lòng nhập ngày hợp đồng</div>
+              <label for="contractDate" class="form-label"
+              >Ngày hợp đồng *</label
+              >
+              <input
+                  type="date"
+                  v-model="contract.contractDate"
+                  id="contractDate"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
+              <div v-if="validationErrors.contractDate" class="text-danger">
+                Vui lòng nhập ngày hợp đồng
+              </div>
             </div>
           </div>
 
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="contractDuration" class="form-label">Thời gian HĐ</label>
+              <label for="contractDuration" class="form-label"
+              >Thời gian HĐ</label
+              >
               <div class="input-group">
-                <input type="number" v-model="contract.contractDuration" id="contractDuration" class="form-control" min="0" />
+                <input
+                    type="number"
+                    v-model="contract.contractDuration"
+                    id="contractDuration"
+                    class="form-control"
+                    min="0"
+                    :readonly="isViewOnly"
+                />
                 <span class="input-group-text">Tháng</span>
               </div>
             </div>
             <div class="col-md-6">
-              <label for="contractEndDate" class="form-label">Ngày kết thúc HĐ</label>
-              <input type="date" v-model="contract.contractEndDate" id="contractEndDate" class="form-control" />
+              <label for="contractEndDate" class="form-label"
+              >Ngày kết thúc HĐ</label
+              >
+              <input
+                  type="date"
+                  v-model="contract.contractEndDate"
+                  id="contractEndDate"
+                  class="form-control"
+                  :readonly="isViewOnly"
+              />
             </div>
           </div>
           <!-- Thông tin bắt buộc -->
@@ -322,6 +588,8 @@ export default {
   data() {
     return {
       activeTab: 'customer-info',
+      isViewOnly: false,
+      isEditMode: false,
       customer: {
         fullName: '',
         identityCard: '',
@@ -389,13 +657,23 @@ export default {
       this.contract = roomData.contract || this.contract;
     }
 
+    // Kiểm tra nếu có tham số "viewOnly" hoặc "editMode"
+    this.isViewOnly = this.$route.query.viewOnly === 'true';
+    this.isEditMode = this.$route.query.editMode === 'true';
+
+    if (this.isViewOnly) {
+      document.title = "Xem thông tin khách thuê phòng";
+    } else if (this.isEditMode) {
+      document.title = "Sửa thông tin khách thuê phòng";
+    }
+
     const storedServices = localStorage.getItem('services');
     if (!storedServices) {
       const defaultServices = [
-        { name: 'Điện', price: 3000, quantity: 1, selected: false },
-        { name: 'Nước', price: 20000, quantity: 1, selected: false },
-        { name: 'Gửi xe máy', price: 80000, quantity: 1, selected: false },
-        { name: 'Rác', price: 50000, quantity: 1, selected: false },
+        {name: 'Điện', price: 3000, quantity: 1, selected: false},
+        {name: 'Nước', price: 20000, quantity: 1, selected: false},
+        {name: 'Gửi xe máy', price: 80000, quantity: 1, selected: false},
+        {name: 'Rác', price: 50000, quantity: 1, selected: false},
       ];
       localStorage.setItem('services', JSON.stringify(defaultServices));
     }
@@ -484,7 +762,7 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-h2{
+h2 {
   font-size: 1.5rem;
   font-weight: 600;
 }
