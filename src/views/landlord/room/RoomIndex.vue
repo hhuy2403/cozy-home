@@ -194,9 +194,10 @@ export default {
   computed: {
     filteredHouses() {
       let filteredHouses = this.houses.map(house => {
+        // Kiểm tra nếu 'house.rooms' không tồn tại hoặc không phải là mảng
         return {
           ...house,
-          rooms: house.rooms.slice()
+          rooms: Array.isArray(house.rooms) ? house.rooms.slice() : []
         };
       });
 
@@ -206,17 +207,17 @@ export default {
 
           if (this.filterStatus) {
             filteredRooms = filteredRooms.filter(room => {
-              return this.filterStatus === 'available' ? room.isAvailable : !room.isAvailable;
+              return this.filterStatus === 'rented' ? room.isAvailable : !room.isAvailable;
             });
           }
 
           if (this.filterFeeStatus) {
             filteredRooms = filteredRooms.filter(room => {
-              return this.filterFeeStatus === 'unpaid' ? room.isUnpaid : !room.isUnpaid;
+              return this.filterFeeStatus === 'paid' ? room.isUnpaid : !room.isUnpaid;
             });
           }
 
-          return {...house, rooms: filteredRooms};
+          return { ...house, rooms: filteredRooms };
         });
       }
 
