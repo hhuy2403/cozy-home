@@ -141,13 +141,7 @@
             <div class="col-md-6">
               <label for="rentalCost" class="form-label">Tiền phòng *</label>
               <div class="input-group">
-                <input
-                    type="text"
-                    v-model="customer.rentalCost"
-                    id="rentalCost"
-                    class="form-control"
-                    readonly
-                />
+                <input type="text" v-model="customer.rentalCost" id="rentalCost" class="form-control" readonly />
                 <span class="input-group-text">VNĐ</span>
               </div>
             </div>
@@ -155,21 +149,14 @@
             <div class="col-md-6">
               <label for="deposit" class="form-label">Đặt cọc *</label>
               <div class="input-group">
-                <input
-                    type="text"
-                    v-model="customer.deposit"
-                    id="deposit"
-                    class="form-control"
-                    @input="formatCurrency('deposit')"
-                    @blur="updateValue('deposit')"
-                />
+                <input type="text" v-model="customer.deposit" id="deposit" class="form-control" />
                 <span class="input-group-text">VNĐ</span>
               </div>
               <div v-if="validationErrors.deposit" class="text-danger">Vui lòng nhập tiền đặt cọc</div>
             </div>
           </div>
 
-          <!-- Payment Cycle and Payment Frequency (with "tháng" label) -->
+          <!-- Payment Cycle and Payment Frequency -->
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="paymentCycle" class="form-label">Kỳ thanh toán *</label>
@@ -187,7 +174,7 @@
             </div>
           </div>
 
-          <!-- Additional Fields (License Plate, Referral, Notes, Image) -->
+          <!-- Additional Fields -->
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="licensePlate" class="form-label">Số xe</label>
@@ -199,6 +186,7 @@
             </div>
           </div>
 
+          <!-- Notes and Image Upload -->
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="notes" class="form-label">Ghi chú khác</label>
@@ -210,13 +198,17 @@
               <img v-if="customer.image" :src="customer.image" class="img-thumbnail mt-2" alt="" />
             </div>
           </div>
+
+          <!-- Thông tin bắt buộc -->
+          <div class="mb-4">
+            <span class="text-danger">(*): Thông tin bắt buộc</span>
+          </div>
         </div>
 
         <!-- Service Tab -->
         <div class="tab-pane fade" :class="{ active: activeTab === 'service', show: activeTab === 'service' }" id="service" role="tabpanel">
           <div class="alert alert-info">
-            <strong>Lưu ý:</strong> Vui lòng chọn dịch vụ cho khách thuê. Nếu khách có chọn dịch vụ thì phần mềm sẽ tự
-            động tính các khoản phí vào hóa đơn. Đối với dịch vụ là loại điện/ nước thì sẽ tính theo chỉ số điện/ nước.
+            <strong>Lưu ý:</strong> Vui lòng chọn dịch vụ cho khách thuê.
           </div>
           <table class="table table-bordered">
             <thead>
@@ -233,7 +225,7 @@
               <td>{{ service.name }}</td>
               <td>
                 <div class="input-group">
-                  <input type="text" v-model="services[index].price" class="form-control" @input="formatCurrency(index)" />
+                  <input type="text" v-model="services[index].price" class="form-control" />
                   <span class="input-group-text">VNĐ</span>
                 </div>
               </td>
@@ -291,12 +283,12 @@
           <div class="alert alert-info">Các thông tin nhập ở đây sẽ được sử dụng cho việc xuất/in hợp đồng thuê phòng.</div>
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="contractNumber" class="form-label">Số hợp đồng</label>
+              <label for="contractNumber" class="form-label">Số hợp đồng *</label>
               <input type="text" v-model="contract.contractNumber" id="contractNumber" class="form-control" />
               <div v-if="validationErrors.contractNumber" class="text-danger">Vui lòng nhập số hợp đồng</div>
             </div>
             <div class="col-md-6">
-              <label for="contractDate" class="form-label">Ngày hợp đồng</label>
+              <label for="contractDate" class="form-label">Ngày hợp đồng *</label>
               <input type="date" v-model="contract.contractDate" id="contractDate" class="form-control" />
               <div v-if="validationErrors.contractDate" class="text-danger">Vui lòng nhập ngày hợp đồng</div>
             </div>
@@ -314,6 +306,10 @@
               <label for="contractEndDate" class="form-label">Ngày kết thúc HĐ</label>
               <input type="date" v-model="contract.contractEndDate" id="contractEndDate" class="form-control" />
             </div>
+          </div>
+          <!-- Thông tin bắt buộc -->
+          <div class="mb-4">
+            <span class="text-danger">(*): Thông tin bắt buộc</span>
           </div>
         </div>
       </div>
@@ -368,30 +364,22 @@ export default {
     };
   },
   mounted() {
-    // Lấy roomNumber từ route query hoặc sử dụng một giá trị mặc định
-    const roomNumber = this.$route.query.roomNumber || "101"; // Giả sử roomNumber mặc định là 101
+    const roomNumber = this.$route.query.roomNumber || "101"; // Default roomNumber
     this.customer.roomNumber = roomNumber;
 
-    // Lấy dữ liệu phòng từ localStorage
     const storedRooms = localStorage.getItem("rooms");
     if (storedRooms) {
-      const rooms = JSON.parse(storedRooms); // Parse dữ liệu JSON từ localStorage
-      const currentRoom = rooms.find((room) => room.roomNumber === roomNumber); // Tìm phòng có roomNumber khớp
+      const rooms = JSON.parse(storedRooms);
+      const currentRoom = rooms.find((room) => room.roomNumber === roomNumber);
 
       if (currentRoom) {
-        this.customer.rentalCost = currentRoom.price; // Gán giá tiền phòng vào rentalCost
-      } else {
-        console.error(`Không tìm thấy phòng số ${roomNumber} trong dữ liệu.`);
+        this.customer.rentalCost = currentRoom.price;
       }
-    } else {
-      console.error("Không tìm thấy dữ liệu rooms trong localStorage.");
     }
 
-    // Lấy thông tin khách thuê từ localStorage
     const roomKey = `room_${roomNumber}`;
     const storedRoomData = localStorage.getItem(roomKey);
 
-    // Nếu dữ liệu phòng đã có trong localStorage, khôi phục thông tin phòng
     if (storedRoomData) {
       const roomData = JSON.parse(storedRoomData);
       this.customer = roomData.customer || this.customer;
@@ -400,10 +388,8 @@ export default {
       this.contract = roomData.contract || this.contract;
     }
 
-    // Kiểm tra và tải dịch vụ mặc định nếu chưa có trong localStorage
     const storedServices = localStorage.getItem('services');
     if (!storedServices) {
-      // Lưu danh sách dịch vụ mặc định vào localStorage nếu chưa có
       const defaultServices = [
         { name: 'Điện', price: 3000, quantity: 1, selected: false },
         { name: 'Nước', price: 20000, quantity: 1, selected: false },
@@ -415,8 +401,6 @@ export default {
 
     this.loadServices();
   },
-
-
   methods: {
     loadServices() {
       const storedServices = localStorage.getItem('services');
@@ -428,7 +412,6 @@ export default {
       this.$router.push('/landlord/room-index');
     },
     saveCustomer() {
-      // Validate dữ liệu
       if (!this.validateCustomer()) return;
 
       const roomKey = `room_${this.customer.roomNumber}`;
@@ -439,15 +422,14 @@ export default {
         contract: this.contract
       };
 
-      // Lưu thông tin phòng vào localStorage
       localStorage.setItem(roomKey, JSON.stringify(roomData));
 
       alert('Lưu thành công!');
+      this.$router.push('/landlord/room-index');
     },
     validateCustomer() {
       this.validationErrors = {};
 
-      // Validate thông tin khách thuê
       if (!this.customer.fullName) this.validationErrors.fullName = true;
       if (!this.customer.identityCard) this.validationErrors.identityCard = true;
       if (!this.customer.phoneNumber1) this.validationErrors.phoneNumber1 = true;
@@ -474,14 +456,6 @@ export default {
     removeMember(index) {
       this.members.splice(index, 1);
     },
-    formatCurrency(field) {
-      const value = this.customer[field];
-      this.customer[field] = value.replace(/\D/g, '');
-    },
-    updateValue(field) {
-      const value = this.customer[field].replace(/\D/g, '');
-      this.customer[field] = parseFloat(value) || 0;
-    },
     onFileChange(event) {
       const file = event.target.files[0];
       if (file) {
@@ -501,18 +475,16 @@ export default {
 
 <style scoped>
 .create-customer {
-  margin-top: 30px;
+  margin-top: 50px;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.form-label {
+h2{
+  font-size: 1.5rem;
   font-weight: 600;
-}
-
-button {
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
 }
 
 .nav-tabs .nav-link {

@@ -30,7 +30,7 @@
 
       <!-- Thông báo thành công -->
       <p v-if="successMessage" class="text-success mt-3">{{ successMessage }}</p>
-      <p v-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
+      <p v-else-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
     </div>
   </div>
   <FooterComponent/>
@@ -78,16 +78,22 @@ export default {
           this.errorMessage = '';
           console.log('Password reset link sent to:', this.email);
 
-          // Logic để gửi email (giả lập trong localStorage)
+          // Logic để gửi email (giả lập)
           const resetLink = `http://example.com/reset-password?email=${encodeURIComponent(this.email)}`;
-          localStorage.setItem('resetLink', resetLink);
           console.log('Reset link:', resetLink);
+
+          // Reset form sau khi gửi thành công
+          this.resetForm();
         } else {
           // Nếu email không tồn tại, hiển thị thông báo lỗi
           this.errorMessage = 'Email không tồn tại trong hệ thống.';
           this.successMessage = '';
         }
       }
+    },
+    resetForm() {
+      this.email = '';
+      this.emailError = '';
     }
   }
 }
@@ -95,6 +101,7 @@ export default {
 
 <style scoped>
 .forgot-password-page {
+  margin-top: -20px;
   display: flex;
   justify-content: center;
   align-items: center;

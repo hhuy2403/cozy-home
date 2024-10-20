@@ -1,5 +1,6 @@
 <template>
   <div class="service-index">
+    <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Danh sách dịch vụ</h2>
       <div>
@@ -12,28 +13,36 @@
       </div>
     </div>
 
+    <!-- Info Alert -->
     <div class="alert alert-info">
       <strong>Lưu ý:</strong> Các dịch vụ phải được gán cho từng khách thuê phòng để khi tính tiền sẽ có tiền dịch vụ đó.
     </div>
 
-    <table class="table table-bordered">
-      <thead>
+    <!-- Service Table -->
+    <table class="table table-hover table-bordered table-responsive-md">
+      <thead class="table-light">
       <tr>
-        <th><input type="checkbox" @change="toggleSelectAll" /></th>
-        <th>Tên</th>
-        <th>Loại dịch vụ</th>
-        <th>Đơn giá (VNĐ)</th>
-        <th>Đang dùng</th>
-        <th>Hành động</th>
+        <th scope="col">
+          <input type="checkbox" @change="toggleSelectAll" />
+        </th>
+        <th scope="col">Tên</th>
+        <th scope="col">Loại dịch vụ</th>
+        <th scope="col">Đơn giá (VNĐ)</th>
+        <th scope="col">Đang dùng</th>
+        <th scope="col">Hành động</th>
       </tr>
       </thead>
       <tbody>
       <tr v-for="(service, index) in services" :key="index">
-        <td><input type="checkbox" v-model="service.selected" /></td>
+        <td>
+          <input type="checkbox" v-model="service.selected" />
+        </td>
         <td>{{ service.name }}</td>
         <td>{{ service.type }}</td>
-        <td>{{ service.price.toLocaleString('vi-VN') }}</td>
-        <td><input type="checkbox" v-model="service.isActive" disabled /></td>
+        <td>{{ formatCurrency(service.price) }}</td>
+        <td>
+          <input type="checkbox" v-model="service.isActive" disabled />
+        </td>
         <td>
           <button class="btn btn-sm btn-primary me-2" @click="editService(index)">
             <i class="fa fa-edit"></i> Sửa
@@ -56,7 +65,7 @@ export default {
   name: 'ServiceIndex',
   data() {
     return {
-      services: JSON.parse(localStorage.getItem('services')) || []
+      services: JSON.parse(localStorage.getItem('services')) || [],
     };
   },
   methods: {
@@ -65,9 +74,7 @@ export default {
     },
     editService(index) {
       const service = this.services[index];
-      // Lưu dịch vụ được chọn vào localStorage để chuyển qua trang sửa
       localStorage.setItem('editingService', JSON.stringify(service));
-      // Điều hướng đến trang sửa
       this.$router.push({ path: '/landlord/create-service', query: { edit: true } });
     },
     deleteService(index) {
@@ -87,20 +94,29 @@ export default {
       this.services.forEach(service => {
         service.selected = isChecked;
       });
-    }
-  }
+    },
+    formatCurrency(value) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    },
+  },
 };
 </script>
 
 <style scoped>
 .service-index {
-  margin-top: 30px;
+  margin-top: 50px;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
+table th,
+table td {
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
-  <div class="list-room">
+  <div class="list-room container mt-4">
     <!-- Header với nút tìm kiếm, quay về, lưu, và xuất file -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Danh Sách Phòng</h2>
-      <div>
+      <div class="action-buttons">
         <input type="text" v-model="searchQuery" class="form-control me-2 d-inline" style="width: 200px;" placeholder="Tìm kiếm...">
         <button class="btn btn-warning me-2" @click="goBack">
           <i class="fa fa-undo"></i> Quay về
@@ -83,7 +83,6 @@ export default {
     // Lọc danh sách phòng theo từ khóa tìm kiếm
     filteredRooms() {
       return this.rooms.filter((room) => {
-        // Ép kiểu roomNumber thành chuỗi để tránh lỗi
         return String(room.roomNumber).toLowerCase().includes(this.searchQuery.toLowerCase().trim());
       });
     }
@@ -139,6 +138,7 @@ export default {
     deleteRoom(index) {
       if (confirm("Bạn có chắc chắn muốn xóa phòng này không?")) {
         this.rooms.splice(index, 1);
+        localStorage.setItem("rooms", JSON.stringify(this.rooms)); // Lưu lại sau khi xóa
       }
     },
     // Hàm xuất danh sách phòng ra file Excel
@@ -166,7 +166,18 @@ thead {
   background-color: #f8f9fa;
 }
 
+.action-buttons .form-control {
+  display: inline-block;
+  margin-right: 10px;
+}
+
 input.form-control {
   border-radius: 5px;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2a3f54;
 }
 </style>

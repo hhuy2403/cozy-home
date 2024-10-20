@@ -14,6 +14,7 @@ export default {
 
 <style scoped>
 .landlord-dashboard {
+  margin-top: 30px;
   padding: 20px;
   color: #2a3f54;
 }

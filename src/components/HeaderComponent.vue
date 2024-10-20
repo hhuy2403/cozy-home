@@ -2,7 +2,9 @@
   <header class="header navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <!-- Logo -->
-      <router-link class="navbar-brand" to="/" @click="closeNavbar"><i class="fas fa-home-alt"></i> CozyHome</router-link>
+      <router-link class="navbar-brand" to="/" @click="closeNavbar">
+        <i class="fas fa-home-alt"></i> CozyHome
+      </router-link>
 
       <!-- Toggler for mobile view -->
       <button
@@ -72,7 +74,7 @@
 
           <!-- Logout Button -->
           <li class="nav-item" v-if="userRole !== 'guest'">
-            <button class="btn btn-outline-light" @click="confirmLogout">Logout</button>
+            <router-link class="btn btn-outline-light nav-link" @click="confirmLogout" to="">Logout</router-link>
           </li>
         </ul>
       </div>
@@ -93,7 +95,8 @@ export default {
   },
   created() {
     // Lấy vai trò người dùng từ localStorage hoặc mặc định là 'guest'
-    this.userRole = localStorage.getItem('userRole') || 'guest';
+    const role = localStorage.getItem('userRole');
+    this.userRole = role ? role : 'guest';
   },
   methods: {
     toggleNavbar() {
@@ -125,6 +128,9 @@ export default {
       // Xóa vai trò người dùng và thông tin đăng nhập khỏi localStorage
       localStorage.removeItem('userRole');
       localStorage.removeItem('currentUser');
+
+      // Đóng navbar
+      this.closeNavbar();
 
       // Điều hướng về trang đăng nhập
       this.$router.push('/login');
@@ -178,6 +184,7 @@ export default {
 /* Styles to handle the collapse and show behavior */
 .collapse {
   display: none;
+  transition: height 0.3s ease;
 }
 
 .collapse.show {

@@ -1,11 +1,8 @@
 <template>
   <div class="create-room">
-    <!-- Header với H2 bên trái và các nút bên phải -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <!-- Tiêu đề h2 -->
-      <h2>Thêm Phòng</h2>
-
-      <!-- Nút Quay về và Lưu bên phải -->
+    <!-- Header với tiêu đề và các nút -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0">Thêm Phòng</h3>
       <div>
         <router-link to="/landlord/room-index">
           <button type="button" class="btn btn-warning me-2">
@@ -13,112 +10,81 @@
           </button>
         </router-link>
         <button type="submit" class="btn btn-success" @click="validateAndSaveRoom">
-          <i class="fa fa-check"></i> Lưu
+          <i class="fa fa-save"></i> Lưu
         </button>
       </div>
     </div>
 
-    <!-- Form Thêm Phòng -->
     <form @submit.prevent="validateAndSaveRoom">
-      <!-- Form Fields -->
+      <!-- Số phòng và Nhà -->
       <div class="row mb-3">
-        <!-- Phòng số -->
         <div class="col-md-6">
-          <label for="roomNumber" class="form-label">Phòng số <span class="text-danger">*</span></label>
-          <input type="text" v-model="room.roomNumber" id="roomNumber" class="form-control"
+          <label for="roomNumber" class="form-label">Phòng số <span>*</span></label>
+          <input type="text" v-model="room.roomNumber" id="roomNumber" class="form-control form-control-sm"
                  :class="{'is-invalid': errors.roomNumber}" placeholder="Nhập số phòng" required/>
           <div class="invalid-feedback" v-if="errors.roomNumber">{{ errors.roomNumber }}</div>
         </div>
-
-        <!-- Nhà -->
         <div class="col-md-6">
-          <label for="house" class="form-label">Nhà <span class="text-danger">*</span></label>
-          <select id="house" v-model="room.house" class="form-select" :class="{'is-invalid': errors.house}" required>
+          <label for="house" class="form-label">Nhà <span>*</span></label>
+          <select id="house" v-model="room.house" class="form-select form-select-sm" :class="{'is-invalid': errors.house}" required>
             <option v-for="house in houses" :key="house.name" :value="house.name">{{ house.name }}</option>
           </select>
           <div class="invalid-feedback" v-if="errors.house">{{ errors.house }}</div>
         </div>
       </div>
 
-      <!-- Đơn giá và kích thước -->
+      <!-- Đơn giá, Dài, Rộng -->
       <div class="row mb-3">
-        <!-- Đơn giá -->
-        <div class="col-md-6">
-          <label for="price" class="form-label">Đơn giá <span class="text-danger">*</span></label>
-          <input type="number" v-model="room.price" id="price" class="form-control"
+        <div class="col-md-4">
+          <label for="price" class="form-label">Đơn giá (VNĐ) <span>*</span></label>
+          <input type="number" v-model="room.price" id="price" class="form-control form-control-sm"
                  :class="{'is-invalid': errors.price}" placeholder="0 VNĐ" required/>
           <div class="invalid-feedback" v-if="errors.price">{{ errors.price }}</div>
         </div>
-
-        <!-- Dài -->
-        <div class="col-md-6">
-          <label for="length" class="form-label">Dài <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <input type="number" v-model="room.length" id="length" class="form-control"
-                   :class="{'is-invalid': errors.length}" placeholder="0" required/>
-            <span class="input-group-text">M</span>
-            <div class="invalid-feedback" v-if="errors.length">{{ errors.length }}</div>
-          </div>
+        <div class="col-md-4">
+          <label for="length" class="form-label">Dài (M) <span>*</span></label>
+          <input type="number" v-model="room.length" id="length" class="form-control form-control-sm"
+                 :class="{'is-invalid': errors.length}" placeholder="0" required/>
+          <div class="invalid-feedback" v-if="errors.length">{{ errors.length }}</div>
+        </div>
+        <div class="col-md-4">
+          <label for="width" class="form-label">Rộng (M) <span>*</span></label>
+          <input type="number" v-model="room.width" id="width" class="form-control form-control-sm"
+                 :class="{'is-invalid': errors.width}" placeholder="0" required/>
+          <div class="invalid-feedback" v-if="errors.width">{{ errors.width }}</div>
         </div>
       </div>
 
-      <!-- Rộng và Số lượng người tối đa -->
-      <div class="row mb-3">
-        <!-- Rộng -->
-        <div class="col-md-6">
-          <label for="width" class="form-label">Rộng <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <input type="number" v-model="room.width" id="width" class="form-control"
-                   :class="{'is-invalid': errors.width}" placeholder="0" required/>
-            <span class="input-group-text">M</span>
-            <div class="invalid-feedback" v-if="errors.width">{{ errors.width }}</div>
-          </div>
-        </div>
-
-        <!-- Số lượng người tối đa -->
-        <div class="col-md-6">
-          <label for="maxPeople" class="form-label">Số lượng người tối đa <span class="text-danger">*</span></label>
-          <div class="input-group">
-            <input type="number" v-model="room.maxPeople" id="maxPeople" class="form-control"
-                   :class="{'is-invalid': errors.maxPeople}" placeholder="0" required/>
-            <span class="input-group-text">Người</span>
-            <div class="invalid-feedback" v-if="errors.maxPeople">{{ errors.maxPeople }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Cho thuê -->
+      <!-- Số lượng người tối đa và Cho thuê -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="rentalStatus" class="form-label">Cho thuê</label>
+          <label for="maxPeople" class="form-label">Số lượng người tối đa <span>*</span></label>
+          <input type="number" v-model="room.maxPeople" id="maxPeople" class="form-control form-control-sm"
+                 :class="{'is-invalid': errors.maxPeople}" placeholder="0" required/>
+          <div class="invalid-feedback" v-if="errors.maxPeople">{{ errors.maxPeople }}</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Cho thuê</label>
           <div>
-            <input type="checkbox" id="male" v-model="room.rentableToMale" class="form-check-input"/>
+            <input type="checkbox" id="male" v-model="room.rentableToMale" class="form-check-input form-check-sm" />
             <label class="form-check-label" for="male">Nam</label>
-
-            <input type="checkbox" id="female" v-model="room.rentableToFemale" class="form-check-input ms-3"/>
+            <input type="checkbox" id="female" v-model="room.rentableToFemale" class="form-check-input form-check-sm ms-3" />
             <label class="form-check-label" for="female">Nữ</label>
           </div>
         </div>
       </div>
 
-      <!-- Mô tả thêm -->
-      <div class="row mb-3">
-        <div class="col-md-12">
-          <label for="description" class="form-label">Mô tả thêm</label>
-          <textarea v-model="room.description" id="description" class="form-control"
-                    placeholder="Nhập mô tả thêm"></textarea>
-        </div>
+      <!-- Mô tả -->
+      <div class="mb-3">
+        <label for="description" class="form-label">Mô tả thêm</label>
+        <textarea v-model="room.description" id="description" class="form-control form-control-sm"
+                  placeholder="Nhập mô tả thêm"></textarea>
       </div>
 
       <!-- Hình ảnh -->
-      <div class="row mb-3">
-        <div class="col-md-12">
-          <label class="form-label">Hình ảnh</label>
-          <div class="drop-zone">
-            <p>Kéo tập tin cần upload thả vào đây</p>
-            <input type="file" @change="onFileChange" class="form-control"/>
-          </div>
-        </div>
+      <div class="mb-3">
+        <label class="form-label">Hình ảnh</label>
+        <input type="file" @change="onFileChange" class="form-control form-control-sm"/>
       </div>
 
       <!-- Thông tin bắt buộc -->
@@ -214,30 +180,16 @@ export default {
 
 <style scoped>
 .create-room {
-  margin-top: 30px;
+  margin-top: 50px;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.form-label {
+h3 {
+  font-size: 1.5rem;
   font-weight: 600;
-}
-
-.input-group-text {
-  background-color: #f0f0f0;
-}
-
-.drop-zone {
-  border: 2px dashed #ddd;
-  padding: 20px;
-  text-align: center;
-  background-color: #f9f9f9;
-  cursor: pointer;
-}
-
-button {
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
 }
 
 .is-invalid {
@@ -247,5 +199,9 @@ button {
 .invalid-feedback {
   display: block;
   color: #dc3545;
+}
+
+input.form-control-sm, select.form-select-sm, textarea.form-control-sm {
+  font-size: 0.875rem;
 }
 </style>

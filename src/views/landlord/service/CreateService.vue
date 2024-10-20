@@ -1,64 +1,77 @@
 <template>
   <div class="create-service">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 v-if="isEditMode">Sửa dịch vụ</h2>
-      <h2 v-else>Thêm dịch vụ</h2>
+    <!-- Header with H2 and Back, Save buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="mb-0" v-if="isEditMode">Sửa Dịch Vụ</h3>
+      <h3 class="mb-0" v-else>Thêm Dịch Vụ</h3>
       <div>
-        <button class="btn btn-warning me-2" @click="goBack">
-          <i class="fa fa-undo"></i> Quay về
-        </button>
-        <button class="btn btn-success" @click="saveService">
+        <router-link to="/landlord/service-index">
+          <button type="button" class="btn btn-warning me-2">
+            <i class="fa fa-undo"></i> Quay về
+          </button>
+        </router-link>
+        <button type="submit" class="btn btn-success" @click="validateAndSave">
           <i class="fa fa-check"></i> Lưu
         </button>
       </div>
     </div>
 
-    <form>
+    <form @submit.prevent="validateAndSave">
+      <!-- Service Name and Type -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="serviceName" class="form-label">Tên *</label>
-          <input type="text" v-model="service.name" id="serviceName" class="form-control" :class="{'is-invalid': validationErrors.name}"/>
-          <div class="invalid-feedback">Tên không được để trống</div>
+          <label for="serviceName" class="form-label">Tên Dịch Vụ <span>&nbsp;*</span></label>
+          <input type="text" v-model="service.name" id="serviceName" class="form-control form-control-sm"
+                 :class="{'is-invalid': errors.name}" placeholder="Nhập tên dịch vụ" required />
+          <div class="invalid-feedback" v-if="errors.name">{{ errors.name }}</div>
         </div>
 
         <div class="col-md-6">
-          <label for="serviceType" class="form-label">Loại *</label>
-          <select v-model="service.type" id="serviceType" class="form-select" :class="{'is-invalid': validationErrors.type}">
+          <label for="serviceType" class="form-label">Loại Dịch Vụ <span>&nbsp;*</span></label>
+          <select v-model="service.type" id="serviceType" class="form-select form-select-sm"
+                  :class="{'is-invalid': errors.type}">
             <option value="">Chọn loại dịch vụ</option>
             <option value="ĐIỆN">Điện</option>
             <option value="NƯỚC">Nước</option>
             <option value="KHÁC">Khác</option>
           </select>
-          <div class="invalid-feedback">Loại dịch vụ không được để trống</div>
+          <div class="invalid-feedback" v-if="errors.type">{{ errors.type }}</div>
         </div>
       </div>
 
+      <!-- Service Price and Status -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <label for="price" class="form-label">Đơn giá *</label>
+          <label for="price" class="form-label">Đơn Giá <span>&nbsp;*</span></label>
           <div class="input-group">
-            <input type="number" v-model="service.price" id="price" class="form-control" :class="{'is-invalid': validationErrors.price}" min="0"/>
+            <input type="number" v-model="service.price" id="price" class="form-control form-control-sm"
+                   :class="{'is-invalid': errors.price}" min="0" placeholder="Nhập đơn giá" required />
             <span class="input-group-text">VNĐ</span>
           </div>
-          <div class="invalid-feedback">Đơn giá không được để trống</div>
+          <div class="invalid-feedback" v-if="errors.price">{{ errors.price }}</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label">Trạng thái</label>
-          <div>
-            <input type="checkbox" v-model="service.isActive" /> Đang dùng
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" v-model="service.isActive" id="isActive" />
+            <label class="form-check-label" for="isActive">Đang dùng</label>
           </div>
         </div>
       </div>
 
+      <!-- Notes -->
       <div class="row mb-3">
         <div class="col-md-12">
-          <label for="note" class="form-label">Ghi chú</label>
-          <textarea v-model="service.note" id="note" class="form-control"></textarea>
+          <label for="note" class="form-label d-block">Ghi Chú</label> <br>
+          <textarea v-model="service.note" id="note" class="form-control form-control-sm d-block" placeholder="Nhập ghi chú nếu có"></textarea>
         </div>
       </div>
 
-      <p class="text-danger">(*): Thông tin bắt buộc</p>
+      <!-- Required Information -->
+      <div class="mb-4">
+        <span class="text-danger">(*): Thông tin bắt buộc</span>
+      </div>
     </form>
   </div>
 </template>
@@ -75,7 +88,7 @@ export default {
         isActive: true,
         note: ''
       },
-      validationErrors: {},
+      errors: {},
       isEditMode: false
     };
   },
@@ -89,38 +102,32 @@ export default {
     }
   },
   methods: {
-    goBack() {
-      this.$router.push('/landlord/service-index');
+    validateAndSave() {
+      this.errors = {};
+
+      // Validation checks
+      if (!this.service.name) this.errors.name = "Vui lòng nhập tên dịch vụ";
+      if (!this.service.type) this.errors.type = "Vui lòng chọn loại dịch vụ";
+      if (this.service.price <= 0) this.errors.price = "Vui lòng nhập đơn giá hợp lệ";
+
+      if (Object.keys(this.errors).length === 0) {
+        this.saveService();
+      }
     },
     saveService() {
-      this.validationErrors = {};
+      let services = JSON.parse(localStorage.getItem('services')) || [];
 
-      // Validate the required fields
-      if (!this.service.name) {
-        this.validationErrors.name = true;
-      }
-      if (!this.service.type) {
-        this.validationErrors.type = true;
-      }
-      if (this.service.price <= 0) {
-        this.validationErrors.price = true;
+      if (this.isEditMode) {
+        const index = services.findIndex(s => s.name === this.service.name);
+        services[index] = this.service; // Update service
+      } else {
+        services.push(this.service); // Add new service
       }
 
-      if (Object.keys(this.validationErrors).length === 0) {
-        const services = JSON.parse(localStorage.getItem('services')) || [];
+      localStorage.setItem('services', JSON.stringify(services));
 
-        if (this.isEditMode) {
-          const index = services.findIndex(s => s.name === this.service.name);
-          services[index] = this.service; // Cập nhật dịch vụ
-        } else {
-          services.push(this.service); // Thêm dịch vụ mới
-        }
-
-        localStorage.setItem('services', JSON.stringify(services));
-
-        alert('Dịch vụ đã được lưu thành công!');
-        this.goBack();
-      }
+      alert('Dịch vụ đã được lưu thành công!');
+      this.$router.push('/landlord/service-index');
     }
   }
 };
@@ -128,17 +135,24 @@ export default {
 
 <style scoped>
 .create-service {
-  margin-top: 30px;
+  margin-top: 50px;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.form-label {
+h3 {
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
-button {
-  border-radius: 5px;
-  padding: 10px 20px;
-  font-size: 16px;
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block;
+  color: #dc3545;
 }
 </style>
