@@ -207,13 +207,13 @@ export default {
 
           if (this.filterStatus) {
             filteredRooms = filteredRooms.filter(room => {
-              return this.filterStatus === 'rented' ? room.isAvailable : !room.isAvailable;
+              return this.filterStatus === 'available' ? room.isAvailable : !room.isAvailable;
             });
           }
 
           if (this.filterFeeStatus) {
             filteredRooms = filteredRooms.filter(room => {
-              return this.filterFeeStatus === 'paid' ? room.isUnpaid : !room.isUnpaid;
+              return this.filterFeeStatus === 'unpaid' ? room.isUnpaid : !room.isUnpaid;
             });
           }
 
@@ -418,6 +418,7 @@ export default {
 </script>
 
 <style scoped>
+
 h3 {
   text-align: left;
   font-size: 24px;
@@ -427,6 +428,10 @@ h3 {
 
 .mt-4 {
   margin-top: 3em !important;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .floor-section {
