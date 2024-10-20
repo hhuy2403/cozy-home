@@ -347,15 +347,58 @@ export default {
         }
       });
     },
+    // Hàm này sẽ được gọi khi nhấn nút trả phòng
     releaseRoom(roomNumber, houseName) {
-      let rooms = JSON.parse(localStorage.getItem('rooms')) || [];
-      const room = rooms.find(r => r.roomNumber === roomNumber && r.house === houseName);
+      // Lấy dữ liệu phòng từ localStorage
+      const roomKey = `${houseName}_room_${roomNumber}`;
+      const roomData = localStorage.getItem(roomKey);
 
-      if (room) {
-        room.customer = null;
-        localStorage.setItem('rooms', JSON.stringify(rooms));
-        this.loadDataFromLocalStorage();
-        alert(`Khách đã trả phòng ${roomNumber} thành công.`);
+      if (!roomData) {
+        alert(`Phòng ${roomNumber} không tồn tại trong nhà ${houseName}`);
+        return;
+      }
+
+      const roomDetails = JSON.parse(roomData);
+
+      // Hiển thị hộp thoại xác nhận ngày trả phòng và thông báo tính tiền
+      const confirmRelease = confirm(`Khách thuê phòng ${roomNumber} sẽ trả phòng.
+    Ngày trả: ${new Date().toLocaleDateString()}.
+    Bạn có muốn tiếp tục?`);
+
+      if (confirmRelease) {
+        // Xử lý trả phòng
+        alert(`Tính tiền phòng cho đến ngày ${new Date().toLocaleDateString()}.`);
+
+        // Xóa dữ liệu khách thuê và các dịch vụ liên quan
+        roomDetails.customer = null;
+        roomDetails.services.forEach(service => service.selected = false);
+
+        // Cập nhật trạng thái phòng: phòng trống và đã thu phí
+        roomDetails.isAvailable = true;
+        roomDetails.isUnpaid = false;  // Đã thu phí sau khi trả phòng
+
+        // Xóa dữ liệu của phòng khỏi localStorage
+        localStorage.removeItem(roomKey);
+
+        // Cập nhật lại dữ liệu rooms trong danh sách
+        this.rooms = this.rooms.map(room => {
+          if (room.roomNumber === roomNumber && room.house === houseName) {
+            room.customer = null;
+            room.isAvailable = true;  // Phòng trống
+            room.isUnpaid = true;    // Đã thu phí
+          }
+          return room;
+        });
+
+        // Cập nhật trạng thái phòng trong house.rooms
+        this.houses.forEach(house => {
+          if (house.name === houseName) {
+            house.rooms = this.rooms.filter(room => room.house === house.name);
+          }
+        });
+
+        alert(`Phòng ${roomNumber} trong nhà ${houseName} đã được trả thành công. Trạng thái phí đã được cập nhật thành "Đã thu phí".`);
+        this.loadDataFromLocalStorage(); // Tải lại dữ liệu sau khi trả phòng
       }
     },
     changeRoom(roomNumber, houseName) {
