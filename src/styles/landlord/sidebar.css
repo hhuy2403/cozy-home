@@ -73,6 +73,9 @@
     left: 96px;
     border: none;
 }
+.sidebar.collapsed .nav-item span{
+    display: none;
+}
 
 .toggle-sidebar i {
     font-size: 1.8em;

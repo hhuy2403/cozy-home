@@ -37,6 +37,8 @@ import CreateService from "@/views/landlord/service/CreateService.vue";
 import CustomerList from "@/views/landlord/room/CustomerList.vue";
 import DataPower from "@/views/landlord/datapower/DataPower.vue";
 import DataWater from "@/views/landlord/datapower/DataWater.vue";
+import OtherFee from "@/views/landlord/otherfee/OtherFee.vue";
+import OtherFeeCreate from "@/views/landlord/otherfee/OtherFeeCreate.vue";
 
 
 // Import Layouts
@@ -117,6 +119,9 @@ const routes = [
             { path: 'customer', component: CustomerList},
             { path: 'data-power', component: DataPower},
             { path: 'data-water', component: DataWater},
+            { path: 'other-fee', component: OtherFee},
+            { path: 'other-fee-create', component: OtherFeeCreate},
+
 
 
 
