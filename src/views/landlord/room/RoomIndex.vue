@@ -1,173 +1,140 @@
 <template>
   <div class="room-index container mt-4">
-    <!-- Tiêu đề -->
+    <!-- Title and Filters -->
     <h3>Danh sách phòng</h3>
-
-    <!-- Filters and Search -->
     <div class="row mb-4 align-items-center">
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <select class="form-select" v-model="filterStatus" :disabled="!houses.length">
+        <select class="form-select" v-model="filterStatus">
           <option value="">- Trạng thái phòng -</option>
           <option value="available">Còn trống</option>
           <option value="rented">Đã cho thuê</option>
         </select>
       </div>
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <select class="form-select" v-model="filterFeeStatus" :disabled="!houses.length">
+        <select class="form-select" v-model="filterFeeStatus">
           <option value="">- Trạng thái phí -</option>
           <option value="unpaid">Chưa thu phí</option>
           <option value="paid">Đã thu phí</option>
         </select>
       </div>
+      <div class="col-lg-3 col-md-3 col-sm-6 mb-2">
+        <input type="text" class="form-control" placeholder="Phòng" v-model="searchQuery"/>
+      </div>
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <input type="text" class="form-control" placeholder="Tìm phòng" v-model="searchQuery"
-               :disabled="!houses.length"/>
+        <button class="btn btn-primary w-100" @click="searchRooms">Tìm kiếm</button>
+      </div>
+      <div class="d-flex justify-content-start">
+        <span>Còn trống: {{ availableRooms }} | Đã cho thuê: {{ rentedRooms }} | Chưa thu phí: {{ unpaidRooms }}</span>
       </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="d-flex justify-content-end mb-4">
-      <button class="btn btn-warning me-2 mb-2" @click="triggerFileUpload" :disabled="!houses.length">
-        <i class="fa fa-upload"></i> Nhập phòng từ excel
-      </button>
-      <input type="file" ref="fileInput" @change="handleFileUpload" style="display: none;"/>
+      <button class="btn btn-warning me-2 mb-2"><i class="fa fa-upload"></i> Nhập phòng từ excel</button>
       <router-link to="/landlord/customer">
-        <button class="btn btn-primary me-3 mb-2" :disabled="!houses.length">
-          <i class="fa fa-users"></i> Khách thuê
-        </button>
+        <button class="btn btn-primary me-2 mb-2"><i class="fa fa-users"></i> Khách thuê</button>
       </router-link>
       <router-link to="/landlord/list-room">
-        <button class="btn btn-info me-3 mb-2" :disabled="!houses.length">
-          <i class="fa fa-list"></i> Phòng
-        </button>
+        <button class="btn btn-info me-2 mb-2"><i class="fa fa-list"></i> Phòng</button>
       </router-link>
       <router-link to="/landlord/create-home">
-        <button class="btn btn-success mb-2">
-          <i class="fa fa-building"></i> Thêm nhà
-        </button>
+        <button class="btn btn-success mb-2"><i class="fa fa-building"></i> Thêm nhà</button>
       </router-link>
     </div>
 
-    <!-- Thông báo nếu chưa có nhà -->
-    <div v-if="!houses.length" class="alert alert-warning text-center">
-      Chưa có nhà! Vui lòng thêm nhà trước khi sử dụng các dịch vụ khác.
-    </div>
-
-    <!-- House Tabs -->
-    <ul v-if="houses.length" class="nav nav-tabs mb-3" role="tablist">
+    <!-- Tabs for Houses -->
+    <ul class="nav nav-tabs mb-3">
       <li class="nav-item" v-for="(house, index) in houses" :key="index">
-        <a
-            class="nav-link"
-            :class="{ active: activeTab === index }"
-            @click="setActiveTab(index)"
-            role="tab"
-        >
+        <a class="nav-link" :class="{ active: activeTab === index }" @click="setActiveTab(index)">
           {{ house.name }}
         </a>
       </li>
     </ul>
 
-    <!-- Tab Content for Houses -->
-    <div v-if="houses.length" class="tab-content">
-      <div
-          class="tab-pane fade"
-          v-for="(house, index) in filteredHouses"
-          :key="index"
-          :class="{ show: activeTab === index, active: activeTab === index }"
-          role="tabpanel"
-      >
-        <div class="floor-section bg-light p-4 rounded shadow-sm">
-          <!-- House Header and Room Summary -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>{{ house.name }}</h4>
-            <span class="status-summary">
-                Còn trống {{ availableRooms(house.name) }} | Đã cho thuê {{
-                rentedRooms(house.name)
-              }} | Chưa thu phí {{ unpaidRooms(house.name) }}
-              </span>
+    <!-- Room Cards -->
+    <div class="tab-content">
+      <div v-for="(house, index) in filteredHouses" :key="index" class="tab-pane fade" :class="{ show: activeTab === index, active: activeTab === index }">
+        <div class="d-flex justify-content-between mb-3">
+          <span>
+            Còn trống: {{ availableRoomsInHouse(house) }} | Đã cho thuê: {{ rentedRoomsInHouse(house) }} | Chưa thu phí: {{ unpaidRoomsInHouse(house) }}
+          </span>
+          <div>
+            <router-link :to="{ path: '/landlord/create-room-fast', query: { houseName: house.name } }">
+              <button class="btn btn-outline-info me-2"><i class="fa fa-plus"></i> Thêm phòng nhanh</button>
+            </router-link>
+            <router-link :to="{ path: '/landlord/create-room', query: { houseName: house.name } }">
+              <button class="btn btn-outline-success me-2"><i class="fa fa-bed"></i> Thêm phòng</button>
+            </router-link>
+            <router-link :to="{ path: '/landlord/edit-home', query: { houseName: house.name } }">
+              <button class="btn btn-outline-primary me-2"><i class="fa fa-pencil-alt"></i> Sửa nhà</button>
+            </router-link>
+            <button class="btn btn-outline-danger" @click="deleteHouse(house)"><i class="fa fa-times"></i> Xóa nhà</button>
           </div>
+        </div>
 
-
-          <!-- Action Buttons for Managing Rooms -->
-          <div class="mb-3 d-flex flex-wrap">
-            <router-link :to="{ path: '/landlord/create-room-fast', query: { house: house.name } }">
-              <button class="btn btn-outline-info me-2 mb-2">
-                <i class="fa fa-plus"></i> Thêm phòng nhanh
-              </button>
-            </router-link>
-            <router-link :to="{ path: '/landlord/create-room', query: { house: house.name } }">
-              <button class="btn btn-outline-success me-2 mb-2">
-                <i class="fa fa-bed"></i> Thêm phòng
-              </button>
-            </router-link>
-
-            <router-link :to="{ path: '/landlord/edit-home', query: { house: house.name } }">
-              <button class="btn btn-outline-primary me-2 mb-2">
-                <i class="fa fa-pencil-alt"></i> Sửa nhà
-              </button>
-            </router-link>
-
-            <button class="btn btn-outline-danger mb-2" @click="deleteHouse(house.name)">
-              <i class="fa fa-times"></i> Xóa nhà
-            </button>
-          </div>
-
-          <!-- Room Cards for Current House -->
-          <div class="row" v-if="house.rooms && house.rooms.length">
-            <div class="col-md-3 col-sm-6 mb-4" v-for="(room, index) in house.rooms" :key="index">
-              <div class="card room-card border-0 shadow-sm h-100">
-                <div class="card-body">
-                  <h5 class="card-title text-primary d-flex align-items-center">
-                    <i class="fa fa-home me-2"></i> {{ room.roomNumber }}
-                  </h5>
-
-                  <!-- Kiểm tra xem phòng đã có khách thuê hay chưa -->
-                  <div v-if="room.customer && room.customer.fullName">
-                    <div class="btn-group w-100 mb-3">
-                      <button class="btn btn-sm btn-outline-danger" @click="releaseRoom(room.roomNumber, house.name)">
-                        <i class="fa fa-sign-out-alt"></i> Trả
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning" @click="changeRoom(room.roomNumber, house.name)">
-                        <i class="fa fa-exchange-alt"></i> Đổi
-                      </button>
-                      <button class="btn btn-sm btn-outline-info" @click="viewCustomer(room.roomNumber, house.name)">
-                        <i class="fa fa-eye"></i> Xem
-                      </button>
-                      <button class="btn btn-sm btn-outline-primary" @click="editCustomer(room.roomNumber, house.name)">
-                        <i class="fa fa-edit"></i> Sửa
-                      </button>
-                    </div>
-                    <p class="card-text text-success">
-                      <i class="fa fa-user me-2"></i>{{ room.customer.fullName }}
-                    </p>
-                  </div>
-
-                  <div v-else>
-                    <!-- Nếu chưa có khách thuê, hiển thị nút Thêm khách -->
-                    <button class="btn btn-sm btn-info w-100 mb-3"
-                            @click="goToCreateCustomer(room.roomNumber, house.name)">
-                      Thêm khách
-                    </button>
-                  </div>
-                  <p class="card-text text-danger fw-bold">
-                    <i class="fa fa-money-bill me-2"></i>{{ formatCurrency(room.price) }}
-                  </p>
-                  <div class="d-flex justify-content-between">
+        <div class="row">
+          <div class="col-md-3 col-sm-6 mb-4" v-for="room in house.rooms" :key="room.roomNumber">
+            <div class="card room-card h-100">
+              <div class="card-body">
+                <h5 class="card-title d-flex align-items-center">
+                  <i class="fa fa-home me-2"></i> Phòng {{ room.roomNumber }}
+                </h5>
+                <div v-if="room.customer">
+                  <div class="btn-group w-100 mb-3">
+                    <button class="btn btn-sm btn-outline-success" @click="checkoutRoom(room, house.name)"><i class="fa fa-undo"></i></button>
+                    <button class="btn btn-sm btn-outline-warning"><i class="fa fa-exchange-alt"></i></button>
                     <router-link
-                        :to="{ path: '/landlord/edit-room', query: { roomNumber: room.roomNumber, houseName: house.name } }">
-                      <button class="btn btn-sm btn-outline-primary">
-                        <i class="fa fa-edit"></i> Chỉnh sửa
-                      </button>
+                        :to="{
+                        path: '/landlord/create-customer',
+                        query: {
+                          roomNumber: room.roomNumber,
+                          houseName: house.name,
+                          viewOnly: true
+                        }
+                      }"
+                    >
+                      <button class="btn btn-sm btn-outline-info"><i class="fa fa-eye"></i></button>
                     </router-link>
-                    <button class="btn btn-sm btn-outline-danger" @click="deleteRoom(room.roomNumber, house.name)">
-                      <i class="fa fa-trash"></i> Xóa
-                    </button>
+                    <router-link
+                        :to="{
+                        path: '/landlord/create-customer',
+                        query: {
+                          roomNumber: room.roomNumber,
+                          houseName: house.name,
+                          editMode: true
+                        }
+                      }"
+                    >
+                      <button class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i></button>
+                    </router-link>
                   </div>
+                  <p class="text-success">{{ room.customer.fullName }}</p>
+                </div>
+                <div v-else>
+                  <router-link
+                      :to="{
+                      path: '/landlord/create-customer',
+                      query: {
+                        roomNumber: room.roomNumber,
+                        houseName: house.name,
+                        price: room.price
+                      }
+                    }"
+                  >
+                    <button class="btn btn-info w-100 mb-3">Thêm khách</button>
+                  </router-link>
+
+                </div>
+                <p><i class="fa fa-money-bill"></i> {{ formatCurrency(room.price) }}</p>
+                <div class="d-flex justify-content-between">
+                  <router-link :to="{ path: '/landlord/edit-room', query: { roomNumber: room.roomNumber, houseName: house.name } }">
+                    <button class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i> Chỉnh sửa</button>
+                  </router-link>
+                  <button class="btn btn-sm btn-outline-danger" @click="deleteRoom(room, house.name)"><i class="fa fa-trash"></i> Xóa</button>
                 </div>
               </div>
             </div>
           </div>
-          <p v-else>Chưa có phòng nào trong nhà này</p>
         </div>
       </div>
     </div>
@@ -175,306 +142,150 @@
 </template>
 
 <script>
-import * as XLSX from 'xlsx';
-
 export default {
-  name: "RoomIndex",
   data() {
     return {
-      houses: [],
-      rooms: [],
-      searchQuery: "", // Từ khóa tìm kiếm
-      filterStatus: "", // Lọc trạng thái phòng
-      filterFeeStatus: "", // Lọc trạng thái phí
-      validationErrors: [],
-      activeTab: 0 // Tab đang chọn
+      houses: [], // List of houses
+      filterStatus: '', // Room status filter (available/rented)
+      filterFeeStatus: '', // Fee status filter (unpaid/paid)
+      searchQuery: '', // Search input for room number
+      activeTab: 0, // Active tab for houses
     };
-  },
-  mounted() {
-    this.loadDataFromLocalStorage();
   },
   computed: {
     filteredHouses() {
-      let filteredHouses = this.houses.map(house => {
-        // Kiểm tra nếu 'house.rooms' không tồn tại hoặc không phải là mảng
-        return {
+      // Filter houses based on status, fee, and search query
+      let houses = [...this.houses];
+      if (this.filterStatus) {
+        houses = houses.map(house => ({
           ...house,
-          rooms: Array.isArray(house.rooms) ? house.rooms.slice() : []
-        };
-      });
-
-      if (this.filterStatus || this.filterFeeStatus) {
-        filteredHouses = filteredHouses.map(house => {
-          let filteredRooms = house.rooms;
-
-          if (this.filterStatus) {
-            filteredRooms = filteredRooms.filter(room => {
-              return this.filterStatus === 'available' ? room.isAvailable : !room.isAvailable;
-            });
-          }
-
-          if (this.filterFeeStatus) {
-            filteredRooms = filteredRooms.filter(room => {
-              return this.filterFeeStatus === 'unpaid' ? room.isUnpaid : !room.isUnpaid;
-            });
-          }
-
-          return { ...house, rooms: filteredRooms };
-        });
+          rooms: house.rooms.filter(room => (this.filterStatus === 'available' ? !room.customer : room.customer)),
+        }));
       }
-
-      if (this.searchQuery.trim()) {
-        filteredHouses = filteredHouses.map(house => {
-          return {
-            ...house,
-            rooms: house.rooms.filter(room =>
-                room.roomNumber.toString().includes(this.searchQuery.trim())
-            )
-          };
-        });
+      if (this.filterFeeStatus) {
+        houses = houses.map(house => ({
+          ...house,
+          rooms: house.rooms.filter(room => (this.filterFeeStatus === 'unpaid' ? !room.isPaid : room.isPaid)),
+        }));
       }
-
-      return filteredHouses;
-    }
+      if (this.searchQuery) {
+        houses = houses.map(house => ({
+          ...house,
+          rooms: house.rooms.filter(room => room.roomNumber.toString().includes(this.searchQuery)),
+        }));
+      }
+      return houses;
+    },
+    availableRooms() {
+      // Count available rooms across all houses
+      return this.houses.reduce((total, house) => total + house.rooms.filter(room => !room.customer).length, 0);
+    },
+    rentedRooms() {
+      // Count rented rooms across all houses
+      return this.houses.reduce((total, house) => total + house.rooms.filter(room => room.customer).length, 0);
+    },
+    unpaidRooms() {
+      // Count unpaid rooms across all houses
+      return this.houses.reduce((total, house) => total + house.rooms.filter(room => !room.isPaid).length, 0);
+    },
   },
-
   methods: {
-    loadDataFromLocalStorage() {
-      const storedHouses = localStorage.getItem("homes");
-      const storedRooms = localStorage.getItem("rooms");
-
-      if (storedHouses) {
-        this.houses = JSON.parse(storedHouses);
-      }
-
-      if (storedRooms) {
-        this.rooms = JSON.parse(storedRooms);
-
-        this.houses.forEach((house) => {
-          house.rooms = this.rooms.filter((room) => room.house === house.name);
-
-          house.rooms.forEach((room) => {
-            const roomKey = `${house.name}_room_${room.roomNumber}`;
-            const roomData = localStorage.getItem(roomKey);
-
-            if (roomData) {
-              const roomDetails = JSON.parse(roomData);
-              room.customer = roomDetails.customer || null;
-              room.isAvailable = !room.customer;  // Phòng trống nếu không có khách
-              room.isUnpaid = true;  // Bạn có thể thay đổi logic nếu cần
-            } else {
-              room.customer = null;
-              room.isAvailable = true;  // Không có khách nên phòng trống
-            }
-          });
-        });
-      }
-    },
-    triggerFileUpload() {
-      this.$refs.fileInput.click();
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-        this.importRoomsFromExcel(jsonData);
-      };
-
-      reader.readAsArrayBuffer(file);
-    },
-    importRoomsFromExcel(excelData) {
-      this.validationErrors = [];
-
-      excelData.forEach((room) => {
-        const newRoom = {
-          roomNumber: room['Tên phòng'],
-          house: room['Khu vực'],
-          price: room['Đơn giá'],
-          length: room['Dài'],
-          width: room['Rộng'],
-          maxPeople: room['Số lượng người tối đa'],
-          description: room['Mô tả'],
-          rentableToMale: room['Cho thuê Nam'] === 'Yes',
-          rentableToFemale: room['Cho thuê Nữ'] === 'Yes',
-          order: room['Thứ tự'],
-          isAvailable: true,
-          isUnpaid: true
-        };
-
-        const houseExists = this.houses.some(h => h.name === newRoom.house);
-        if (!houseExists) {
-          this.validationErrors.push(`Nhà "${newRoom.house}" không tồn tại.`);
-          return;
-        }
-
-        const roomExists = this.rooms.some(
-            (r) => r.roomNumber === newRoom.roomNumber && r.house === newRoom.house
-        );
-        if (roomExists) {
-          this.validationErrors.push(
-              `Phòng "${newRoom.roomNumber}" đã tồn tại trong nhà "${newRoom.house}".`
-          );
-          return;
-        }
-
-        this.rooms.push(newRoom);
-      });
-
-      if (this.validationErrors.length === 0) {
-        localStorage.setItem('rooms', JSON.stringify(this.rooms));
-        alert('Nhập phòng từ file Excel thành công!');
-        this.loadDataFromLocalStorage();
-      } else {
-        alert('Có lỗi xảy ra khi nhập phòng từ Excel:\n' + this.validationErrors.join('\n'));
-      }
-    },
     setActiveTab(index) {
+      // Set the active tab based on the selected house
       this.activeTab = index;
-      this.searchQuery = "";
     },
-    goToCreateCustomer(roomNumber, houseName) {
-      this.$router.push({
-        path: '/landlord/create-customer',
-        query: {
-          roomNumber: roomNumber,
-          houseName: houseName
-        }
-      });
-    },
-    // Hàm này sẽ được gọi khi nhấn nút trả phòng
-    releaseRoom(roomNumber, houseName) {
-      // Lấy dữ liệu phòng từ localStorage
-      const roomKey = `${houseName}_room_${roomNumber}`;
-      const roomData = localStorage.getItem(roomKey);
-
-      if (!roomData) {
-        alert(`Phòng ${roomNumber} không tồn tại trong nhà ${houseName}`);
+    checkoutRoom(room, houseName) {
+      const checkoutDate = prompt("Nhập ngày trả phòng (yyyy-mm-dd):");
+      if (!checkoutDate) {
+        alert("Vui lòng nhập ngày trả phòng hợp lệ.");
         return;
       }
 
-      const roomDetails = JSON.parse(roomData);
+      const isPaid = confirm("Khách đã thanh toán toàn bộ chi phí cuối tháng chưa?");
 
-      // Hiển thị hộp thoại xác nhận ngày trả phòng và thông báo tính tiền
-      const confirmRelease = confirm(`Khách thuê phòng ${roomNumber} sẽ trả phòng.
-    Ngày trả: ${new Date().toLocaleDateString()}.
-    Bạn có muốn tiếp tục?`);
+      if (isPaid) {
+        let homes = JSON.parse(localStorage.getItem('homes')) || [];
+        const home = homes.find(h => h.name === houseName);
 
-      if (confirmRelease) {
-        // Xử lý trả phòng
-        alert(`Tính tiền phòng cho đến ngày ${new Date().toLocaleDateString()}.`);
+        if (home) {
+          const currentRoom = home.rooms.find(r => r.roomNumber === room.roomNumber);
 
-        // Xóa dữ liệu khách thuê và các dịch vụ liên quan
-        roomDetails.customer = null;
-        roomDetails.services.forEach(service => service.selected = false);
+          if (currentRoom) {
+            // Reset the room information (clear customer, services, members)
+            currentRoom.customer = null;
+            currentRoom.services = [];
+            currentRoom.members = [];
+            currentRoom.contract = [];
+            currentRoom.electricData = [];
+            currentRoom.waterData = [];
+            currentRoom.isPaid = false;
+            currentRoom.isRented = false;
 
-        // Cập nhật trạng thái phòng: phòng trống và đã thu phí
-        roomDetails.isAvailable = true;
-        roomDetails.isUnpaid = false;  // Đã thu phí sau khi trả phòng
+            // Update localStorage
+            localStorage.setItem('homes', JSON.stringify(homes));
 
-        // Xóa dữ liệu của phòng khỏi localStorage
-        localStorage.removeItem(roomKey);
-
-        // Cập nhật lại dữ liệu rooms trong danh sách
-        this.rooms = this.rooms.map(room => {
-          if (room.roomNumber === roomNumber && room.house === houseName) {
-            room.customer = null;
-            room.isAvailable = true;  // Phòng trống
-            room.isUnpaid = true;    // Đã thu phí
+            alert(`Phòng ${room.roomNumber} đã được trả và cập nhật thành phòng trống!`);
+            this.houses = homes; // Refresh the house list
           }
-          return room;
-        });
-
-        // Cập nhật trạng thái phòng trong house.rooms
-        this.houses.forEach(house => {
-          if (house.name === houseName) {
-            house.rooms = this.rooms.filter(room => room.house === house.name);
-          }
-        });
-
-        alert(`Phòng ${roomNumber} trong nhà ${houseName} đã được trả thành công. Trạng thái phí đã được cập nhật thành "Đã thu phí".`);
-        this.loadDataFromLocalStorage(); // Tải lại dữ liệu sau khi trả phòng
+        } else {
+          alert("Không tìm thấy nhà hoặc phòng!");
+        }
+      } else {
+        alert("Vui lòng thanh toán toàn bộ chi phí trước khi trả phòng.");
       }
     },
-    changeRoom(roomNumber, houseName) {
-      alert(`Khách thuê phòng ${roomNumber} trong nhà ${houseName} muốn đổi phòng.`);
+    availableRoomsInHouse(house) {
+      // Count available rooms in the selected house
+      return house.rooms.filter(room => !room.customer).length;
     },
-    viewCustomer(roomNumber, houseName) {
-      this.$router.push({
-        path: '/landlord/create-customer',
-        query: { roomNumber: roomNumber, houseName: houseName, viewOnly: true }  // Truyền thêm trạng thái xem
-      });
+    rentedRoomsInHouse(house) {
+      // Count rented rooms in the selected house
+      return house.rooms.filter(room => room.customer).length;
     },
-
-    editCustomer(roomNumber, houseName) {
-      this.$router.push({
-        path: '/landlord/create-customer',
-        query: { roomNumber: roomNumber, houseName: houseName, editMode: true }  // Truyền thêm trạng thái sửa
-      });
-    },
-    availableRooms(houseName) {
-      const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
-      return roomsInHouse.filter(room => room.isAvailable).length;
-    },
-
-    rentedRooms(houseName) {
-      const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
-      return roomsInHouse.filter(room => !room.isAvailable).length;
-    },
-
-    unpaidRooms(houseName) {
-      const roomsInHouse = this.rooms.filter((room) => room.house === houseName);
-      return roomsInHouse.filter(room => room.isUnpaid).length;
+    unpaidRoomsInHouse(house) {
+      // Count unpaid rooms in the selected house
+      return house.rooms.filter(room => !room.isPaid).length;
     },
     formatCurrency(value) {
-      if (!value) return "0 VNĐ";
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND"
-      }).format(value);
+      // Format currency to VND
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     },
-    deleteHouse(houseName) {
-      let homes = JSON.parse(localStorage.getItem('homes')) || [];
-      homes = homes.filter(home => home.name !== houseName);
-      localStorage.setItem('homes', JSON.stringify(homes));
-      this.houses = homes;
-      alert(`Nhà ${houseName} đã được xóa thành công!`);
-      window.location.reload();
+    searchRooms() {
+      // Trigger search based on filters (status, fee, search query)
     },
-    deleteRoom(roomNumber, houseName) {
-      let rooms = JSON.parse(localStorage.getItem('rooms')) || [];
-      rooms = rooms.filter(room => room.roomNumber !== roomNumber || room.house !== houseName);
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-      this.rooms = rooms;
+    deleteRoom(room, houseName) {
+      const confirmation = confirm(`Bạn có chắc chắn muốn xóa phòng ${room.roomNumber} thuộc nhà ${houseName}?`);
+      if (confirmation) {
+        let homes = JSON.parse(localStorage.getItem('homes')) || [];
+        const home = homes.find(h => h.name === houseName);
 
-      this.houses.forEach((house) => {
-        if (house.name === houseName) {
-          house.rooms = this.rooms.filter((room) => room.house === house.name);
+        if (home) {
+          home.rooms = home.rooms.filter(r => r.roomNumber !== room.roomNumber); // Xóa phòng ra khỏi danh sách
+          localStorage.setItem('homes', JSON.stringify(homes));
+          alert(`Phòng ${room.roomNumber} đã được xóa!`);
+          this.houses = homes; // Cập nhật lại danh sách nhà
         }
-      });
-
-      alert(`Phòng ${roomNumber} trong ${houseName} đã được xóa thành công!`);
-    }
-  }
+      }
+    },
+    deleteHouse(house) {
+      const confirmation = confirm(`Bạn có chắc chắn muốn xóa toàn bộ nhà ${house.name}?`);
+      if (confirmation) {
+        let homes = JSON.parse(localStorage.getItem('homes')) || [];
+        homes = homes.filter(h => h.name !== house.name); // Xóa nhà ra khỏi danh sách
+        localStorage.setItem('homes', JSON.stringify(homes));
+        alert(`Nhà ${house.name} đã được xóa!`);
+        this.houses = homes; // Cập nhật lại danh sách nhà
+      }
+    },
+  },
+  mounted() {
+    // Load houses and rooms from localStorage
+    this.houses = JSON.parse(localStorage.getItem('homes')) || [];
+  },
 };
 </script>
 
 <style scoped>
-
-h3 {
-  text-align: left;
-  font-size: 24px;
-  font-weight: bold;
-  color: #2a3f54;
-}
-
 .mt-4 {
   margin-top: 3em !important;
   padding: 20px;
@@ -483,43 +294,40 @@ h3 {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.floor-section {
-  background-color: #f8f9fa;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+h3 {
+  font-size: 24px;
+  font-weight: bold;
 }
 
-.card.room-card {
+.nav-tabs .nav-link {
+  padding: 10px 15px;
+}
+
+.room-card {
   border-radius: 10px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card.room-card:hover {
+.room-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.btn-outline-primary,
-.btn-outline-success,
-.btn-outline-info,
-.btn-outline-danger {
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.btn-outline-primary:hover,
-.btn-outline-success:hover,
-.btn-outline-info:hover,
-.btn-outline-danger:hover {
-  color: #fff;
-}
-
 .card-title {
   font-size: 18px;
-  font-weight: bold;
 }
 
-.card-text {
+.btn-group .btn {
+  flex-grow: 1;
+}
+
+.text-success {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.text-danger {
+  font-weight: bold;
   font-size: 16px;
 }
 </style>

@@ -39,6 +39,7 @@ import DataPower from "@/views/landlord/datapower/DataPower.vue";
 import DataWater from "@/views/landlord/datapower/DataWater.vue";
 import OtherFee from "@/views/landlord/otherfee/OtherFee.vue";
 import OtherFeeCreate from "@/views/landlord/otherfee/OtherFeeCreate.vue";
+import calculatorMoney from "@/views/landlord/calculator-money/CalculatorMoney.vue";
 
 
 // Import Layouts
@@ -121,6 +122,7 @@ const routes = [
             { path: 'data-water', component: DataWater},
             { path: 'other-fee', component: OtherFee},
             { path: 'other-fee-create', component: OtherFeeCreate},
+            { path: 'calculator-money', component: calculatorMoney},
 
 
 

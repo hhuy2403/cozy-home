@@ -74,16 +74,23 @@ export default {
   data() {
     return {
       home: {
+        id: this.generateUniqueId(),
         name: "",
         city: "",
         district: "",
         ward: "",
-        address: ""
+        address: "",
+        rooms: [] // Các phòng sẽ được thêm vào sau
       },
       errors: {} // Để lưu trữ các lỗi validate
     };
   },
   methods: {
+    // Tạo ID duy nhất cho mỗi nhà
+    generateUniqueId() {
+      return "home_" + Date.now(); // Ví dụ home_1631234567890
+    },
+
     validateAndSave() {
       this.errors = {}; // Xóa các lỗi trước đó
 

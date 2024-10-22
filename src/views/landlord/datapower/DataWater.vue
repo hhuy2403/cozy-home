@@ -19,21 +19,14 @@
     <div class="row mb-3">
       <div class="col-md-3">
         <label for="selectedMonth">Tháng/năm</label>
-        <input type="month" id="selectedMonth" v-model="selectedMonth" class="form-control" @change="handleMonthChange" />
-      </div>
-      <div class="col-md-3">
-        <label for="selectedCycle">Kỳ</label>
-        <select id="selectedCycle" v-model="selectedCycle" class="form-select">
-          <option value="">Tất cả</option>
-          <option value="Kỳ 30">Kỳ 30</option>
-          <option value="Kỳ 15">Kỳ 15</option>
-        </select>
+        <input type="month" id="selectedMonth" v-model="selectedMonth" class="form-control"
+               @change="handleMonthChange"/>
       </div>
       <div class="col-md-3">
         <label for="selectedHouse">Nhà</label>
         <select id="selectedHouse" v-model="selectedHouse" class="form-select">
           <option value="">Tất cả</option>
-          <option v-for="house in houses" :key="house.name" :value="house.name">
+          <option v-for="house in houses" :key="house.id" :value="house.id">
             {{ house.name }}
           </option>
         </select>
@@ -46,6 +39,13 @@
           <option value="rented">Đã cho thuê</option>
         </select>
       </div>
+    </div>
+
+    <div class="alert alert-info">
+      <strong>Lưu ý:</strong> Bạn phải gán dịch vụ thuộc loại nước cho khách thuê trước
+      thì phần chỉ số này mới được tính cho phòng đó khi tính tiền.
+      <p>Đối với lần đầu tiên sử dụng phần mềm bạn sẽ phải nhập chỉ số cũ và mới cho tháng sử dụng đầu tiên,
+        các tháng tiếp theo phần mềm sẽ tự động lấy chỉ số mới tháng trước làm chỉ số cũ tháng sau.</p>
     </div>
 
     <!-- Warning Section -->
@@ -69,18 +69,19 @@
         </thead>
         <tbody>
         <tr v-for="room in filteredRooms" :key="room.roomNumber">
-          <td>{{ room.house }}</td>
+          <td>{{ room.houseName }}</td>
           <td>{{ room.roomNumber }}</td>
           <td>{{ room.customer?.fullName || 'Chưa có khách thuê' }}</td>
           <td>
-            <input type="number" class="form-control form-control-sm" v-model="room.oldWaterIndex" />
+            <input type="number" class="form-control form-control-sm" v-model="room.oldWaterIndex" :disabled="room.isPaid"/>
           </td>
           <td>
-            <input type="number" class="form-control form-control-sm" v-model="room.newWaterIndex" @input="calculateWaterUsage(room)" />
+            <input type="number" class="form-control form-control-sm" v-model="room.newWaterIndex"
+                   @input="calculateWaterUsage(room)" :disabled="room.isPaid"/>
           </td>
-          <td>{{ room.waterUsage }}</td> <!-- Thay 'usage' bằng 'waterUsage' -->
+          <td>{{ room.waterUsage }}</td>
           <td>
-            <button class="btn btn-primary btn-sm" @click="saveRoomData(room)">
+            <button class="btn btn-primary btn-sm" @click="saveRoomData(room)" :disabled="room.isPaid">
               <i class="fas fa-save"></i> Lưu
             </button>
           </td>
@@ -98,13 +99,11 @@ export default {
   data() {
     return {
       selectedMonth: new Date().toISOString().substring(0, 7), // Tháng hiện tại
-      selectedCycle: "",
       selectedHouse: "",
       roomStatus: "",
-      houses: [],
-      rooms: [],
-      filteredRooms: [],
-      warningMessage: false,
+      houses: [], // Danh sách nhà
+      filteredRooms: [], // Danh sách phòng đã lọc
+      warningMessage: false, // Thông báo nếu chỉ số cũ lớn hơn chỉ số mới
     };
   },
   mounted() {
@@ -115,43 +114,35 @@ export default {
       const storedHouses = localStorage.getItem("homes");
       if (storedHouses) {
         this.houses = JSON.parse(storedHouses);
+        this.applyFilters(); // Áp dụng bộ lọc ban đầu
       }
+    },
+    applyFilters() {
+      // Lọc danh sách phòng theo nhà và trạng thái phòng
+      this.filteredRooms = this.houses.flatMap(house =>
+          house.rooms.map(room => {
+            const waterDataForMonth = room.waterData?.find(data => data.monthYear === this.selectedMonth);
+            const previousMonth = this.getPreviousMonth(this.selectedMonth);
+            const waterDataForPreviousMonth = room.waterData?.find(data => data.monthYear === previousMonth);
 
-      const storedRooms = localStorage.getItem("rooms");
-      if (storedRooms) {
-        this.rooms = JSON.parse(storedRooms).map((room) => {
-          const roomKey = `${room.house}_room_${room.roomNumber}`;
-          const storedRoomData = localStorage.getItem(roomKey);
-          if (storedRoomData) {
-            const roomData = JSON.parse(storedRoomData);
             return {
               ...room,
-              customer: roomData.customer,
-              oldWaterIndex: roomData.oldWaterIndex || 0,
-              newWaterIndex: roomData.newWaterIndex || 0,
-              waterUsage: roomData.waterUsage || 0,
+              houseName: house.name,
+              isPaid: room.paymentHistory?.[this.selectedMonth]?.totalAmount > 0, // Đánh dấu nếu đã thanh toán
+              oldWaterIndex: waterDataForMonth ? waterDataForMonth.oldWaterIndex : (waterDataForPreviousMonth ? waterDataForPreviousMonth.newWaterIndex : 0),
+              newWaterIndex: waterDataForMonth?.newWaterIndex || 0,
+              waterUsage: waterDataForMonth?.waterUsage || 0,
+              status: room.isRented ? "rented" : "available", // Trạng thái phòng
             };
-          } else {
-            return room;
-          }
-        });
-      }
-
-      this.applyFilters();
+          })
+      ).filter(room => {
+        const matchesHouse = this.selectedHouse ? room.house === this.selectedHouse : true;
+        const matchesStatus = this.roomStatus ? room.status === this.roomStatus : true;
+        return matchesHouse && matchesStatus;
+      });
     },
     handleMonthChange() {
-      this.filteredRooms.forEach((room) => {
-        const previousMonth = this.getPreviousMonth(this.selectedMonth);
-        const roomKey = `${room.house}_room_${room.roomNumber}`;
-        const storedRoomData = localStorage.getItem(roomKey);
-        if (storedRoomData) {
-          const roomData = JSON.parse(storedRoomData);
-          // Lấy chỉ số nước từ tháng trước và cập nhật vào chỉ số cũ
-          if (roomData[previousMonth] && roomData[previousMonth].newWaterIndex) {
-            room.oldWaterIndex = roomData[previousMonth].newWaterIndex;
-          }
-        }
-      });
+      this.applyFilters();
     },
     getPreviousMonth(currentMonth) {
       const date = new Date(currentMonth + "-01");
@@ -167,35 +158,53 @@ export default {
         this.warningMessage = true;
       }
     },
-    applyFilters() {
-      this.filteredRooms = this.rooms.filter((room) => {
-        const matchesHouse =
-            this.selectedHouse === "" || room.house === this.selectedHouse;
-        const matchesStatus =
-            this.roomStatus === "" ||
-            (this.roomStatus === "available" ? !room.customer : room.customer);
-        return matchesHouse && matchesStatus;
-      });
-    },
     saveRoomData(room) {
-      const roomKey = `${room.house}_room_${room.roomNumber}`;
-      const monthYearKey = this.selectedMonth;
-      const storedRoomData = localStorage.getItem(roomKey);
-      let roomData = storedRoomData ? JSON.parse(storedRoomData) : {};
-
-      if (!roomData[monthYearKey]) {
-        roomData[monthYearKey] = {};
+      const houseIndex = this.houses.findIndex(h => h.id === room.house);
+      if (houseIndex === -1) {
+        alert("Không tìm thấy nhà.");
+        return;
       }
-      roomData[monthYearKey].oldWaterIndex = room.oldWaterIndex;
-      roomData[monthYearKey].newWaterIndex = room.newWaterIndex;
-      roomData[monthYearKey].waterUsage = room.waterUsage;
 
-      localStorage.setItem(roomKey, JSON.stringify(roomData));
-      alert(`Dữ liệu phòng ${room.roomNumber} cho tháng ${monthYearKey} đã được lưu!`);
+      const roomIndex = this.houses[houseIndex].rooms.findIndex(
+          r => r.roomNumber === room.roomNumber
+      );
+      if (roomIndex === -1) {
+        alert("Không tìm thấy phòng.");
+        return;
+      }
+
+      // Thêm hoặc cập nhật dữ liệu chỉ số nước vào trường `waterData` trong phòng
+      if (!this.houses[houseIndex].rooms[roomIndex].waterData) {
+        this.houses[houseIndex].rooms[roomIndex].waterData = [];
+      }
+
+      const existingDataIndex = this.houses[houseIndex].rooms[roomIndex].waterData.findIndex(
+          data => data.monthYear === this.selectedMonth
+      );
+
+      const newWaterData = {
+        monthYear: this.selectedMonth,
+        oldWaterIndex: room.oldWaterIndex,
+        newWaterIndex: room.newWaterIndex,
+        waterUsage: room.waterUsage,
+      };
+
+      if (existingDataIndex === -1) {
+        this.houses[houseIndex].rooms[roomIndex].waterData.push(newWaterData);
+      } else {
+        this.houses[houseIndex].rooms[roomIndex].waterData[existingDataIndex] = newWaterData;
+      }
+
+      // Lưu lại toàn bộ dữ liệu về homes vào localStorage
+      localStorage.setItem("homes", JSON.stringify(this.houses));
+
+      alert(`Dữ liệu phòng ${room.roomNumber} đã được lưu!`);
     },
     saveAllData() {
       this.filteredRooms.forEach((room) => {
-        this.saveRoomData(room);
+        if (!room.isPaid) {
+          this.saveRoomData(room);
+        }
       });
       alert("Dữ liệu của tất cả các phòng đã được lưu!");
     },
@@ -205,7 +214,7 @@ export default {
     exportToExcel() {
       const worksheet = XLSX.utils.json_to_sheet(
           this.filteredRooms.map((room) => ({
-            Nhà: room.house,
+            Nhà: room.houseName,
             Phòng: room.roomNumber,
             "Khách thuê": room.customer?.fullName || "Chưa có khách thuê",
             "CS Nước Cũ": room.oldWaterIndex,

@@ -1,6 +1,6 @@
 <template>
   <div class="create-service">
-    <!-- Header with H2 and Back, Save buttons -->
+    <!-- Header with title and buttons -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mb-0" v-if="isEditMode">Sửa Dịch Vụ</h3>
       <h3 class="mb-0" v-else>Thêm Dịch Vụ</h3>

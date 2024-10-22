@@ -61,7 +61,7 @@ export default {
         { label: 'Chỉ số điện', route: '/landlord/data-power', icon: 'fas fa-bolt' },
         { label: 'Chỉ số nước', route: '/landlord/data-water', icon: 'fas fa-tint' },
         { label: 'Phát sinh', route: '/landlord/other-fee', icon: 'fas fa-file-invoice-dollar' },
-        { label: 'Tính tiền', route: '/landlord/tenant-fee', icon: 'fas fa-money-check-alt' },
+        { label: 'Tính tiền', route: '/landlord/calculator-money', icon: 'fas fa-money-check-alt' },
         { label: 'Lịch sử gửi email/SMS', route: '/landlord/email-sms-history', icon: 'fas fa-envelope' },
         { label: 'Báo cáo', route: '/landlord/report', icon: 'fas fa-chart-line' },
         { label: 'Thiết lập', route: '/landlord/settings', icon: 'fas fa-cogs' },

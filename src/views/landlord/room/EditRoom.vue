@@ -1,6 +1,6 @@
 <template>
   <div class="edit-room">
-    <!-- Header với tiêu đề và các nút -->
+    <!-- Header with title and buttons -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3 class="mb-0">Chỉnh sửa phòng</h3>
       <div>
@@ -16,7 +16,7 @@
     </div>
 
     <form @submit.prevent="validateAndSave">
-      <!-- Phòng số và Nhà -->
+      <!-- Room Number and House -->
       <div class="row mb-3">
         <div class="col-md-6">
           <label for="roomNumber" class="form-label">Phòng số <span>&nbsp;*</span></label>
@@ -34,7 +34,7 @@
         </div>
       </div>
 
-      <!-- Đơn giá và Kích thước -->
+      <!-- Price and Dimensions -->
       <div class="row mb-3">
         <div class="col-md-4">
           <label for="price" class="form-label">Đơn giá (VNĐ) <span>&nbsp;*</span></label>
@@ -56,12 +56,12 @@
         </div>
       </div>
 
-      <!-- Số lượng người tối đa và Cho thuê -->
+      <!-- Max People and Rent Options -->
       <div class="row mb-3">
         <div class="col-md-6">
           <label for="maxPeople" class="form-label">Số lượng người tối đa <span>&nbsp;*</span></label>
           <input type="number" v-model="room.maxPeople" id="maxPeople" class="form-control form-control-sm"
-                 :class="{'is-invalid': errors.maxPeople}" placeholder="0" required />
+                 :class="{'is-invalid': errors.maxPeople}" placeholder="0" required/>
           <div class="invalid-feedback" v-if="errors.maxPeople">Vui lòng nhập số lượng người tối đa</div>
         </div>
         <div class="col-md-6">
@@ -77,20 +77,20 @@
         </div>
       </div>
 
-      <!-- Mô tả -->
+      <!-- Description -->
       <div class="mb-3">
         <label for="description" class="form-label">Mô tả</label>
         <textarea v-model="room.description" id="description" class="form-control form-control-sm"
                   placeholder="Nhập mô tả"></textarea>
       </div>
 
-      <!-- Hình ảnh -->
+      <!-- Image Upload -->
       <div class="mb-3">
         <label class="form-label">Hình ảnh</label>
         <input type="file" @change="onFileChange" class="form-control form-control-sm">
       </div>
 
-      <!-- Thông tin bắt buộc -->
+      <!-- Required Fields Notice -->
       <div class="mb-4">
         <span class="text-danger">(*): Thông tin bắt buộc</span>
       </div>
@@ -124,23 +124,32 @@ export default {
   },
   methods: {
     loadRoomData() {
-      const storedRooms = JSON.parse(localStorage.getItem('rooms')) || [];
-      const roomNumber = this.$route.query.roomNumber;
+      const storedHomes = JSON.parse(localStorage.getItem('homes')) || [];
+      const roomNumber = this.$route.query.roomNumber; // Nhận roomNumber từ query
+      const houseName = this.$route.query.houseName; // Nhận houseName từ query
 
-      const storedHouses = JSON.parse(localStorage.getItem('homes')) || [];
-      this.houses = storedHouses;
+      // Load danh sách nhà
+      this.houses = storedHomes.map(home => home.name);
 
-      const room = storedRooms.find(room => room.roomNumber === roomNumber);
-      if (room) {
-        this.room = { ...room };
+      // Tìm nhà và phòng tương ứng
+      const currentHome = storedHomes.find(home => home.name === houseName);
+      if (currentHome) {
+        const room = currentHome.rooms.find(room => room.roomNumber === roomNumber);
+        if (room) {
+          this.room = { ...room }; // Load dữ liệu phòng
+        } else {
+          alert('Không tìm thấy phòng!');
+          this.$router.push('/landlord/room-index');
+        }
       } else {
-        alert("Không tìm thấy phòng!");
+        alert('Không tìm thấy nhà!');
         this.$router.push('/landlord/room-index');
       }
     },
     validateAndSave() {
       this.errors = {};
 
+      // Kiểm tra các trường hợp lỗi
       if (!this.room.roomNumber) this.errors.roomNumber = true;
       if (!this.room.house) this.errors.house = true;
       if (!this.room.price || this.room.price <= 0) this.errors.price = true;
@@ -148,20 +157,24 @@ export default {
       if (!this.room.width || this.room.width <= 0) this.errors.width = true;
       if (!this.room.maxPeople || this.room.maxPeople <= 0) this.errors.maxPeople = true;
 
+      // Lưu phòng nếu không có lỗi
       if (Object.keys(this.errors).length === 0) {
         this.saveRoom();
       }
     },
     saveRoom() {
-      let rooms = JSON.parse(localStorage.getItem('rooms')) || [];
+      let homes = JSON.parse(localStorage.getItem('homes')) || [];
 
-      const index = rooms.findIndex(r => r.roomNumber === this.room.roomNumber);
-      if (index !== -1) {
-        rooms[index] = { ...this.room };
+      // Tìm nhà và phòng để cập nhật
+      const home = homes.find(h => h.name === this.room.house);
+      if (home) {
+        const index = home.rooms.findIndex(r => r.roomNumber === this.room.roomNumber);
+        if (index !== -1) {
+          home.rooms[index] = { ...this.room };
+        }
       }
 
-      localStorage.setItem('rooms', JSON.stringify(rooms));
-
+      localStorage.setItem('homes', JSON.stringify(homes));
       alert('Phòng đã được cập nhật thành công!');
       this.$router.push('/landlord/room-index');
     },
@@ -170,7 +183,7 @@ export default {
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.room.image = e.target.result;
+          this.room.image = e.target.result; // Store the image as base64
         };
         reader.readAsDataURL(file);
       }

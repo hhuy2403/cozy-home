@@ -1,6 +1,6 @@
 <template>
   <div class="list-room container mt-4">
-    <!-- Header với nút tìm kiếm, quay về, lưu, và xuất file -->
+    <!-- Header with search, back, save, and export buttons -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2>Danh Sách Phòng</h2>
       <div class="action-buttons">
@@ -17,19 +17,19 @@
       </div>
     </div>
 
-    <!-- Hiển thị lỗi nếu có -->
+    <!-- Display errors if any -->
     <div v-if="errors.length" class="alert alert-danger">
       <ul>
         <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
       </ul>
     </div>
 
-    <!-- Hiển thị danh sách phòng rỗng nếu không tìm thấy -->
+    <!-- Display warning if no rooms are found -->
     <div v-if="filteredRooms.length === 0" class="alert alert-warning">
       Không tìm thấy phòng nào phù hợp với từ khóa "{{ searchQuery }}".
     </div>
 
-    <!-- Bảng hiển thị danh sách phòng -->
+    <!-- Table to display rooms -->
     <table class="table table-bordered" v-if="filteredRooms.length > 0">
       <thead class="thead-light">
       <tr>
@@ -74,13 +74,13 @@ export default {
   name: "ListRoom",
   data() {
     return {
-      rooms: [], // Danh sách các phòng từ localStorage
-      searchQuery: "", // Biến lưu trữ từ khóa tìm kiếm
-      errors: [] // Biến lưu trữ các lỗi khi validate
+      rooms: [], // Room list from localStorage
+      searchQuery: "", // Search keyword
+      errors: [] // Store errors during validation
     };
   },
   computed: {
-    // Lọc danh sách phòng theo từ khóa tìm kiếm
+    // Filter the list of rooms based on the search keyword
     filteredRooms() {
       return this.rooms.filter((room) => {
         return String(room.roomNumber).toLowerCase().includes(this.searchQuery.toLowerCase().trim());
@@ -88,25 +88,33 @@ export default {
     }
   },
   mounted() {
-    // Lấy danh sách phòng từ localStorage
-    const storedRooms = localStorage.getItem("rooms");
-    if (storedRooms) {
-      this.rooms = JSON.parse(storedRooms);
+    // Load room list from localStorage
+    const storedHomes = localStorage.getItem("homes");
+    if (storedHomes) {
+      const homes = JSON.parse(storedHomes);
+      homes.forEach(home => {
+        home.rooms.forEach(room => {
+          this.rooms.push({
+            ...room, // Include room properties like price, order, etc.
+            house: home.name // Add house name to each room
+          });
+        });
+      });
     }
   },
   methods: {
-    // Hàm quay về trang trước
+    // Navigate back to the previous page
     goBack() {
       this.$router.push("/landlord/room-index");
     },
-    // Hàm kiểm tra trùng lặp tên phòng và thứ tự
+    // Validate rooms before saving
     validate() {
       this.errors = [];
       const roomNumbers = new Set();
       const roomOrders = new Set();
 
       this.rooms.forEach((room) => {
-        // Kiểm tra rỗng hoặc trùng lặp tên phòng
+        // Check for empty or duplicate room numbers
         const roomNumber = room.roomNumber.trim();
         if (!roomNumber) {
           this.errors.push(`Tên phòng không được để trống.`);
@@ -114,7 +122,7 @@ export default {
           this.errors.push(`Tên phòng "${roomNumber}" bị trùng lặp!`);
         }
 
-        // Kiểm tra trùng lặp thứ tự
+        // Check for valid and duplicate order numbers
         if (!room.order || room.order <= 0) {
           this.errors.push(`Thứ tự phòng không hợp lệ!`);
         } else if (roomOrders.has(room.order)) {
@@ -125,23 +133,32 @@ export default {
         roomOrders.add(room.order);
       });
 
-      return this.errors.length === 0; // Nếu không có lỗi, trả về true
+      return this.errors.length === 0; // Return true if no errors
     },
-    // Hàm lưu thay đổi vào localStorage sau khi validate
+    // Save changes to localStorage after validation
     saveChanges() {
       if (this.validate()) {
-        localStorage.setItem("rooms", JSON.stringify(this.rooms));
+        // Group rooms by house and update the homes structure
+        const homes = {};
+        this.rooms.forEach(room => {
+          if (!homes[room.house]) {
+            homes[room.house] = {name: room.house, rooms: []};
+          }
+          homes[room.house].rooms.push(room);
+        });
+
+        localStorage.setItem("homes", JSON.stringify(Object.values(homes))); // Save the updated homes
         alert("Thay đổi đã được lưu!");
       }
     },
-    // Hàm xóa phòng
+    // Delete a room
     deleteRoom(index) {
       if (confirm("Bạn có chắc chắn muốn xóa phòng này không?")) {
         this.rooms.splice(index, 1);
-        localStorage.setItem("rooms", JSON.stringify(this.rooms)); // Lưu lại sau khi xóa
+        this.saveChanges(); // Save after deletion
       }
     },
-    // Hàm xuất danh sách phòng ra file Excel
+    // Export the list of rooms to an Excel file
     exportToExcel() {
       const worksheet = XLSX.utils.json_to_sheet(this.rooms);
       const workbook = XLSX.utils.book_new();

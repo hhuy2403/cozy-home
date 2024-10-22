@@ -37,7 +37,7 @@
         <div class="col-md-6">
           <label for="house" class="form-label">Nhà <span>&nbsp;*</span></label>
           <select id="house" v-model="house" class="form-select form-select-sm" :class="{'is-invalid': errors.house}" required>
-            <option v-for="house in houses" :key="house.name" :value="house.name">{{ house.name }}</option>
+            <option v-for="house in houses" :key="house.id" :value="house.id">{{ house.name }}</option>
           </select>
           <div class="invalid-feedback" v-if="errors.house">Vui lòng chọn nhà.</div>
         </div>
@@ -116,24 +116,27 @@ export default {
       rentableToFemale: false,
       description: "",
       houses: [],
-      existingRooms: [], // Lưu trữ các phòng hiện có
       errors: {} // Để lưu lỗi validate
     };
   },
   mounted() {
-    // Lấy dữ liệu nhà và phòng từ localStorage
-    const storedHouses = localStorage.getItem("homes");
-    const storedRooms = localStorage.getItem("rooms");
-
-    if (storedHouses) {
-      this.houses = JSON.parse(storedHouses);
-    }
-
-    if (storedRooms) {
-      this.existingRooms = JSON.parse(storedRooms); // Lấy tất cả các phòng để kiểm tra
+    this.loadHouses(); // Load danh sách nhà từ localStorage
+    const houseName = this.$route.query.houseName; // Lấy houseName từ query
+    if (houseName) {
+      const house = this.houses.find(h => h.name === houseName);
+      if (house) {
+        this.house = house.id; // Gán giá trị house vào form
+      }
     }
   },
   methods: {
+    loadHouses() {
+      // Load danh sách nhà từ localStorage
+      const storedHouses = localStorage.getItem("homes");
+      if (storedHouses) {
+        this.houses = JSON.parse(storedHouses);
+      }
+    },
     validateAndSave() {
       this.errors = {}; // Reset lỗi
 
@@ -160,8 +163,9 @@ export default {
       }
 
       // Kiểm tra trùng lặp số phòng
+      const existingRooms = this.getAllRooms(); // Lấy tất cả các phòng hiện có
       for (let roomNumber = this.startRoomNumber; roomNumber <= this.endRoomNumber; roomNumber++) {
-        const roomExists = this.existingRooms.some(
+        const roomExists = existingRooms.some(
             (room) => room.roomNumber === roomNumber.toString() && room.house === this.house
         );
         if (roomExists) {
@@ -177,33 +181,44 @@ export default {
       }
     },
 
+    getAllRooms() {
+      // Lấy tất cả các phòng trong tất cả các nhà
+      const homes = JSON.parse(localStorage.getItem("homes")) || [];
+      return homes.flatMap(home => home.rooms || []);
+    },
+
     saveRooms() {
       // Lấy danh sách các phòng từ localStorage
-      let rooms = JSON.parse(localStorage.getItem("rooms")) || [];
+      let homes = JSON.parse(localStorage.getItem("homes")) || [];
+      const homeIndex = homes.findIndex(house => house.id === this.house);
 
-      // Tạo phòng từ số phòng bắt đầu đến số phòng kết thúc
-      for (let roomNumber = this.startRoomNumber; roomNumber <= this.endRoomNumber; roomNumber++) {
-        const room = {
-          roomNumber: roomNumber.toString(),
-          house: this.house,
-          price: this.price,
-          length: this.length,
-          width: this.width,
-          maxPeople: this.maxPeople,
-          rentableToMale: this.rentableToMale,
-          rentableToFemale: this.rentableToFemale,
-          description: this.description
-        };
+      if (homeIndex !== -1) {
+        // Tạo phòng từ số phòng bắt đầu đến số phòng kết thúc
+        for (let roomNumber = this.startRoomNumber; roomNumber <= this.endRoomNumber; roomNumber++) {
+          const room = {
+            roomNumber: roomNumber.toString(),
+            house: this.house,
+            price: this.price,
+            length: this.length,
+            width: this.width,
+            maxPeople: this.maxPeople,
+            rentableToMale: this.rentableToMale,
+            rentableToFemale: this.rentableToFemale,
+            description: this.description
+          };
 
-        // Thêm phòng vào mảng
-        rooms.push(room);
+          // Thêm phòng vào mảng rooms của nhà
+          homes[homeIndex].rooms.push(room);
+        }
+
+        // Lưu danh sách phòng đã cập nhật vào localStorage
+        localStorage.setItem("homes", JSON.stringify(homes));
+
+        alert("Các phòng đã được lưu thành công!");
+        this.$router.push("/landlord/room-index");
+      } else {
+        alert("Không tìm thấy nhà đã chọn.");
       }
-
-      // Lưu danh sách phòng đã cập nhật vào localStorage
-      localStorage.setItem("rooms", JSON.stringify(rooms));
-
-      alert("Các phòng đã được lưu thành công!");
-      this.$router.push("/landlord/room-index");
     }
   }
 };

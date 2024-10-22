@@ -15,7 +15,6 @@
       </div>
     </div>
 
-
     <form>
       <!-- Tabs for Navigation -->
       <ul class="nav nav-tabs mb-3" role="tablist">
@@ -124,9 +123,7 @@
               </div>
             </div>
             <div class="col-md-6">
-              <label for="phoneNumber1" class="form-label"
-              >Điện thoại 1 *</label
-              >
+              <label for="phoneNumber1" class="form-label">Điện thoại 1 *</label>
               <input
                   type="text"
                   v-model="customer.phoneNumber1"
@@ -140,7 +137,7 @@
             </div>
           </div>
 
-          <!-- Second Phone and Address -->
+          <!-- Additional Fields -->
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="phoneNumber2" class="form-label">Điện thoại 2</label>
@@ -167,9 +164,7 @@
           <!-- Date of Birth and Email -->
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="birthDate" class="form-label"
-              >Ngày sinh (dd/MM/yyyy)</label
-              >
+              <label for="birthDate" class="form-label">Ngày sinh (dd/MM/yyyy)</label>
               <input
                   type="date"
                   v-model="customer.birthDate"
@@ -254,9 +249,7 @@
           <!-- Payment Cycle and Payment Frequency -->
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="paymentCycle" class="form-label"
-              >Kỳ thanh toán *</label
-              >
+              <label for="paymentCycle" class="form-label">Kỳ thanh toán *</label>
               <select
                   v-model="customer.paymentCycle"
                   id="paymentCycle"
@@ -267,9 +260,7 @@
               </select>
             </div>
             <div class="col-md-6">
-              <label for="paymentFrequency" class="form-label"
-              >Thanh toán mỗi lần *</label
-              >
+              <label for="paymentFrequency" class="form-label">Thanh toán mỗi lần *</label>
               <div class="input-group">
                 <input
                     type="number"
@@ -280,30 +271,6 @@
                 />
                 <span class="input-group-text">Tháng</span>
               </div>
-            </div>
-          </div>
-
-          <!-- Additional Fields -->
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="licensePlate" class="form-label">Số xe</label>
-              <input
-                  type="text"
-                  v-model="customer.licensePlate"
-                  id="licensePlate"
-                  class="form-control"
-                  :readonly="isViewOnly"
-              />
-            </div>
-            <div class="col-md-6">
-              <label for="referral" class="form-label">Người giới thiệu</label>
-              <input
-                  type="text"
-                  v-model="customer.referral"
-                  id="referral"
-                  class="form-control"
-                  :readonly="isViewOnly"
-              />
             </div>
           </div>
 
@@ -330,12 +297,12 @@
                   v-if="customer.image"
                   :src="customer.image"
                   class="img-thumbnail mt-2"
-                  alt=""
+                  alt="Hình ảnh khách hàng"
               />
             </div>
           </div>
 
-          <!-- Thông tin bắt buộc -->
+          <!-- Required Information -->
           <div class="mb-4">
             <span class="text-danger">(*): Thông tin bắt buộc</span>
           </div>
@@ -362,13 +329,15 @@
             </thead>
             <tbody>
             <tr v-for="(service, index) in services" :key="index">
-              <td><input type="checkbox" v-model="service.selected" /></td>
+              <td>
+                <input type="checkbox" v-model="service.selected" />
+              </td>
               <td>{{ service.name }}</td>
               <td>
                 <div class="input-group">
                   <input
                       type="text"
-                      v-model="services[index].price"
+                      v-model="service.price"
                       class="form-control"
                       :readonly="isViewOnly"
                   />
@@ -388,6 +357,7 @@
             </tbody>
           </table>
         </div>
+
 
         <!-- Member Tab -->
         <div
@@ -507,14 +477,11 @@
             role="tabpanel"
         >
           <div class="alert alert-info">
-            Các thông tin nhập ở đây sẽ được sử dụng cho việc xuất/in hợp đồng
-            thuê phòng.
+            Các thông tin nhập ở đây sẽ được sử dụng cho việc xuất/in hợp đồng thuê phòng.
           </div>
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="contractNumber" class="form-label"
-              >Số hợp đồng *</label
-              >
+              <label for="contractNumber" class="form-label">Số hợp đồng *</label>
               <input
                   type="text"
                   v-model="contract.contractNumber"
@@ -527,9 +494,7 @@
               </div>
             </div>
             <div class="col-md-6">
-              <label for="contractDate" class="form-label"
-              >Ngày hợp đồng *</label
-              >
+              <label for="contractDate" class="form-label">Ngày hợp đồng *</label>
               <input
                   type="date"
                   v-model="contract.contractDate"
@@ -545,9 +510,7 @@
 
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="contractDuration" class="form-label"
-              >Thời gian HĐ</label
-              >
+              <label for="contractDuration" class="form-label">Thời gian HĐ</label>
               <div class="input-group">
                 <input
                     type="number"
@@ -561,9 +524,7 @@
               </div>
             </div>
             <div class="col-md-6">
-              <label for="contractEndDate" class="form-label"
-              >Ngày kết thúc HĐ</label
-              >
+              <label for="contractEndDate" class="form-label">Ngày kết thúc HĐ</label>
               <input
                   type="date"
                   v-model="contract.contractEndDate"
@@ -573,7 +534,8 @@
               />
             </div>
           </div>
-          <!-- Thông tin bắt buộc -->
+
+          <!-- Required Information -->
           <div class="mb-4">
             <span class="text-danger">(*): Thông tin bắt buộc</span>
           </div>
@@ -609,6 +571,7 @@ export default {
         notes: '',
         image: null,
       },
+      houseName: '',
       contract: {
         contractNumber: '',
         contractDate: '',
@@ -632,59 +595,89 @@ export default {
     };
   },
   mounted() {
-    const roomNumber = this.$route.query.roomNumber || "101";
-    const houseName = this.$route.query.houseName || "HomeA";
+    const roomNumber = this.$route.query.roomNumber || '101';
+    const houseName = this.$route.query.houseName || 'HomeA';
     this.customer.roomNumber = roomNumber;
 
-    const storedRooms = localStorage.getItem("rooms");
-    if (storedRooms) {
-      const rooms = JSON.parse(storedRooms);
-      const currentRoom = rooms.find((room) => room.roomNumber === roomNumber);
+    const storedHomes = JSON.parse(localStorage.getItem('homes'));
+    const currentHome = storedHomes.find((home) => home.name === houseName);
 
-      if (currentRoom) {
-        this.customer.rentalCost = currentRoom.price;
+    if (currentHome) {
+      const currentRoom = currentHome.rooms.find(
+          (room) => room.roomNumber === roomNumber
+      );
+
+      if (currentRoom && currentRoom.customer) {
+        this.customer = { ...currentRoom.customer };
+        this.services = currentRoom.services ? [...currentRoom.services] : [];
+        this.members = [...currentRoom.members];
+        this.contract = currentRoom.contract ? { ...currentRoom.contract } : {};
       }
+
+      this.isViewOnly = this.$route.query.viewOnly === 'true';
+      this.isEditMode = this.$route.query.editMode === 'true';
+
+      if (this.isViewOnly) {
+        document.title = 'Xem thông tin khách thuê phòng';
+      } else if (this.isEditMode) {
+        document.title = 'Sửa thông tin khách thuê phòng';
+      }
+
+      this.loadServicesFromLocalStorage(houseName, roomNumber);
+      this.loadDefaultServices(houseName);
+      this.loadRoomData(houseName, roomNumber);
+    } else {
+      alert('Không tìm thấy nhà!');
     }
-
-    const roomKey = `${houseName}_room_${roomNumber}`;
-    const storedRoomData = localStorage.getItem(roomKey);
-
-    if (storedRoomData) {
-      const roomData = JSON.parse(storedRoomData);
-      this.customer = roomData.customer || this.customer;
-      this.services = roomData.services || this.services;
-      this.members = roomData.members || this.members;
-      this.contract = roomData.contract || this.contract;
-    }
-
-    // Kiểm tra nếu có tham số "viewOnly" hoặc "editMode"
-    this.isViewOnly = this.$route.query.viewOnly === 'true';
-    this.isEditMode = this.$route.query.editMode === 'true';
-
-    if (this.isViewOnly) {
-      document.title = "Xem thông tin khách thuê phòng";
-    } else if (this.isEditMode) {
-      document.title = "Sửa thông tin khách thuê phòng";
-    }
-
-    const storedServices = localStorage.getItem('services');
-    if (!storedServices) {
-      const defaultServices = [
-        {name: 'Điện', price: 3000, quantity: 1, selected: false},
-        {name: 'Nước', price: 20000, quantity: 1, selected: false},
-        {name: 'Gửi xe máy', price: 80000, quantity: 1, selected: false},
-        {name: 'Rác', price: 50000, quantity: 1, selected: false},
-      ];
-      localStorage.setItem('services', JSON.stringify(defaultServices));
-    }
-
-    this.loadServices();
   },
   methods: {
-    loadServices() {
-      const storedServices = localStorage.getItem('services');
-      if (storedServices) {
-        this.services = JSON.parse(storedServices);
+    loadDefaultServices() {
+      // Lấy danh sách dịch vụ từ localStorage
+      const storedServices = JSON.parse(localStorage.getItem('services'));
+      if (storedServices && storedServices.length > 0) {
+        this.services = storedServices.map(service => ({
+          ...service,
+          selected: false, // Mặc định chưa chọn
+          quantity: 1 // Mặc định số lượng là 1
+        }));
+      }
+    },
+    loadServicesFromLocalStorage(houseName, roomNumber) {
+      const storedHomes = JSON.parse(localStorage.getItem('homes'));
+      const currentHome = storedHomes.find((home) => home.name === houseName);
+
+      if (currentHome) {
+        const currentRoom = currentHome.rooms.find(
+            (room) => room.roomNumber === roomNumber
+        );
+
+        if (currentRoom) {
+          this.services = currentRoom.services ? [...currentRoom.services] : [];
+        }
+      }
+    },
+    loadRoomData(houseName, roomNumber) {
+      const storedHomes = JSON.parse(localStorage.getItem('homes')) || [];
+      const currentHome = storedHomes.find((home) => home.name === houseName);
+
+      if (currentHome) {
+        const currentRoom = currentHome.rooms.find(
+            (room) => room.roomNumber === roomNumber
+        );
+
+        if (currentRoom) {
+          // Kiểm tra nếu phòng đang trống
+          if (!currentRoom.customer) {
+            // Phòng trống, hiển thị giá thuê từ thông tin phòng
+            this.customer.rentalCost = currentRoom.price;
+            this.loadDefaultServices(); // Tải dịch vụ mặc định nếu phòng trống
+          } else {
+            // Phòng đã có khách thuê, tải thông tin khách thuê và giá thuê
+            this.customer = { ...currentRoom.customer };
+            this.customer.rentalCost = currentRoom.price; // Hiển thị giá thuê từ phòng
+            this.services = [...currentRoom.services]; // Tải dịch vụ đã chọn
+          }
+        }
       }
     },
     goBack() {
@@ -693,19 +686,35 @@ export default {
     saveCustomer() {
       if (!this.validateCustomer()) return;
 
-      const houseName = this.$route.query.houseName || "HomeA";
-      const roomKey = `${houseName}_room_${this.customer.roomNumber}`;
-      const roomData = {
-        customer: this.customer,
-        services: this.services,
-        members: this.members,
-        contract: this.contract
-      };
+      const houseName = this.$route.query.houseName || 'HomeA';
+      const roomNumber = this.customer.roomNumber;
 
-      localStorage.setItem(roomKey, JSON.stringify(roomData));
+      const storedHomes = JSON.parse(localStorage.getItem('homes'));
+      const currentHome = storedHomes.find((home) => home.name === houseName);
 
-      alert('Lưu thành công!');
-      this.$router.push('/landlord/room-index');
+      if (currentHome) {
+        const currentRoom = currentHome.rooms.find(
+            (room) => room.roomNumber === roomNumber
+        );
+
+        if (currentRoom) {
+          currentRoom.customer = { ...this.customer };
+          currentRoom.services = this.services.map(service => ({
+            ...service,
+            selected: service.selected
+          }));
+          currentRoom.members = [...this.members];
+          currentRoom.contract = { ...this.contract };
+          currentRoom.isRented = true;
+        }
+
+        localStorage.setItem('homes', JSON.stringify(storedHomes));
+
+        alert('Lưu thông tin khách thuê thành công!');
+        this.$router.push('/landlord/room-index');
+      } else {
+        alert('Không tìm thấy nhà hoặc phòng!');
+      }
     },
     validateCustomer() {
       this.validationErrors = {};
@@ -716,7 +725,8 @@ export default {
       if (!this.customer.startDate) this.validationErrors.startDate = true;
       if (!this.customer.rentalCost) this.validationErrors.rentalCost = true;
       if (!this.customer.deposit) this.validationErrors.deposit = true;
-      if (!this.contract.contractNumber) this.validationErrors.contractNumber = true;
+      if (!this.contract.contractNumber)
+        this.validationErrors.contractNumber = true;
       if (!this.contract.contractDate) this.validationErrors.contractDate = true;
 
       return Object.keys(this.validationErrors).length === 0;
@@ -803,7 +813,7 @@ h2 {
   display: block;
 }
 
-.nav-tabs .nav-link:hover{
+.nav-tabs .nav-link:hover {
   color: #1e2d3b;
   background-color: #fff;
 }

@@ -7,8 +7,8 @@
       </div>
       <div class="col-md-6 text-end">
         <!-- Action Buttons -->
-        <button class="btn btn-warning me-2" @click="goBack">Quay về</button>
-        <button class="btn btn-success" @click="saveFee">Lưu</button>
+        <button class="btn btn-warning me-2" @click="goBack"><i class="fas fa-arrow-rotate-left"></i> Quay về</button>
+        <button class="btn btn-success" @click="saveFee"><i class="fas fa-save"></i> Lưu</button>
       </div>
     </div>
 
@@ -18,9 +18,9 @@
         <!-- House Selection -->
         <div class="col-md-6">
           <label for="house">Nhà</label>
-          <select id="house" v-model="selectedHouse" class="form-select">
-            <option value="">Tất cả</option>
-            <option v-for="house in houses" :key="house.name" :value="house.name">
+          <select id="house" v-model="selectedHouse" class="form-select" @change="updateRooms">
+            <option value="">Chọn nhà</option>
+            <option v-for="house in houses" :key="house.id" :value="house.id">
               {{ house.name }}
             </option>
           </select>
@@ -30,7 +30,7 @@
         <div class="col-md-6">
           <label for="room">Phòng</label>
           <select id="room" v-model="selectedRoom" class="form-select" :disabled="!selectedHouse">
-            <option value="">Phòng</option>
+            <option value="">Chọn phòng</option>
             <option v-for="room in filteredRooms" :key="room.roomNumber" :value="room.roomNumber">
               {{ room.roomNumber }}
             </option>
@@ -63,7 +63,7 @@
         </div>
       </div>
 
-      <!-- Thông tin bắt buộc -->
+      <!-- Required Information -->
       <div class="mb-4">
         <span class="text-danger">(*): Thông tin bắt buộc</span>
       </div>
@@ -80,13 +80,17 @@ export default {
       selectedMonthYear: new Date().toISOString().substring(0, 7),
       amount: 0,
       description: "",
-      houses: [],
-      rooms: [],
+      houses: [], // Stores the list of houses
     };
   },
   computed: {
     filteredRooms() {
-      return this.rooms.filter(room => room.house === this.selectedHouse);
+      // Filters rooms based on the selected house
+      if (this.selectedHouse) {
+        const house = this.houses.find(h => h.id === this.selectedHouse);
+        return house ? house.rooms : [];
+      }
+      return [];
     },
   },
   mounted() {
@@ -94,15 +98,13 @@ export default {
   },
   methods: {
     loadDataFromLocalStorage() {
-      const storedHouses = localStorage.getItem("homes");
-      const storedRooms = localStorage.getItem("rooms");
-
-      if (storedHouses) {
-        this.houses = JSON.parse(storedHouses);
+      const storedHomes = localStorage.getItem("homes");
+      if (storedHomes) {
+        this.houses = JSON.parse(storedHomes); // Load the houses and rooms from localStorage
       }
-      if (storedRooms) {
-        this.rooms = JSON.parse(storedRooms);
-      }
+    },
+    updateRooms() {
+      this.selectedRoom = ""; // Reset room selection when house is changed
     },
     goBack() {
       this.$router.push('/landlord/other-fee');
@@ -114,32 +116,38 @@ export default {
         return;
       }
 
-      // Construct the room key (e.g., HomeA_room_1)
-      const roomKey = `${this.selectedHouse}_room_${this.selectedRoom}`;
+      // Find the selected house and room
+      const houseIndex = this.houses.findIndex(h => h.id === this.selectedHouse);
+      if (houseIndex === -1) {
+        alert("Không tìm thấy nhà.");
+        return;
+      }
+
+      const roomIndex = this.houses[houseIndex].rooms.findIndex(r => r.roomNumber === this.selectedRoom);
+      if (roomIndex === -1) {
+        alert("Không tìm thấy phòng.");
+        return;
+      }
+
+      const room = this.houses[houseIndex].rooms[roomIndex];
+
+      // Initialize otherFees array if it doesn't exist in the room object
+      if (!room.otherFees) {
+        room.otherFees = [];
+      }
+
+      // Create a new fee object
       const feeData = {
         monthYear: this.selectedMonthYear,
         amount: this.amount,
         description: this.description,
       };
 
-      // Get room's existing data from localStorage
-      const storedRoomData = localStorage.getItem(roomKey);
-      let roomData = {};
+      // Add the new fee to the room's otherFees array
+      room.otherFees.push(feeData);
 
-      if (storedRoomData) {
-        roomData = JSON.parse(storedRoomData);
-      }
-
-      // Initialize otherFees if it doesn't exist in the room data
-      if (!roomData.otherFees) {
-        roomData.otherFees = [];
-      }
-
-      // Add the new fee to the otherFees array
-      roomData.otherFees.push(feeData);
-
-      // Save the updated room data back to localStorage
-      localStorage.setItem(roomKey, JSON.stringify(roomData));
+      // Save the updated homes data back to localStorage
+      localStorage.setItem("homes", JSON.stringify(this.houses));
 
       alert("Phí phát sinh đã được lưu thành công!");
       this.goBack();
@@ -182,14 +190,6 @@ label {
 }
 
 .input-group {
-  display: flex;
-  align-items: center;
-}
-
-.input-group-text {
-  background-color: #eee;
-  border: 1px solid #ced4da;
-  padding: 0.375rem 0.75rem;
   display: flex;
   align-items: center;
 }
