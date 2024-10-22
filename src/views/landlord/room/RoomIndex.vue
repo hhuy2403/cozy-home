@@ -80,8 +80,8 @@
                   <i class="fa fa-home me-2"></i> Phòng {{ room.roomNumber }}
                 </h5>
                 <div v-if="room.customer">
-                  <div class="btn-group w-100 mb-3">
-                    <button class="btn btn-sm btn-outline-success" @click="checkoutRoom(room, house.name)"><i class="fa fa-undo"></i></button>
+                  <div class="btn-group w-90 mb-3">
+                    <button class="btn btn-sm btn-outline-success" @click="checkoutRoom(room, house.name)"><i class="fa fa-undo"></i></button>&nbsp;
                     <button class="btn btn-sm btn-outline-warning"><i class="fa fa-exchange-alt"></i></button>
                     <router-link
                         :to="{

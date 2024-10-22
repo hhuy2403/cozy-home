@@ -157,7 +157,7 @@
             </div>
 
             <h5 class="text-end">Số tiền còn lại: {{ formatCurrency(selectedBill.paymentHistory[selectedMonth].remainingAmount) }}</h5>
-            <h5 class="text-end">Tổng cộng: {{ formatCurrency(selectedBill.paymentHistory[selectedMonth].totalAmount) }}</h5>
+            <h5 class="text-end">Tổng cộng: {{ formatCurrency(selectedBill.paymentHistory[selectedMonth].remainingAmount) }}</h5>
           </div>
           <div class="modal-footer">
             <button class="btn btn-info me-2" @click="print"><i class="fas fa-print"></i> In</button>
@@ -459,7 +459,7 @@ export default {
       this.selectedCustomers.forEach(customer => {
         let serviceDetails = '';
 
-        // Loop through all services (including Điện, Nước, Gửi xe máy, Rác)
+
         customer.services.forEach(service => {
           let serviceUsage = 0;
           let totalAmount = 0;
@@ -472,8 +472,7 @@ export default {
             serviceUsage = this.getWaterUsage(customer);
             totalAmount = serviceUsage * service.price;
           } else {
-            // For other services like Trash (Rác), Parking (Gửi xe máy)
-            serviceUsage = service.quantity || 1; // Default to 1 if no quantity is provided
+            serviceUsage = service.quantity || 1;
             totalAmount = serviceUsage * service.price;
           }
 
@@ -514,8 +513,8 @@ export default {
           ${serviceDetails} <!-- Include all services like Điện, Nước, Gửi xe máy, Rác here -->
         </tbody>
       </table>
-
-      <h5 style="text-align: right;">Tổng cộng: ${this.formatCurrency(customer.paymentHistory?.[this.selectedMonth]?.totalAmount || 0)}</h5>
+        <h3  style="text-align: left;">Số tiền đã trả: ${this.formatCurrency(customer.paymentHistory?.[this.selectedMonth]?.paidAmount || 0)}</h3>
+      <h3 style="text-align: right;">Tổng cộng: ${this.formatCurrency(customer.paymentHistory?.[this.selectedMonth]?.remainingAmount || 0)}</h3>
       <hr>
     `;
 
