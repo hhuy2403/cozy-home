@@ -57,7 +57,7 @@
           <input type="text" v-model="room.note" class="form-control" />
         </td>
         <td>
-          <button class="btn btn-danger" @click="deleteRoom(index)">
+          <button class="btn btn-sm btn-danger" @click="deleteRoom(index)">
             <i class="fa fa-trash"></i> Xóa
           </button>
         </td>
@@ -201,8 +201,10 @@ input.form-control {
 }
 
 h2 {
-  font-size: 24px;
-  font-weight: bold;
   color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
 }
 </style>

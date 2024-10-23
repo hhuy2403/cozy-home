@@ -111,6 +111,14 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+h2{
+  color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
+}
+
 table th,
 table td {
   vertical-align: middle;

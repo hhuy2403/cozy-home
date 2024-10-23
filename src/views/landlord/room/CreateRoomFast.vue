@@ -204,7 +204,8 @@ export default {
             maxPeople: this.maxPeople,
             rentableToMale: this.rentableToMale,
             rentableToFemale: this.rentableToFemale,
-            description: this.description
+            description: this.description,
+            isPaid: true
           };
 
           // Thêm phòng vào mảng rooms của nhà

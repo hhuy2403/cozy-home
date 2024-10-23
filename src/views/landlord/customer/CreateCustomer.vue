@@ -708,6 +708,15 @@ export default {
           currentRoom.isRented = true;
         }
 
+        if (currentRoom.bookings) {
+          const booking = currentRoom.bookings.find(
+              booking => booking.status === 'Đang giữ chỗ'
+          );
+          if (booking) {
+            booking.status = 'Đang thuê';
+          }
+        }
+
         localStorage.setItem('homes', JSON.stringify(storedHomes));
 
         alert('Lưu thông tin khách thuê thành công!');
@@ -773,8 +782,11 @@ export default {
 }
 
 h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
 }
 
 .nav-tabs .nav-link {

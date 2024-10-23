@@ -166,10 +166,11 @@ export default {
 }
 
 h2 {
-  text-align: left;
-  font-size: 1.75rem;
-  font-weight: bold;
   color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
 }
 
 label {

@@ -3,14 +3,14 @@
     <!-- Title and Filters -->
     <h3>Danh sách phòng</h3>
     <div class="row mb-4 align-items-center">
-      <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
+      <div class="col-lg-3 col-md-3 col-sm-6 mb-2">
         <select class="form-select" v-model="filterStatus">
           <option value="">- Trạng thái phòng -</option>
           <option value="available">Còn trống</option>
           <option value="rented">Đã cho thuê</option>
         </select>
       </div>
-      <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
+      <div class="col-lg-3 col-md-3 col-sm-6 mb-2">
         <select class="form-select" v-model="filterFeeStatus">
           <option value="">- Trạng thái phí -</option>
           <option value="unpaid">Chưa thu phí</option>
@@ -21,7 +21,7 @@
         <input type="text" class="form-control" placeholder="Phòng" v-model="searchQuery"/>
       </div>
       <div class="col-lg-2 col-md-3 col-sm-6 mb-2">
-        <button class="btn btn-primary w-100" @click="searchRooms">Tìm kiếm</button>
+        <button class="btn btn-primary w-100" @click="searchRooms"><i class="fas fa-search"></i> Tìm kiếm</button>
       </div>
       <div class="d-flex justify-content-start">
         <span>Còn trống: {{ availableRooms }} | Đã cho thuê: {{ rentedRooms }} | Chưa thu phí: {{ unpaidRooms }}</span>
@@ -108,7 +108,7 @@
                       <button class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i></button>
                     </router-link>
                   </div>
-                  <p class="text-success">{{ room.customer.fullName }}</p>
+                   <p class="text-success"><i class="fas fa-user"></i> {{ room.customer.fullName }}</p>
                 </div>
                 <div v-else>
                   <router-link
@@ -145,11 +145,11 @@
 export default {
   data() {
     return {
-      houses: [], // List of houses
-      filterStatus: '', // Room status filter (available/rented)
-      filterFeeStatus: '', // Fee status filter (unpaid/paid)
-      searchQuery: '', // Search input for room number
-      activeTab: 0, // Active tab for houses
+      houses: [],
+      filterStatus: '',
+      filterFeeStatus: '',
+      searchQuery: '',
+      activeTab: 0,
     };
   },
   computed: {
@@ -177,21 +177,17 @@ export default {
       return houses;
     },
     availableRooms() {
-      // Count available rooms across all houses
       return this.houses.reduce((total, house) => total + house.rooms.filter(room => !room.customer).length, 0);
     },
     rentedRooms() {
-      // Count rented rooms across all houses
       return this.houses.reduce((total, house) => total + house.rooms.filter(room => room.customer).length, 0);
     },
     unpaidRooms() {
-      // Count unpaid rooms across all houses
       return this.houses.reduce((total, house) => total + house.rooms.filter(room => !room.isPaid).length, 0);
     },
   },
   methods: {
     setActiveTab(index) {
-      // Set the active tab based on the selected house
       this.activeTab = index;
     },
     checkoutRoom(room, houseName) {
@@ -211,7 +207,6 @@ export default {
           const currentRoom = home.rooms.find(r => r.roomNumber === room.roomNumber);
 
           if (currentRoom) {
-            // Reset the room information (clear customer, services, members)
             currentRoom.customer = null;
             currentRoom.services = [];
             currentRoom.members = [];
@@ -220,12 +215,12 @@ export default {
             currentRoom.waterData = [];
             currentRoom.isPaid = false;
             currentRoom.isRented = false;
+            currentRoom.bookings = [];
 
-            // Update localStorage
             localStorage.setItem('homes', JSON.stringify(homes));
 
             alert(`Phòng ${room.roomNumber} đã được trả và cập nhật thành phòng trống!`);
-            this.houses = homes; // Refresh the house list
+            this.houses = homes;
           }
         } else {
           alert("Không tìm thấy nhà hoặc phòng!");
@@ -235,23 +230,18 @@ export default {
       }
     },
     availableRoomsInHouse(house) {
-      // Count available rooms in the selected house
       return house.rooms.filter(room => !room.customer).length;
     },
     rentedRoomsInHouse(house) {
-      // Count rented rooms in the selected house
       return house.rooms.filter(room => room.customer).length;
     },
     unpaidRoomsInHouse(house) {
-      // Count unpaid rooms in the selected house
       return house.rooms.filter(room => !room.isPaid).length;
     },
     formatCurrency(value) {
-      // Format currency to VND
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     },
     searchRooms() {
-      // Trigger search based on filters (status, fee, search query)
     },
     deleteRoom(room, houseName) {
       const confirmation = confirm(`Bạn có chắc chắn muốn xóa phòng ${room.roomNumber} thuộc nhà ${houseName}?`);
@@ -260,10 +250,10 @@ export default {
         const home = homes.find(h => h.name === houseName);
 
         if (home) {
-          home.rooms = home.rooms.filter(r => r.roomNumber !== room.roomNumber); // Xóa phòng ra khỏi danh sách
+          home.rooms = home.rooms.filter(r => r.roomNumber !== room.roomNumber);
           localStorage.setItem('homes', JSON.stringify(homes));
           alert(`Phòng ${room.roomNumber} đã được xóa!`);
-          this.houses = homes; // Cập nhật lại danh sách nhà
+          this.houses = homes;
         }
       }
     },
@@ -271,15 +261,14 @@ export default {
       const confirmation = confirm(`Bạn có chắc chắn muốn xóa toàn bộ nhà ${house.name}?`);
       if (confirmation) {
         let homes = JSON.parse(localStorage.getItem('homes')) || [];
-        homes = homes.filter(h => h.name !== house.name); // Xóa nhà ra khỏi danh sách
+        homes = homes.filter(h => h.name !== house.name);
         localStorage.setItem('homes', JSON.stringify(homes));
         alert(`Nhà ${house.name} đã được xóa!`);
-        this.houses = homes; // Cập nhật lại danh sách nhà
+        this.houses = homes;
       }
     },
   },
   mounted() {
-    // Load houses and rooms from localStorage
     this.houses = JSON.parse(localStorage.getItem('homes')) || [];
   },
 };
@@ -295,8 +284,11 @@ export default {
 }
 
 h3 {
-  font-size: 24px;
-  font-weight: bold;
+  color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
 }
 
 .nav-tabs .nav-link {
@@ -322,11 +314,6 @@ h3 {
 }
 
 .text-success {
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.text-danger {
   font-weight: bold;
   font-size: 16px;
 }

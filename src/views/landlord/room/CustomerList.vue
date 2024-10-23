@@ -76,7 +76,7 @@
         </td>
         <td>{{ customer.paymentCycle }}</td>
         <td>
-          <button class="btn btn-danger btn-sm" @click="deleteCustomer(customer)">
+          <button class="btn btn-sm btn-danger" @click="deleteCustomer(customer)">
             <i class="fa fa-trash"></i> Xóa
           </button>
         </td>
@@ -215,9 +215,11 @@ export default {
 }
 
 h2 {
-  font-size: 24px;
-  font-weight: bold;
   color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
 }
 
 .table th, .table td {

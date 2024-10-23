@@ -40,6 +40,13 @@ import DataWater from "@/views/landlord/datapower/DataWater.vue";
 import OtherFee from "@/views/landlord/otherfee/OtherFee.vue";
 import OtherFeeCreate from "@/views/landlord/otherfee/OtherFeeCreate.vue";
 import calculatorMoney from "@/views/landlord/calculator-money/CalculatorMoney.vue";
+import SettingIndex from "@/views/landlord/setting/SettingIndex.vue";
+import AssetIndex from "@/views/landlord/asset/AssetIndex.vue";
+import AssetCreate from "@/views/landlord/asset/AssetCreate.vue";
+import ContractIndex from "@/views/landlord/contract/ContractIndex.vue";
+import ContractCreate from "@/views/landlord/contract/ContractCreate.vue";
+import BookingIndex from "@/views/landlord/booking/BookingIndex.vue";
+import BookingCreate from "@/views/landlord/booking/BookingCreate.vue";
 
 
 // Import Layouts
@@ -48,7 +55,7 @@ import LandlordLayout from '@/layouts/LandlordLayout.vue';
 import LoginPage from "@/views/auth/LoginPage.vue";
 import RegisterPage from "@/views/auth/RegisterPage.vue";
 import ForgotPassword from "@/views/auth/ForgotPassword.vue";
-
+import ChangePassword from "@/views/settings/ChangePassword.vue";
 
 
 
@@ -123,6 +130,14 @@ const routes = [
             { path: 'other-fee', component: OtherFee},
             { path: 'other-fee-create', component: OtherFeeCreate},
             { path: 'calculator-money', component: calculatorMoney},
+            { path: 'setting-index', component: SettingIndex},
+            { path: 'asset-index', component: AssetIndex},
+            { path: 'asset-create', component: AssetCreate},
+            { path: 'contract-index', component: ContractIndex},
+            { path: 'contract-create', component: ContractCreate},
+            { path: 'booking-index', component: BookingIndex},
+            { path: 'booking-create', component: BookingCreate},
+            { path: 'change-password', component: ChangePassword},
 
 
 

@@ -1,68 +1,186 @@
 <template>
-  <div class="change-password-page">
-    <h1>Change Password</h1>
-    <form @submit.prevent="changePassword">
-      <div>
-        <label for="current-password">Current Password:</label>
-        <input type="password" v-model="passwords.current" id="current-password" required />
+  <div class="container mt-5">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="m-0">Thay đổi mật khẩu</h2>
+        <div>
+          <button type="button" class="btn btn-success me-2" @click="handleSubmit">
+            <i class="fas fa-save"></i> Lưu
+          </button>
+          <button type="button" class="btn btn-secondary" @click="openForgotPasswordModal">
+            <i class="fas fa-unlock-alt"></i> Quên mật khẩu
+          </button>
+        </div>
       </div>
-      <div>
-        <label for="new-password">New Password:</label>
-        <input type="password" v-model="passwords.new" id="new-password" required />
+
+      <div class="card-body">
+        <form @submit.prevent="handleSubmit">
+          <div class="mb-3">
+            <label for="currentPassword" class="form-label">Mật khẩu hiện tại: *</label>
+            <input
+                type="password"
+                class="form-control"
+                id="currentPassword"
+                v-model="currentPassword"
+                required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">Mật khẩu mới: *</label>
+            <input
+                type="password"
+                class="form-control"
+                id="newPassword"
+                v-model="newPassword"
+                required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Nhập lại mật khẩu: *</label>
+            <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                v-model="confirmPassword"
+                required
+            />
+          </div>
+
+          <div class="text-danger mb-3" v-if="errorMessage">
+            <small>{{ errorMessage }}</small>
+          </div>
+        </form>
       </div>
-      <div>
-        <label for="confirm-password">Confirm New Password:</label>
-        <input type="password" v-model="passwords.confirm" id="confirm-password" required />
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div v-if="isForgotPasswordModalOpen" class="modal-overlay">
+      <div class="modal-content">
+        <h5>Quên mật khẩu</h5>
+        <p>Nhập email để lấy lại mật khẩu:</p>
+        <input
+            type="email"
+            class="form-control mb-3"
+            v-model="forgotPasswordEmail"
+            placeholder="Nhập email của bạn"
+        />
+        <div class="text-danger mb-2" v-if="forgotPasswordError">{{ forgotPasswordError }}</div>
+        <button class="btn btn-primary me-2" @click="handleForgotPassword">Xác nhận</button>
+        <button class="btn btn-secondary" @click="closeForgotPasswordModal">Đóng</button>
       </div>
-      <button type="submit">Change Password</button>
-    </form>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'ChangePassword',
   data() {
     return {
-      passwords: {
-        current: '',
-        new: '',
-        confirm: ''
-      }
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+      errorMessage: '',
+      isForgotPasswordModalOpen: false,
+      forgotPasswordEmail: '',
+      forgotPasswordError: '',
     };
   },
   methods: {
-    changePassword() {
-      if (this.passwords.new !== this.passwords.confirm) {
-        alert('New password and confirm password do not match!');
+    handleSubmit() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+
+      const decodedPassword = atob(currentUser.password);
+
+      if (this.currentPassword !== decodedPassword) {
+        this.errorMessage = 'Mật khẩu hiện tại không chính xác.';
         return;
       }
-      // Logic để xác thực mật khẩu hiện tại và cập nhật mật khẩu mới
-      console.log('Password changed successfully.');
-      alert('Your password has been changed.');
-    }
-  }
-}
+
+      if (this.newPassword !== this.confirmPassword) {
+        this.errorMessage = 'Mật khẩu mới và mật khẩu nhập lại không khớp.';
+        return;
+      }
+
+      const encodedNewPassword = btoa(this.newPassword);
+      currentUser.password = encodedNewPassword;
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+      const userIndex = users.findIndex(user => user.id === currentUser.id);
+      if (userIndex !== -1) {
+        users[userIndex].password = encodedNewPassword;
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+
+      this.clearForm();
+      alert('Mật khẩu đã được thay đổi thành công!');
+    },
+    openForgotPasswordModal() {
+      this.isForgotPasswordModalOpen = true;
+    },
+    closeForgotPasswordModal() {
+      this.isForgotPasswordModalOpen = false;
+      this.forgotPasswordEmail = '';
+      this.forgotPasswordError = '';
+    },
+    handleForgotPassword() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+      if (this.forgotPasswordEmail !== currentUser.email) {
+        this.forgotPasswordError = 'Email không chính xác.';
+        return;
+      }
+
+      alert(`Mật khẩu của bạn đã được gửi đến email: ${this.forgotPasswordEmail}`);
+      this.closeForgotPasswordModal();
+    },
+    clearForm() {
+      this.currentPassword = '';
+      this.newPassword = '';
+      this.confirmPassword = '';
+      this.errorMessage = '';
+    },
+  },
+};
 </script>
 
 <style scoped>
-.change-password-page {
+.container {
+  margin-top: 3em !important;
   padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-form div {
-  margin-bottom: 10px;
+
+.card-header {
+  background-color: #f8f9fa;
 }
-input {
+
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  box-sizing: border-box;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-button {
-  padding: 10px 20px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  cursor: pointer;
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 90%;
 }
 </style>

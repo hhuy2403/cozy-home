@@ -202,8 +202,11 @@ export default {
 }
 
 h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
+  text-align: left;
 }
 
 .is-invalid {

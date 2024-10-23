@@ -274,21 +274,10 @@ export default {
 }
 
 h2 {
+  color: #2a3f54;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 48px;
   text-align: left;
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #1e2d3b;
-}
-
-label {
-  font-weight: 600;
-}
-
-.action-buttons .btn {
-  margin-right: 10px;
-}
-
-.action-buttons .btn-info {
-  color: #fff;
 }
 </style>
