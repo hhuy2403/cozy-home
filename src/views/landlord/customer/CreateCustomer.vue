@@ -708,14 +708,15 @@ export default {
           currentRoom.isRented = true;
         }
 
-        if (currentRoom.bookings) {
+        if (currentRoom && currentRoom.bookings) {
           const booking = currentRoom.bookings.find(
-              booking => booking.status === 'Đang giữ chỗ'
+              (booking) => booking.status === 'Đang giữ chỗ'
           );
           if (booking) {
             booking.status = 'Đang thuê';
           }
         }
+
 
         localStorage.setItem('homes', JSON.stringify(storedHomes));
 

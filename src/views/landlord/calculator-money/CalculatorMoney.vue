@@ -71,19 +71,28 @@
         </tr>
         </thead>
         <tbody>
-        <tr  v-for="(item, index) in filteredCustomers" :key="index" >
+        <tr v-for="(item, index) in filteredCustomers" :key="index">
           <td><input type="checkbox" v-model="selectedCustomers" :value="item" /></td>
           <td>{{ item.house }}</td>
           <td>{{ item.roomNumber }}</td>
           <td>{{ item.customer.fullName }}</td>
           <td>{{ selectedMonth }}</td> <!-- Hiển thị tháng -->
-          <td>{{ formatCurrency(item.paymentHistory?.[selectedMonth]?.totalAmount || 0) }}</td>
-          <td>{{ formatCurrency(item.paymentHistory?.[selectedMonth]?.paidAmount || 0) }}</td>
-          <td>{{ formatCurrency(item.paymentHistory?.[selectedMonth]?.remainingAmount || 0) }}</td>
           <td>
-            <button class="btn" @click="showBillDetail(item)"><i class="fas fa-file-invoice"></i></button>
+            {{ formatCurrency(item.paymentHistory?.[selectedMonth]?.totalAmount || 0) }}
+          </td>
+          <td>
+            {{ formatCurrency(item.paymentHistory?.[selectedMonth]?.paidAmount || 0) }}
+          </td>
+          <td>
+            {{ formatCurrency(item.paymentHistory?.[selectedMonth]?.remainingAmount || 0) }}
+          </td>
+          <td>
+            <button class="btn" @click="showBillDetail(item)">
+              <i class="fas fa-file-invoice"></i>
+            </button>
           </td>
         </tr>
+
         <tr v-if="filteredCustomers.length === 0">
           <td colspan="8" class="text-center">Không tìm thấy dòng nào phù hợp</td>
         </tr>
@@ -647,7 +656,7 @@ export default {
               this.customers.push({
                 house: home.name,
                 roomNumber: room.roomNumber,
-                customer: room.customer,
+                customer: room.customer || { fullName: "", paymentHistory: {} },
                 services: room.services || [],
                 otherFees: room.otherFees || [],
                 electricData: room.electricData || [],
@@ -739,12 +748,17 @@ export default {
       alert('Tiền phòng đã được tính xong!');
     },
     updateRemainingAmount() {
-      const totalAmount = this.selectedBill.paymentHistory?.[this.selectedMonth]?.totalAmount || 0;
-      const paidAmount = this.selectedBill.paymentHistory?.[this.selectedMonth]?.paidAmount || 0;
+      const payment = this.selectedBill.paymentHistory?.[this.selectedMonth] || {
+        totalAmount: 0,
+        paidAmount: 0,
+        remainingAmount: 0,
+      };
 
-      const remainingAmount = totalAmount - paidAmount;
-      this.selectedBill.paymentHistory[this.selectedMonth].remainingAmount = remainingAmount >= 0 ? remainingAmount : 0;
+      const remainingAmount = payment.totalAmount - payment.paidAmount;
+      this.selectedBill.paymentHistory[this.selectedMonth].remainingAmount =
+          remainingAmount >= 0 ? remainingAmount : 0;
     },
+
 
     formatCurrency(value) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);

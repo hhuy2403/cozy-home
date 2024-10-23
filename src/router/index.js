@@ -47,6 +47,11 @@ import ContractIndex from "@/views/landlord/contract/ContractIndex.vue";
 import ContractCreate from "@/views/landlord/contract/ContractCreate.vue";
 import BookingIndex from "@/views/landlord/booking/BookingIndex.vue";
 import BookingCreate from "@/views/landlord/booking/BookingCreate.vue";
+import ReportCustomerRent from "@/views/landlord/report/ReportCustomerRent.vue";
+import ReportCustomerDebt from "@/views/landlord/report/ReportCustomerDebt.vue";
+import ReportCustomerDeposit from "@/views/landlord/report/ReportCustomerDeposit.vue";
+import ReportCustomerContractExpired from "@/views/landlord/report/ReportCustomerContractExpired.vue";
+import ReportRoomPerson from "@/views/landlord/report/ReportRoomPerson.vue";
 
 
 // Import Layouts
@@ -138,6 +143,11 @@ const routes = [
             { path: 'booking-index', component: BookingIndex},
             { path: 'booking-create', component: BookingCreate},
             { path: 'change-password', component: ChangePassword},
+            { path: 'customer-rent', component: ReportCustomerRent},
+            { path: 'customer-debt', component: ReportCustomerDebt},
+            { path: 'customer-deposit', component: ReportCustomerDeposit},
+            { path: 'customer-contract-expired', component: ReportCustomerContractExpired},
+            { path: 'room-person', component: ReportRoomPerson},
 
 
 
