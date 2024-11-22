@@ -22,3 +22,8 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### file .env
+```
+VUE_APP_DOMAIN_BE="http://localhost:1337"
+```
