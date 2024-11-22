@@ -2,7 +2,7 @@ import baseApi from './baseApi';
 
 const authApi = {
   register: (data) => {
-    const url = "/api/register";
+    const url = "/api/auth/local/register";
     return baseApi.post(url, data);
   },
 
