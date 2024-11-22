@@ -122,9 +122,7 @@ export default {
         const response = await authApi.register({
           username: this.user.name,
           email: this.user.email,
-          password: this.user.password,
-          customRole: this.user.role,
-          customStatus: this.user.status,
+          password: this.user.password
         });
         if(response.error){
           Swal.fire({
@@ -139,23 +137,23 @@ export default {
           return;
         }
 
-        // const resUpdate = await authApi.updateUser(response.user.id, {
-        //   customRole: this.user.role,
-        //   customStatus: this.user.status,
-        // })
+        const resUpdate = await authApi.updateUser(response.user.id, {
+          customRole: this.user.role,
+          customStatus: this.user.status,
+        })
         
-        // if(resUpdate.error){
-        //   Swal.fire({
-        //     icon: 'error',
-        //     title: "Đăng ký thất bại!",
-        //     text: response.error,
-        //     confirmButtonText: 'OK',
-        //     timer: 3000,
-        //     timerProgressBar: true,
-        //   })
+        if(resUpdate.error){
+          Swal.fire({
+            icon: 'error',
+            title: "Đăng ký thất bại!",
+            text: response.error,
+            confirmButtonText: 'OK',
+            timer: 3000,
+            timerProgressBar: true,
+          })
 
-        //   return;
-        // }
+          return;
+        }
 
         Swal.fire({
           icon: 'success',
