@@ -372,10 +372,9 @@ export default {
       crudApi.read('api::room.room', {id: this.roomId}),
       crudApi.read('api::home.home', {id: this.houseId}),
     ]);
-    const [roomData, homeData] = await Promise.all([
-      roomResponse.json(),
-      homeResponse.json()
-    ]);
+
+    const roomData = roomResponse.data[0];
+    const homeData = homeResponse.data[0];
 
     // Set room details
     this.customer.roomNumber = roomData.roomNumber;
@@ -439,7 +438,7 @@ export default {
     async fetchCustomerData() {
       try {
         const response = await crudApi.read('api::customer.customer', {rooms: {id: this.roomId}});
-        const customers = await response.json();
+        const customers = response.data;
 
         if (customers.length > 0) {
           const customerData = customers[0];
@@ -545,6 +544,8 @@ export default {
         rentalCost: ''
       };
 
+      console.log("this.customer", this.customer);
+
       if (!this.customer.fullName) {
         this.errors.fullName = 'Vui lòng nhập họ tên';
       }
@@ -603,10 +604,8 @@ export default {
           crudApi.read('api::home.home', {id: this.houseId}),
         ]);
 
-        const [roomData, homeData] = await Promise.all([
-          roomResponse.json(),
-          homeResponse.json()
-        ]);
+        const roomData = roomResponse.data[0];
+        const homeData = homeResponse.data[0];
 
         // 4. Prepare customer data
         const customerData = {

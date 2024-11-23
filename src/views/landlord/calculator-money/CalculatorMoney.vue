@@ -302,7 +302,7 @@ import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-const API_ENDPOINT = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
+import crudApi from '@/apis/crudApi';
 
 export default {
   name: 'CalculatorMoney',
@@ -821,26 +821,26 @@ export default {
         }
 
         // Load houses for current landlord
-        const housesResponse = await fetch(`${API_ENDPOINT}/homes?landlordId=${currentUser.id}`);
-        if (!housesResponse.ok) throw new Error('Failed to load houses');
-        this.houses = await housesResponse.json();
-
-        // Get house IDs for current landlord
+        const houseResponse = await crudApi.read("api::home.home", {landlordId: {id: this.currentUser.id} });
+        if (houseResponse.error) throw new Error('Không thể tải dữ liệu nhà.');
+        this.houses = houseResponse.data;
         const houseIds = this.houses.map(house => house.id);
 
+
         // Load and filter rooms
-        const roomsResponse = await fetch(`${API_ENDPOINT}/rooms`);
-        if (!roomsResponse.ok) throw new Error('Failed to load rooms');
-        const allRooms = await roomsResponse.json();
-        this.rooms = allRooms.filter(room => houseIds.includes(room.houseId));
+        const roomResponse = await crudApi.read("api::room.room", {houseId: {id: houseIds} });
+        if (roomResponse.error) throw new Error('Không thể tải dữ liệu phòng.');
+        
+        // Lọc rooms theo houses của landlord
+        const allRooms = roomResponse.data;
+        const listRoomId = allRooms.map(room => room.id);
+        this.rooms = allRooms;
 
         // Load and filter customers
-        const customersResponse = await fetch(`${API_ENDPOINT}/customers`);
-        if (!customersResponse.ok) throw new Error('Failed to load customers');
-        const allCustomers = await customersResponse.json();
-        this.customers = allCustomers.filter(customer =>
-          this.rooms.some(room => room.id === customer.roomId)
-        );
+        const customersResponse = await crudApi.read("api::customer.customer", {rooms: {id: listRoomId} });
+        if (customersResponse.error) throw new Error('Không thể tải dữ liệu khách hàng.');
+        const allCustomers = customersResponse.data;
+        this.customers = allCustomers;
 
         // Khởi tạo giá mặc định cho utility rates nếu không load được từ API
         this.electricRates = [
@@ -860,28 +860,24 @@ export default {
         ];
 
         // Load and filter electric data
-        const electricResponse = await fetch(`${API_ENDPOINT}/electric-data`);
-        if (!electricResponse.ok) throw new Error('Failed to load electric data');
-        const allElectricData = await electricResponse.json();
-        this.electricData = allElectricData.filter(data =>
-          this.rooms.some(room => room.id === data.roomId)
-        );
+        const electricResponse = await crudApi.read("api::electric-data.electric-data", {roomId: {id: listRoomId} });
+        if (electricResponse.error) throw new Error('Không thể tải dữ liệu điện.');
+        
+        const allElectricData = electricResponse.data;
+        this.electricData = allElectricData;
 
         // Load and filter water data
-        const waterResponse = await fetch(`${API_ENDPOINT}/water-data`);
-        if (!waterResponse.ok) throw new Error('Failed to load water data');
-        const allWaterData = await waterResponse.json();
-        this.waterData = allWaterData.filter(data =>
-          this.rooms.some(room => room.id === data.roomId)
-        );
+        const waterResponse = await crudApi.read("api::water-data.water-data", {roomId: {id: listRoomId} });
+        if (waterResponse.error) throw new Error('Không thể tải dữ liệu nước.');
+        
+        const allWaterData = waterResponse.data;
+        this.waterData = allWaterData;
 
         // Load and filter other fees
-        const feesResponse = await fetch(`${API_ENDPOINT}/other-fee`);
-        if (!feesResponse.ok) throw new Error('Failed to load other fees');
-        const allFees = await feesResponse.json();
-        this.otherFees = allFees.filter(fee =>
-          houseIds.includes(fee.houseId)
-        );
+        const feesResponse = await crudApi.read("api::other-fee.other-fee", {houseId: {id: houseIds} });
+        if (feesResponse.error) throw new Error('Không thể tải dữ liệu phí khác.');
+        const allFees = feesResponse.data;
+        this.otherFees = allFees;
 
         // Load and filter bills
         await this.loadBills();
@@ -905,19 +901,12 @@ export default {
         }
 
         // Lấy tất cả hóa đơn từ API
-        const response = await fetch(`${API_ENDPOINT}/bills`);
-        if (!response.ok) throw new Error('Failed to load bills');
+        const houseIds = this.houses.map(house => house.id);
+        const response = await crudApi.read("api::bill.bill", {homeId: {id: houseIds} });
+        if(response.error) throw new Error('Không thể tải dữ liệu hóa đơn.');
 
-        const allBills = await response.json();
-
-        // Lọc hóa đơn dựa trên houses của landlord hiện tại
-        const landlordHouseIds = this.houses
-          .filter(house => house.landlordId === currentUser.id)
-          .map(house => house.id);
-
-        this.bills = allBills.filter(bill =>
-          landlordHouseIds.includes(bill.houseId)
-        );
+        const allBills = await response.data;
+        this.bills = allBills;
 
       } catch (error) {
         console.error('Error loading bills:', error);
@@ -986,8 +975,9 @@ export default {
         });
 
         // Lấy danh sách bills hiện tại
-        const response = await fetch(`${API_ENDPOINT}/bills`);
-        const existingBills = await response.json();
+        const listRoomId = selectedRooms.map(room => room.id);
+        const response = await crudApi.read("api::bill.bill", {room: {id: listRoomId} });
+        const existingBills = response.data;
 
         for (const room of selectedRooms) {
           const customer = this.customers.find(c => c.roomId === room.id);
@@ -1077,10 +1067,7 @@ export default {
           try {
             if (existingBill) {
               // Update existing bill
-              await fetch(`${API_ENDPOINT}/bills/${existingBill.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+              await crudApi.update(`api::bill.bill`, {id: existingBill.id}, {
                   ...billData,
                   id: existingBill.id,
                   paidAmount: existingBill.paidAmount,
@@ -1089,15 +1076,10 @@ export default {
                     existingBill.paidAmount === totalAmount ? 'paid' : 'partial',
                   paymentHistory: existingBill.paymentHistory,
                   createdAt: existingBill.createdAt
-                })
-              });
+                });
             } else {
               // Create new bill
-              await fetch(`${API_ENDPOINT}/bills`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(billData)
-              });
+              await crudApi.create(`api::bill.bill`, billData);
             }
           } catch (error) {
             console.error(`Error processing bill for room ${room.roomNumber}:`, error);

@@ -145,8 +145,8 @@
 <script>
 import Swal from 'sweetalert2';
 import { debounce } from 'lodash';
+import crudApi from '@/apis/crudApi';
 
-const API_ENDPOINT = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
 const ITEMS_PER_PAGE = 10;
 const MAX_INDEX = 999999;
 
@@ -244,21 +244,29 @@ export default {
         if (!this.validateSelectedMonth()) return;
 
         // Fetch all required data in parallel
-        const [houses, rooms, waterData] = await Promise.all([
-          this.fetchWithCache('/homes', { landlordId: this.currentUser.id }), // Lọc theo landlordId
-          this.fetchWithCache('/rooms'),
-          this.fetchWaterData()
-        ]);
+        // const [houses, rooms, waterData] = await Promise.all([
+        //   this.fetchWithCache('/homes', { landlordId: this.currentUser.id }), // Lọc theo landlordId
+        //   this.fetchWithCache('/rooms'),
+        //   this.fetchWaterData()
+        // ]);
+
+        
+        const houses = await this.fetchWithCache('/homes', { landlordId: this.currentUser.id });
+        const landlordHouseIds = houses.map(h => h.id);
+
+        const rooms = await this.fetchWithCache('/rooms', { houseId: landlordHouseIds });
+        const roomIds = rooms.map(r => r.id);
+        
+        const waterData = await this.fetchWaterData(roomIds);
+
 
         if (!Array.isArray(houses) || houses.length === 0) {
           throw new Error('Không có dữ liệu nhà');
         }
 
         // Lọc rooms theo houses của landlord
-        const landlordHouseIds = houses.map(h => h.id);
-        const filteredRooms = rooms.filter(room =>
-          landlordHouseIds.includes(room.houseId)
-        );
+        
+        const filteredRooms = rooms;
 
         if (filteredRooms.length === 0) {
           throw new Error('Không có dữ liệu phòng');
@@ -288,24 +296,25 @@ export default {
       }
     },
 
-    async fetchWaterData() {
+    async fetchWaterData(roomIds) {
       try {
         if (!this.selectedMonth) {
           throw new Error('Chưa chọn tháng');
         }
 
         // Lấy tất cả dữ liệu nước
-        const response = await this.fetchWithCache('/water-data');
 
-        if (!Array.isArray(response)) {
+        const response = await crudApi.read("api::water-data.water-data", {
+          roomId: {id: {$in: roomIds}},
+          monthYear: {$contains: this.selectedMonth}
+        });
+
+        if (response.error) {
           return [];
         }
 
         // Lọc dữ liệu theo landlordId và tháng
-        return response.filter(item =>
-          item.landlordId === this.currentUser.id &&
-          item.monthYear === this.selectedMonth
-        ).map(item => ({
+        return response.data.map(item => ({
           ...item,
           oldWaterIndex: Number(item.oldWaterIndex) || 0,
           newWaterIndex: Number(item.newWaterIndex) || 0,
@@ -319,6 +328,18 @@ export default {
       }
     },
 
+    async getResource(endpoint, params={}){
+      if(endpoint === "/homes"){
+        return await crudApi.read("api::home.home", {landlordId: {id: params.landlordId}});
+      }
+
+      if(endpoint === "/rooms"){
+        return await crudApi.read("api::room.room", {houseId: {id: {$in: params.houseId}}});
+      }
+
+
+      return {};
+    },
     // API Methods
     async fetchWithCache(endpoint, params = {}) {
       try {
@@ -327,33 +348,15 @@ export default {
 
         if (cachedData) return cachedData;
 
-        const url = new URL(`${API_ENDPOINT}${endpoint}`);
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            url.searchParams.append(key, value);
-          }
-        });
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-
         try {
-          const response = await fetch(url.toString(), {
-            signal: controller.signal
-          });
+          const response = await this.getResource(endpoint, params);
 
-          clearTimeout(timeoutId);
-
-          if (response.status === 404) {
+          if (response.error) {
             this.setCacheData(cacheKey, []);
             return [];
           }
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
+          const data = response.data;
           this.setCacheData(cacheKey, data);
           return data;
 
@@ -401,20 +404,24 @@ export default {
     // Data Processing Methods
     async processRoomsData(houses, rooms, waterData) {
       const processedRooms = [];
+      const roomIds = rooms.map(r => r.id);
 
       // Fetch all customers first to avoid multiple API calls
-      const customers = await this.fetchWithCache('/customers') || [];
+      const customerResponse = await crudApi.read("api::customer.customer", {rooms: {id: {$in: roomIds}}});
+
+      const customers = customerResponse.data || [];
+
 
       for (const room of rooms) {
         try {
-          const house = houses.find(h => h.id === room.houseId);
+          const house = houses.find(h => h.id === room.houseId.id);
           if (!house) {
             console.warn(`Không tìm thấy thông tin nhà cho phòng ${room.roomNumber}`);
             continue;
           }
 
-          const water = waterData?.find(w => w.roomId === room.id);
-          const customer = customers.find(c => c.roomId === room.id);
+          const water = waterData?.find(w => w.roomId.id === room.id);
+          const customer = customers.find(c => c.roomId.id === room.id);
 
           let oldWaterIndex = 0;
           let newWaterIndex = 0;
@@ -684,17 +691,13 @@ export default {
         updatedAt: new Date().toISOString()
       };
 
-      const response = await fetch(`${API_ENDPOINT}/water-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(waterData)
-      });
+      const response = await crudApi.create("api::water-data.water-data", waterData);
 
-      if (!response.ok) {
+      if (response.error) {
         throw new Error('Không thể lưu dữ liệu. Vui lòng thử lại!');
       }
 
-      return response.json();
+      return response.data;
     },
 
     async updateWaterData(id, data) {
@@ -704,17 +707,13 @@ export default {
         updatedAt: new Date().toISOString()
       };
 
-      const response = await fetch(`${API_ENDPOINT}/water-data/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(waterData)
-      });
+      const response = await crudApi.update("api::water-data.water-data", {id: id}, waterData);
 
-      if (!response.ok) {
+      if (response.error) {
         throw new Error('Không thể cập nhật dữ liệu. Vui lòng thử lại!');
       }
 
-      return response.json();
+      return response.data;
     },
 
     // Helper Methods

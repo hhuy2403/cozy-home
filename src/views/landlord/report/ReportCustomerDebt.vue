@@ -35,7 +35,7 @@
           </div>
 
           <button class="btn-search" @click="fetchReport" :disabled="isLoading">
-            <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+            <!-- <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i> -->
             {{ isLoading ? 'Đang tải...' : 'Tìm kiếm' }}
           </button>
         </div>
@@ -148,6 +148,8 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
+
 export default {
   name: 'ReportCustomerDebt',
 
@@ -168,7 +170,7 @@ export default {
     filteredRooms() {
       if (!this.selectedHouse) return this.rooms;
       return this.rooms.filter(room => {
-        const house = this.houses.find(h => h.id === room.houseId);
+        const house = this.houses.find(h => h.id === room.houseId.id);
         return house && house.name === this.selectedHouse;
       });
     },
@@ -256,42 +258,26 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng!');
         }
 
-        const [housesRes, roomsRes, customersRes, billsRes] = await Promise.all([
-          fetch("https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes"),
-          fetch("https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms"),
-          fetch("https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers"),
-          fetch("https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills")
-        ]);
 
-        // Kiểm tra response status
-        if (!housesRes.ok || !roomsRes.ok || !customersRes.ok || !billsRes.ok) {
-          throw new Error('Một số request không thành công');
-        }
-
-        // Parse JSON data
-        const [allHouses, allRooms, allCustomers, allBills] = await Promise.all([
-          housesRes.json(),
-          roomsRes.json(),
-          customersRes.json(),
-          billsRes.json()
-        ]);
-
-        // Lọc dữ liệu theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === currentUser.id);
+        const housesRes = await crudApi.read("api::home.home", {landlordId: {id: currentUser.id}});
+        const allHouses = housesRes.data;
+        this.houses = allHouses;
         const landlordHouseIds = this.houses.map(house => house.id);
 
-        // Lọc rooms theo houses của landlord
-        this.rooms = allRooms.filter(room => landlordHouseIds.includes(room.houseId));
+        const roomsRes = await crudApi.read("api::room.room", {houseId: {id: landlordHouseIds}});
+        const allRooms = roomsRes.data;
+        this.rooms = allRooms;
         const landlordRoomIds = this.rooms.map(room => room.id);
-
-        // Lọc customers theo rooms của landlord
-        this.customers = allCustomers.filter(customer =>
-          landlordRoomIds.includes(customer.roomId)
-        );
-
+        
+        const customersRes = await crudApi.read("api::customer.customer", {rooms: {id: landlordRoomIds}});
+        const allCustomers = customersRes.data;
+        this.customers = allCustomers;
+        
         // Lọc bills theo customers của landlord
+        const billsRes = await crudApi.read("api::bill.bill", {room: {id: landlordRoomIds}});
+        const allBills = billsRes.data;
         this.bills = allBills.filter(bill => {
-          const customer = this.customers.find(c => c.id === bill.customerId);
+          const customer = this.customers.find(c => c.billID.find(x=>x.id === bill.id));
           return customer && bill.remainingAmount > 0; // Chỉ lấy bills còn nợ
         });
 

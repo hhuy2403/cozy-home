@@ -417,109 +417,44 @@ export default {
           });
 
           // Kiểm tra và xóa bills
-          const billsResponse = await fetch(
-            `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills`
-          );
-          if (billsResponse.ok) {
-            const allBills = await billsResponse.json();
-            const roomBills = allBills.filter(bill => bill.roomId === room.id);
+          await crudApi.delete("api::bill.bill", {room: {id: room.id}});
+          await crudApi.delete("api::electric-data.electric-data", {roomId: {id: room.id}});
+          await crudApi.delete("api::water-data.water-data", {roomId: {id: room.id}});
+          await crudApi.delete("api::other-fee.other-fee", {roomNumber: room.roomNumber});
+          await crudApi.delete("api::customer.customer", {rooms: {id: room.id}});
+          delete this.roomCustomers[room.id];
 
-            if (roomBills.length > 0) {
-              await Promise.all(roomBills.map(bill =>
-                fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills/${bill.id}`, {
-                  method: 'DELETE'
-                })
-              ));
-            }
-          }
-
-          // Kiểm tra và xóa electric data
-          const electricResponse = await fetch(
-            `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/electric-data`
-          );
-          if (electricResponse.ok) {
-            const allElectricData = await electricResponse.json();
-            const roomElectricData = allElectricData.filter(data => data.roomId === room.id);
-
-            if (roomElectricData.length > 0) {
-              await Promise.all(roomElectricData.map(data =>
-                fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/electric-data/${data.id}`, {
-                  method: 'DELETE'
-                })
-              ));
-            }
-          }
-
-          // Kiểm tra và xóa water data
-          const waterResponse = await fetch(
-            `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/water-data`
-          );
-          if (waterResponse.ok) {
-            const allWaterData = await waterResponse.json();
-            const roomWaterData = allWaterData.filter(data => data.roomId === room.id);
-
-            if (roomWaterData.length > 0) {
-              await Promise.all(roomWaterData.map(data =>
-                fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/water-data/${data.id}`, {
-                  method: 'DELETE'
-                })
-              ));
-            }
-          }
-
-          // Kiểm tra và xóa other fees
-          const otherFeeResponse = await fetch(
-            `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/other-fee`
-          );
-          if (otherFeeResponse.ok) {
-            const allOtherFees = await otherFeeResponse.json();
-            const roomOtherFees = allOtherFees.filter(fee => fee.roomNumber === room.roomNumber);
-
-            if (roomOtherFees.length > 0) {
-              await Promise.all(roomOtherFees.map(fee =>
-                fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/other-fee/${fee.id}`, {
-                  method: 'DELETE'
-                })
-              ));
-            }
-          }
-
+          // TODO: xoa contact
+          
           // Kiểm tra và xóa customer data
-          const customersResponse = await fetch(
-            `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers`
-          );
-          if (customersResponse.ok) {
-            const allCustomers = await customersResponse.json();
-            const roomCustomer = allCustomers.find(c => c.roomId === room.id);
+          // const customersResponse = await fetch(
+          //   `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers`
+          // );
+          // if (customersResponse.ok) {
+          //   const allCustomers = await customersResponse.json();
+          //   const roomCustomer = allCustomers.find(c => c.roomId === room.id);
 
-            if (roomCustomer) {
-              // Xóa customer
-              await fetch(
-                `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers/${roomCustomer.id}`,
-                { method: 'DELETE' }
-              );
-              delete this.roomCustomers[room.id];
+          //   if (roomCustomer) {
+          //     // Xóa customer
+          //     await fetch(
+          //       `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers/${roomCustomer.id}`,
+          //       { method: 'DELETE' }
+          //     );
 
-              // Xóa contracts nếu có
-              if (roomCustomer.contracts && roomCustomer.contracts.length > 0) {
-                await Promise.all(roomCustomer.contracts.map(contract =>
-                  fetch(
-                    `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/contracts/${contract.contractNumber}`,
-                    { method: 'DELETE' }
-                  )
-                ));
-              }
-            }
-          }
+          //     // Xóa contracts nếu có
+          //     if (roomCustomer.contracts && roomCustomer.contracts.length > 0) {
+          //       await Promise.all(roomCustomer.contracts.map(contract =>
+          //         fetch(
+          //           `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/contracts/${contract.contractNumber}`,
+          //           { method: 'DELETE' }
+          //         )
+          //       ));
+          //     }
+          //   }
+          // }
 
           // Cập nhật trạng thái phòng
-          await fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms/${room.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...room,
+          await crudApi.update("api::room.room", {id: room.id}, {
               isRented: false,
               isPaid: false,
               customer: null,
@@ -528,8 +463,7 @@ export default {
               contracts: [],
               currentContract: null,
               currentTenant: null
-            })
-          });
+            });
 
           // Cập nhật state
           this.houses = this.houses.map(house => {

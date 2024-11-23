@@ -1,10 +1,12 @@
 import baseApi from "./baseApi";
 
-const tokenHeader = {
+const getTokenHeader = ()=> {
+  return {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   };
+};
 
 const crudApi = {
   read: (source, where) => {
@@ -12,14 +14,14 @@ const crudApi = {
       source: source,
       where: where,
     },
-    tokenHeader);
+    getTokenHeader());
   },
   create: (source, data) => {
     return baseApi.post(`/api/create?source=${source}`, {
       source: source,
       data: data,
     },
-    tokenHeader);
+    getTokenHeader());
   },
   update: (source, where, data) => {
     return baseApi.post(`/api/update?source=${source}`, {
@@ -27,14 +29,14 @@ const crudApi = {
       where: where,
       data: data,
     },
-    tokenHeader);
+    getTokenHeader());
   },
   delete: (source, where) => {
     return baseApi.post(`/api/delete?source=${source}`, {
       source: source,
       where: where,
     },
-    tokenHeader);
+    getTokenHeader());
   },
 };
 
