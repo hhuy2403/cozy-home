@@ -11,7 +11,11 @@
           <i class="fas fa-plus"></i>
           <span>Thêm hợp đồng</span>
         </button>
-        <button class="action-btn print-btn" :disabled="!selectedContract" @click="printContract">
+        <button
+          class="action-btn print-btn"
+          :disabled="!selectedContract"
+          @click="printContract"
+        >
           <i class="fas fa-print"></i>
           <span>In hợp đồng</span>
         </button>
@@ -35,7 +39,11 @@
           <label>Phòng</label>
           <select v-model="selectedRoom" :disabled="selectedHouse === 'all'">
             <option value="all">Tất cả phòng</option>
-            <option v-for="room in filteredRooms" :key="room.roomNumber" :value="room.roomNumber">
+            <option
+              v-for="room in filteredRooms"
+              :key="room.roomNumber"
+              :value="room.roomNumber"
+            >
               {{ room.roomNumber }}
             </option>
           </select>
@@ -55,7 +63,11 @@
           <label>Tìm kiếm</label>
           <div class="search-input">
             <i class="fas fa-search"></i> &nbsp;
-            <input type="text" v-model="searchQuery" placeholder="Tìm theo tên, mã hợp đồng...">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Tìm theo tên, mã hợp đồng..."
+            />
           </div>
         </div>
       </div>
@@ -83,7 +95,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="contract in paginatedContracts" :key="contract.id" @click="viewContract(contract)">
+          <tr
+            v-for="contract in paginatedContracts"
+            :key="contract.id"
+            @click="viewContract(contract)"
+          >
             <td>{{ contract.houseName }}</td>
             <td>{{ contract.roomNumber }}</td>
             <td>{{ contract.id }}</td>
@@ -97,13 +113,22 @@
             </td>
             <td>
               <div class="action-group">
-                <button class="icon-btn view-btn" @click.stop="viewContract(contract)">
+                <button
+                  class="icon-btn view-btn"
+                  @click.stop="viewContract(contract)"
+                >
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="icon-btn edit-btn" @click.stop="editContract(contract.id)">
+                <button
+                  class="icon-btn edit-btn"
+                  @click.stop="editContract(contract.id)"
+                >
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="icon-btn delete-btn" @click.stop="deleteContract(contract)">
+                <button
+                  class="icon-btn delete-btn"
+                  @click.stop="deleteContract(contract)"
+                >
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
@@ -122,14 +147,23 @@
     <!-- Pagination -->
     <div class="pagination-section">
       <span class="pagination-info">
-        Hiển thị {{ startItem }} đến {{ endItem }} trong tổng số {{ totalItems }} hợp đồng
+        Hiển thị {{ startItem }} đến {{ endItem }} trong tổng số
+        {{ totalItems }} hợp đồng
       </span>
       <div class="pagination-controls">
-        <button class="page-btn" :disabled="currentPage === 1" @click="previousPage">
+        <button
+          class="page-btn"
+          :disabled="currentPage === 1"
+          @click="previousPage"
+        >
           <i class="fas fa-chevron-left"></i>
         </button>
         <span class="page-info">Trang {{ currentPage }}/{{ totalPages }}</span>
-        <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">
+        <button
+          class="page-btn"
+          :disabled="currentPage === totalPages"
+          @click="nextPage"
+        >
           <i class="fas fa-chevron-right"></i>
         </button>
       </div>
@@ -244,6 +278,7 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 
 const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
@@ -265,14 +300,14 @@ export default {
       contracts: [],
       selectedContract: null,
       userId: null,
-      warningDays: 30
+      warningDays: 30,
     };
   },
 
   computed: {
     filteredRooms() {
       if (this.selectedHouse === 'all') return [];
-      return this.rooms.filter(room => room.houseId === this.selectedHouse);
+      return this.rooms.filter((room) => room.houseId === this.selectedHouse);
     },
 
     filteredContracts() {
@@ -280,14 +315,17 @@ export default {
 
       // Filter by house
       if (this.selectedHouse !== 'all') {
-        filtered = filtered.filter(contract => contract.houseId === this.selectedHouse);
+        filtered = filtered.filter(
+          (contract) => contract.houseId === this.selectedHouse
+        );
       }
 
       // Filter by room
       if (this.selectedRoom !== 'all') {
-        filtered = filtered.filter(contract =>
-          contract.roomNumber === this.selectedRoom &&
-          contract.houseId === this.selectedHouse
+        filtered = filtered.filter(
+          (contract) =>
+            contract.roomNumber === this.selectedRoom &&
+            contract.houseId === this.selectedHouse
         );
       }
 
@@ -297,7 +335,7 @@ export default {
         const warningDate = new Date();
         warningDate.setDate(today.getDate() + this.warningDays);
 
-        filtered = filtered.filter(contract => {
+        filtered = filtered.filter((contract) => {
           const endDate = new Date(contract.endDate);
           switch (this.selectedStatus) {
             case 'active':
@@ -315,14 +353,17 @@ export default {
       // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase().trim();
-        filtered = filtered.filter(contract =>
-          contract.id.toLowerCase().includes(query) ||
-          contract.tenantName.toLowerCase().includes(query) ||
-          contract.houseName.toLowerCase().includes(query)
+        filtered = filtered.filter(
+          (contract) =>
+            contract.id.toLowerCase().includes(query) ||
+            contract.tenantName.toLowerCase().includes(query) ||
+            contract.houseName.toLowerCase().includes(query)
         );
       }
 
-      return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      return filtered.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
     },
 
     paginatedContracts() {
@@ -339,12 +380,14 @@ export default {
     },
 
     startItem() {
-      return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+      return this.totalItems === 0
+        ? 0
+        : (this.currentPage - 1) * this.itemsPerPage + 1;
     },
 
     endItem() {
       return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
-    }
+    },
   },
 
   async created() {
@@ -357,7 +400,11 @@ export default {
       await this.loadInitialData();
     } catch (error) {
       console.error('Error in created:', error);
-      Swal.fire('Lỗi', 'Không thể tải dữ liệu. Vui lòng đăng nhập lại.', 'error');
+      Swal.fire(
+        'Lỗi',
+        'Không thể tải dữ liệu. Vui lòng đăng nhập lại.',
+        'error'
+      );
       this.$router.push('/login');
     }
   },
@@ -372,7 +419,7 @@ export default {
       if (!value) return '0 VND';
       return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
-        currency: 'VND'
+        currency: 'VND',
       }).format(value);
     },
 
@@ -425,7 +472,7 @@ export default {
           icon: 'error',
           title: 'Lỗi',
           text: 'Không thể tải dữ liệu. Vui lòng thử lại sau.',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
       } finally {
         this.isLoading = false;
@@ -433,27 +480,45 @@ export default {
     },
 
     async loadHouses() {
-  try {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser?.id) {
-      throw new Error('User not found');
-    }
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser?.id) {
+          throw new Error('User not found');
+        }
 
-    // Lấy danh sách nhà của landlord hiện tại
-    const response = await fetch(`${API_URL}/homes?landlordId=${currentUser.id}`);
-    if (!response.ok) throw new Error('Failed to load houses');
-    this.houses = await response.json();
-  } catch (error) {
-    console.error('Error loading houses:', error);
-    throw error;
-  }
-},
+        const response = await crudApi.read('api::home.home', {
+          landlordId: currentUser.id,
+        });
+
+        if (!response.isSuccess) {
+          throw new Error('Failed to load houses');
+        }
+
+        // Lấy danh sách nhà của landlord hiện tại
+        this.houses = response.data.map((f) => ({
+          ...f,
+          landlordId: f.landlordId.id,
+          landlord: f.landlordId,
+        }));
+      } catch (error) {
+        console.error('Error loading houses:', error);
+        throw error;
+      }
+    },
 
     async loadRooms(houseId) {
       try {
-        const response = await fetch(`${API_URL}/rooms?houseId=${houseId}`);
-        if (!response.ok) throw new Error('Failed to load rooms');
-        this.rooms = await response.json();
+        const response = await crudApi.read('api::room.room', {
+          houseId: houseId,
+        });
+
+        if (!response.isSuccess) throw new Error('Failed to load rooms');
+
+        this.rooms = response.data.map((f) => ({
+          ...f,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
       } catch (error) {
         console.error('Error loading rooms:', error);
         throw error;
@@ -465,43 +530,57 @@ export default {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
         // Lấy danh sách nhà của landlord hiện tại
-        const houseIds = this.houses.map(house => house.id);
+        const houseIds = this.houses.map((house) => house.id);
 
         // Lấy tất cả contracts
-        const response = await fetch(`${API_URL}/contracts`);
-        if (!response.ok) throw new Error('Failed to load contracts');
-        const allContracts = await response.json();
+        const response = await crudApi.read('api::contract.contract', null);
+        if (!response.isSuccess) {
+          throw new Error('Failed to fetch contracts');
+        }
+
+        const allContracts = response.data.map((f) => ({
+          ...f,
+          userId: f.userId.id,
+          user: f.userId,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
 
         // Lọc contracts theo houses của landlord hiện tại
-        const filteredContracts = allContracts.filter(contract =>
-          houseIds.includes(contract.houseId) &&
-          contract.userId === currentUser.id
+        const filteredContracts = allContracts.filter(
+          (contract) =>
+            houseIds.includes(contract.houseId) &&
+            contract.userId === currentUser.id
         );
 
         // Map thông tin house name cho mỗi contract
-        this.contracts = await Promise.all(filteredContracts.map(async contract => {
-          const house = this.houses.find(h => h.id === contract.houseId);
+        this.contracts = await Promise.all(
+          filteredContracts.map(async (contract) => {
+            const house = this.houses.find((h) => h.id === contract.houseId);
 
-          // Lấy thông tin phòng
-          const roomResponse = await fetch(`${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`);
-          const rooms = await roomResponse.json();
-          const room = rooms[0];
+            const response = await crudApi.read('api::home.home', {
+              houseId: contract.houseId,
+              roomNumber: contract.roomNumber,
+            });
 
-          return {
-            ...contract,
-            houseName: house ? house.name : 'N/A',
-            roomId: room ? room.id : null,
-            price: room ? room.price : 0
-          };
-        }));
+            // Lấy thông tin phòng
+            const room = response.isSuccess ? response.data[0] : null;
 
+            return {
+              ...contract,
+              houseName: house ? house.name : 'N/A',
+              roomId: room ? room.id : null,
+              price: room ? room.price : 0,
+            };
+          })
+        );
       } catch (error) {
         console.error('Error loading contracts:', error);
         Swal.fire({
           icon: 'error',
           title: 'Lỗi',
           text: 'Không thể tải danh sách hợp đồng',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
         throw error;
       }
@@ -524,14 +603,16 @@ export default {
           confirmButtonText: 'Xóa',
           cancelButtonText: 'Hủy',
           confirmButtonColor: '#dc3545',
-          cancelButtonColor: '#6c757d'
+          cancelButtonColor: '#6c757d',
         });
 
         if (result.isConfirmed) {
           this.isLoading = true;
 
           // Tìm room trước khi xóa contract
-          const roomResponse = await fetch(`${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`);
+          const roomResponse = await fetch(
+            `${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`
+          );
           if (!roomResponse.ok) throw new Error('Failed to find room');
           const rooms = await roomResponse.json();
           const room = rooms[0];
@@ -539,37 +620,50 @@ export default {
           if (!room) throw new Error('Room not found');
 
           // Xóa contract
-          const contractResponse = await fetch(`${API_URL}/contracts/${contract.id}`, {
-            method: 'DELETE'
-          });
+          const contractResponse = await fetch(
+            `${API_URL}/contracts/${contract.id}`,
+            {
+              method: 'DELETE',
+            }
+          );
 
-          if (!contractResponse.ok) throw new Error('Failed to delete contract');
+          if (!contractResponse.ok)
+            throw new Error('Failed to delete contract');
 
           // Cập nhật trạng thái phòng
-          const updateRoomResponse = await fetch(`${API_URL}/rooms/${room.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              ...room,
-              isRented: false,
-              currentContract: null,
-              currentTenant: null,
-              customer: null
-            })
-          });
+          const updateRoomResponse = await fetch(
+            `${API_URL}/rooms/${room.id}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                ...room,
+                isRented: false,
+                currentContract: null,
+                currentTenant: null,
+                customer: null,
+              }),
+            }
+          );
 
-          if (!updateRoomResponse.ok) throw new Error('Failed to update room status');
+          if (!updateRoomResponse.ok)
+            throw new Error('Failed to update room status');
 
           // Xóa customer tương ứng
-          const customerResponse = await fetch(`${API_URL}/customers?contractNumber=${contract.id}`);
+          const customerResponse = await fetch(
+            `${API_URL}/customers?contractNumber=${contract.id}`
+          );
           if (customerResponse.ok) {
             const customers = await customerResponse.json();
             if (customers.length > 0) {
-              const deleteCustomerResponse = await fetch(`${API_URL}/customers/${customers[0].id}`, {
-                method: 'DELETE'
-              });
+              const deleteCustomerResponse = await fetch(
+                `${API_URL}/customers/${customers[0].id}`,
+                {
+                  method: 'DELETE',
+                }
+              );
               if (!deleteCustomerResponse.ok) {
                 console.error('Failed to delete customer');
               }
@@ -589,8 +683,10 @@ export default {
 
     async viewContract(contract) {
       try {
-        const house = this.houses.find(h => h.id === contract.houseId);
-        const roomResponse = await fetch(`${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`);
+        const house = this.houses.find((h) => h.id === contract.houseId);
+        const roomResponse = await fetch(
+          `${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`
+        );
         if (!roomResponse.ok) throw new Error('Failed to load room details');
         const rooms = await roomResponse.json();
         const room = rooms[0];
@@ -602,7 +698,7 @@ export default {
           startDate: this.formatDate(contract.startDate),
           endDate: this.formatDate(contract.endDate),
           rentalCost: this.formatCurrency(contract.rentalCost),
-          deposit: this.formatCurrency(contract.deposit)
+          deposit: this.formatCurrency(contract.deposit),
         };
         document.body.classList.add('modal-open');
       } catch (error) {
@@ -628,33 +724,33 @@ export default {
           <head>
             <title>Hợp đồng thuê phòng</title>
             <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                padding: 40px; 
+              body {
+                font-family: Arial, sans-serif;
+                padding: 40px;
                 line-height: 1.6;
               }
-              h1 { 
-                text-align: center; 
+              h1 {
+                text-align: center;
                 margin-bottom: 30px;
               }
-              .section { 
-                margin-bottom: 30px; 
+              .section {
+                margin-bottom: 30px;
                 padding: 20px;
                 border: 1px solid #ddd;
                 border-radius: 5px;
               }
-              .section h2 { 
+              .section h2 {
                 color: #333;
                 margin-bottom: 15px;
                 border-bottom: 2px solid #ddd;
                 padding-bottom: 10px;
               }
-              .info-row { 
+              .info-row {
                 margin: 10px 0;
                 display: flex;
                 flex-wrap: wrap;
               }
-              .info-label { 
+              .info-label {
                 font-weight: bold;
                 min-width: 150px;
               }
@@ -670,7 +766,7 @@ export default {
           </head>
           <body>
             <h1>HỢP ĐỒNG THUÊ PHÒNG</h1>
-            
+
             <div class="section">
               <h2>BÊN CHO THUÊ</h2>
               <div class="info-row">
@@ -753,7 +849,7 @@ export default {
 
     nextPage() {
       if (this.currentPage < this.totalPages) this.currentPage++;
-    }
+    },
   },
 
   watch: {
@@ -764,7 +860,7 @@ export default {
         }
         this.selectedRoom = 'all';
         this.currentPage = 1;
-      }
+      },
     },
 
     searchQuery() {
@@ -773,8 +869,8 @@ export default {
 
     selectedStatus() {
       this.currentPage = 1;
-    }
-  }
+    },
+  },
 };
 </script>
 

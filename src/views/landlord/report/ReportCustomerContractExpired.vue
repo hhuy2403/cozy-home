@@ -15,9 +15,17 @@
             <label class="filter-label">
               <i class="fas fa-home"></i> Nhà
             </label>
-            <select class="modern-select" v-model="selectedHouse" :disabled="isLoading">
+            <select
+              class="modern-select"
+              v-model="selectedHouse"
+              :disabled="isLoading"
+            >
               <option value="">Tất cả nhà</option>
-              <option v-for="house in houses" :key="house.id" :value="house.name">
+              <option
+                v-for="house in houses"
+                :key="house.id"
+                :value="house.name"
+              >
                 {{ house.name }}
               </option>
             </select>
@@ -27,16 +35,31 @@
             <label class="filter-label">
               <i class="fas fa-door-open"></i> Phòng
             </label>
-            <select class="modern-select" v-model="selectedRoom" :disabled="isLoading">
+            <select
+              class="modern-select"
+              v-model="selectedRoom"
+              :disabled="isLoading"
+            >
               <option value="">Tất cả phòng</option>
-              <option v-for="room in filteredRooms" :key="room.roomNumber" :value="room.roomNumber">
+              <option
+                v-for="room in filteredRooms"
+                :key="room.roomNumber"
+                :value="room.roomNumber"
+              >
                 Phòng {{ room.roomNumber }}
               </option>
             </select>
           </div>
 
-          <button class="search-button" @click="fetchReport" :disabled="isLoading">
-            <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+          <button
+            class="search-button"
+            @click="fetchReport"
+            :disabled="isLoading"
+          >
+            <i
+              class="fas"
+              :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"
+            ></i>
             {{ isLoading ? 'Đang tải...' : 'Tìm kiếm' }}
           </button>
         </div>
@@ -76,8 +99,13 @@
                 <div class="tenant-info">
                   <div class="tenant-name">{{ contract.tenantName }}</div>
                   <div class="tenant-contact">
-                    <div><i class="fas fa-map-marker-alt"></i> {{ contract.tenantAddress }}</div>
-                    <div><i class="fas fa-phone"></i> {{ contract.tenantPhone }}</div>
+                    <div>
+                      <i class="fas fa-map-marker-alt"></i>
+                      {{ contract.tenantAddress }}
+                    </div>
+                    <div>
+                      <i class="fas fa-phone"></i> {{ contract.tenantPhone }}
+                    </div>
                   </div>
                 </div>
               </td>
@@ -97,7 +125,10 @@
                 </div>
               </td>
               <td>
-                <div class="remaining-days" :class="getRemainingDaysClass(contract.remainingDays)">
+                <div
+                  class="remaining-days"
+                  :class="getRemainingDaysClass(contract.remainingDays)"
+                >
                   <span class="days-number">{{ contract.remainingDays }}</span>
                   <span class="days-text">ngày</span>
                 </div>
@@ -117,6 +148,7 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 
 export default {
@@ -124,8 +156,8 @@ export default {
 
   data() {
     return {
-      selectedHouse: "",
-      selectedRoom: "",
+      selectedHouse: '',
+      selectedRoom: '',
       houses: [],
       rooms: [],
       contracts: [],
@@ -136,8 +168,8 @@ export default {
   computed: {
     filteredRooms() {
       if (!this.selectedHouse) return this.rooms;
-      return this.rooms.filter(room => {
-        const house = this.houses.find(h => h.id === room.houseId);
+      return this.rooms.filter((room) => {
+        const house = this.houses.find((h) => h.id === room.houseId);
         return house && house.name === this.selectedHouse;
       });
     },
@@ -145,13 +177,15 @@ export default {
     filteredContracts() {
       return this.contracts.filter((contract) => {
         // Chỉ lấy những contract thuộc nhà và phòng của landlord
-        const house = this.houses.find(h => h.id === contract.houseId);
-        const room = this.rooms.find(r => r.id === contract.roomId);
+        const house = this.houses.find((h) => h.id === contract.houseId);
+        const room = this.rooms.find((r) => r.id === contract.roomId);
 
         if (!house || !room) return false;
 
-        const matchHouse = !this.selectedHouse || contract.houseName === this.selectedHouse;
-        const matchRoom = !this.selectedRoom || contract.roomNumber === this.selectedRoom;
+        const matchHouse =
+          !this.selectedHouse || contract.houseName === this.selectedHouse;
+        const matchRoom =
+          !this.selectedRoom || contract.roomNumber === this.selectedRoom;
 
         return matchHouse && matchRoom;
       });
@@ -171,33 +205,43 @@ export default {
 
         // Fetch houses và rooms
         const [housesResponse, roomsResponse] = await Promise.all([
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes'),
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms')
+          crudApi.read('api::home.home', null),
+          crudApi.read('api::room.room', null),
         ]);
 
-        if (!housesResponse.ok || !roomsResponse.ok) {
+        if (!housesResponse.isSuccess || !roomsResponse.isSuccess) {
           throw new Error('Failed to fetch data');
         }
 
-        const [allHouses, allRooms] = await Promise.all([
-          housesResponse.json(),
-          roomsResponse.json()
-        ]);
+        const allHouses = housesResponse.data.map((f) => ({
+          ...f,
+          landlordId: f.landlordId.id,
+          landlord: f.landlordId,
+        }));
+        const allRooms = roomsResponse.data.map((f) => ({
+          ...f,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
 
         // Lọc houses theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === currentUser.id);
-        const landlordHouseIds = this.houses.map(house => house.id);
+        this.houses = allHouses.filter(
+          (house) => house.landlordId === currentUser.id
+        );
+        const landlordHouseIds = this.houses.map((house) => house.id);
 
         // Lọc rooms theo houses của landlord
-        this.rooms = allRooms.filter(room => landlordHouseIds.includes(room.houseId));
+        this.rooms = allRooms.filter((room) =>
+          landlordHouseIds.includes(room.house.id)
+        );
 
         await this.fetchReport();
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
+        console.error('Lỗi khi tải dữ liệu:', error);
         Swal.fire({
           icon: 'error',
           title: 'Lỗi!',
-          text: 'Không thể tải dữ liệu. Vui lòng thử lại sau!'
+          text: 'Không thể tải dữ liệu. Vui lòng thử lại sau!',
         });
       } finally {
         this.isLoading = false;
@@ -213,26 +257,35 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng!');
         }
 
-        // Fetch contracts
-        const contractsResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/contracts');
-        if (!contractsResponse.ok) {
+        const response = await crudApi.read('api::contract.contract', null);
+        if (!response.isSuccess) {
           throw new Error('Failed to fetch contracts');
         }
-        const allContracts = await contractsResponse.json();
+
+        const allContracts = response.data.map((f) => ({
+          ...f,
+          userId: f.userId.id,
+          user: f.userId,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
 
         // Process contracts
         const today = new Date();
         this.contracts = allContracts
-          .filter(contract => {
+          .filter((contract) => {
             // Chỉ lấy contracts thuộc nhà của landlord
-            const house = this.houses.find(h => h.id === contract.houseId);
-            const room = this.rooms.find(r => r.id === contract.roomId);
+            const house = this.houses.find((h) => h.id == contract.houseId);
+            const room = this.rooms.find((r) => r.id == contract.roomNumber);
             return house && room;
           })
-          .map(contract => {
-            const house = this.houses.find(h => h.id === contract.houseId);
-            const room = this.rooms.find(r => r.id === contract.roomId);
-            const remainingDays = this.calculateRemainingDays(today, new Date(contract.endDate));
+          .map((contract) => {
+            const house = this.houses.find((h) => h.id == contract.houseId);
+            const room = this.rooms.find((r) => r.id == contract.roomNumber);
+            const remainingDays = this.calculateRemainingDays(
+              today,
+              new Date(contract.endDate)
+            );
 
             return {
               ...contract,
@@ -240,18 +293,20 @@ export default {
               roomNumber: room?.roomNumber || 'N/A',
               remainingDays,
               houseId: contract.houseId,
-              roomId: contract.roomId
+              roomId: contract.roomNumber,
             };
           })
-          .filter(contract => contract.remainingDays <= 30 && contract.remainingDays > 0)
+          .filter(
+            (contract) =>
+              contract.remainingDays <= 30 && contract.remainingDays > 0
+          )
           .sort((a, b) => a.remainingDays - b.remainingDays);
-
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu báo cáo:", error);
+        console.error('Lỗi khi tải dữ liệu báo cáo:', error);
         Swal.fire({
           icon: 'error',
           title: 'Lỗi!',
-          text: 'Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau!'
+          text: 'Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau!',
         });
       } finally {
         this.isLoading = false;
@@ -277,7 +332,7 @@ export default {
       if (days <= 7) return 'text-danger fw-bold';
       if (days <= 15) return 'text-warning fw-bold';
       return 'text-success';
-    }
+    },
   },
 
   async mounted() {
