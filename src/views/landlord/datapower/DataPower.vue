@@ -144,8 +144,8 @@
 <script>
 import Swal from 'sweetalert2';
 import { debounce } from 'lodash';
+import crudApi from '@/apis/crudApi';
 
-const API_ENDPOINT = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
 const ITEMS_PER_PAGE = 10;
 const MAX_INDEX = 999999;
 
@@ -245,21 +245,26 @@ export default {
         if (!this.validateSelectedMonth()) return;
 
         // Fetch all required data in parallel
-        const [houses, rooms, electricData] = await Promise.all([
-          this.fetchWithCache('/homes', { landlordId: this.currentUser.id }), // Lọc theo landlordId
-          this.fetchWithCache('/rooms'),
-          this.fetchElectricData()
-        ]);
+        // const [houses, rooms, electricData] = await Promise.all([
+        //   this.fetchWithCache('/homes', { landlordId: this.currentUser.id }), // Lọc theo landlordId
+        //   this.fetchWithCache('/rooms'),
+        //   this.fetchElectricData()
+        // ]);
+
+        const houses = await this.fetchWithCache('/homes', { landlordId: this.currentUser.id });
+        const landlordHouseIds = houses.map(h => h.id);
+
+        const rooms = await this.fetchWithCache('/rooms', { houseId: landlordHouseIds });
+        const roomIds = rooms.map(r => r.id);
+        
+        const electricData = await this.fetchElectricData(roomIds);
 
         if (!Array.isArray(houses) || houses.length === 0) {
           throw new Error('Không có dữ liệu nhà');
         }
 
         // Lọc rooms theo houses của landlord
-        const landlordHouseIds = houses.map(h => h.id);
-        const filteredRooms = rooms.filter(room =>
-          landlordHouseIds.includes(room.houseId)
-        );
+        const filteredRooms = rooms;
 
         if (filteredRooms.length === 0) {
           throw new Error('Không có dữ liệu phòng');
@@ -289,29 +294,42 @@ export default {
       }
     },
 
-    async fetchElectricData() {
+    async fetchElectricData(roomIds) {
       try {
+        console.log(this.selectedMonth);
         if (!this.selectedMonth) {
           throw new Error('Chưa chọn tháng');
         }
 
         // Lấy tất cả dữ liệu điện và lọc theo landlordId và tháng
-        const response = await this.fetchWithCache('/electric-data');
+        const response = await crudApi.read("api::electric-data.electric-data", {
+          roomId: {id: {$in: roomIds}},
+          monthYear: {$contains: this.selectedMonth}
+        });
 
-        if (!Array.isArray(response)) {
+        if (response.error) {
           return [];
         }
 
         // Lọc dữ liệu theo landlordId và tháng
-        return response.filter(item =>
-          item.landlordId === this.currentUser.id &&
-          item.monthYear === this.selectedMonth
-        );
+        return response.data;
 
       } catch (error) {
         console.error('Error fetching electric data:', error);
         return [];
       }
+    },
+    async getResource(endpoint, params={}){
+      if(endpoint === "/homes"){
+        return await crudApi.read("api::home.home", {landlordId: {id: params.landlordId}});
+      }
+
+      if(endpoint === "/rooms"){
+        return await crudApi.read("api::room.room", {houseId: {id: {$in: params.houseId}}});
+      }
+
+
+      return {};
     },
     // API Methods
     async fetchWithCache(endpoint, params = {}) {
@@ -321,33 +339,19 @@ export default {
 
         if (cachedData) return cachedData;
 
-        const url = new URL(`${API_ENDPOINT}${endpoint}`);
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            url.searchParams.append(key, value);
-          }
-        });
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-
         try {
-          const response = await fetch(url.toString(), {
-            signal: controller.signal
-          });
+          const response = await this.getResource(endpoint, params);
+          
+          // await fetch(url.toString(), {
+          //   signal: controller.signal
+          // });
 
-          clearTimeout(timeoutId);
-
-          if (response.status === 404) {
+          if (response.error) {
             this.setCacheData(cacheKey, []);
             return [];
           }
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
+          const data = response.data;
           this.setCacheData(cacheKey, data);
           return data;
 
@@ -366,7 +370,6 @@ export default {
         throw error;
       }
     },
-
     // Cache Methods
     getCacheKey(endpoint, params = {}) {
       return `${endpoint}?${new URLSearchParams(params).toString()}`;
@@ -395,20 +398,23 @@ export default {
     // Data Processing Methods
     async processRoomsData(houses, rooms, electricData) {
       const processedRooms = [];
+      const roomIds = rooms.map(r => r.id);
 
       // Fetch all customers first to avoid multiple API calls
-      const customers = await this.fetchWithCache('/customers') || [];
+      const customerResponse = await crudApi.read("api::customer.customer", {rooms: {id: {$in: roomIds}}});
+
+      const customers = customerResponse.data || [];
 
       for (const room of rooms) {
         try {
-          const house = houses.find(h => h.id === room.houseId);
+          const house = houses.find(h => h.id === room.houseId.id);
           if (!house) {
             console.warn(`Không tìm thấy thông tin nhà cho phòng ${room.roomNumber}`);
             continue;
           }
 
-          const electric = electricData?.find(e => e.roomId === room.id);
-          const customer = customers.find(c => c.roomId === room.id);
+          const electric = electricData?.find(e => e.roomId.id === room.id);
+          const customer = customers.find(c => c.rooms.id === room.id);
 
           let oldElectricIndex = 0;
           let newElectricIndex = 0;
@@ -613,17 +619,13 @@ export default {
         updatedAt: new Date().toISOString()
       };
 
-      const response = await fetch(`${API_ENDPOINT}/electric-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(electricData)
-      });
+      const response = await crudApi.create("api::electric-data.electric-data", electricData);
 
-      if (!response.ok) {
+      if (response.error) {
         throw new Error('Không thể lưu dữ liệu. Vui lòng thử lại!');
       }
 
-      return response.json();
+      return response.data;
     },
 
 
@@ -634,20 +636,16 @@ export default {
         updatedAt: new Date().toISOString()
       };
 
-      const response = await fetch(`${API_ENDPOINT}/electric-data/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(electricData)
-      });
+      const response = await crudApi.update("api::electric-data.electric-data", {id: id}, electricData);
 
-      if (!response.ok) {
+      if (response.error) {
         throw new Error('Không thể cập nhật dữ liệu. Vui lòng thử lại!');
       }
 
-      return response.json();
+      return response.data;
     },
     // Helper Methods
-    async getPreviousMonthData(roomId) {
+    async getPreviousMonthData(roomIdRq) {
       try {
         if (!this.selectedMonth) return null;
 
@@ -663,15 +661,15 @@ export default {
         const previousMonthStr = `${previousYear}-${String(previousMonth).padStart(2, '0')}`;
 
         // Lấy tất cả dữ liệu điện
-        const response = await this.fetchWithCache('/electric-data');
-        if (!Array.isArray(response)) return null;
+        const response = await crudApi.read("api::electric-data.electric-data", {
+          roomId: {id: roomIdRq},
+          monthYear: {$contains: previousMonthStr}
+        });
+
+        if (response.error) return null;
 
         // Lọc theo roomId, landlordId và tháng trước
-        return response.find(item =>
-          item.roomId === roomId &&
-          item.landlordId === this.currentUser.id &&
-          item.monthYear === previousMonthStr
-        );
+        return response.data;
 
       } catch (error) {
         console.warn('Could not fetch previous month data:', error);

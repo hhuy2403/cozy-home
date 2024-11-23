@@ -140,9 +140,29 @@ export default {
         const resUpdate = await authApi.updateUser(response.user.id, {
           customRole: this.user.role,
           customStatus: this.user.status,
-        })
+        }, {
+          headers: {
+            Authorization: `Bearer ${response.jwt}`,
+          },
+        });
+
         
-        if(resUpdate.error){
+
+        const resUpdateLandInfo = await authApi.updateDetailLandlordInfo("api::landlord-info.landlord-info", {
+          userId: response.user.id,
+          personalInfo: {
+            name: this.user.name,
+            email: this.user.email,
+            phone: '',
+            address: '',
+          },
+        }, {
+          headers: {
+            Authorization: `Bearer ${response.jwt}`,
+          },
+        });
+        
+        if(resUpdate.error || resUpdateLandInfo.error){
           Swal.fire({
             icon: 'error',
             title: "Đăng ký thất bại!",

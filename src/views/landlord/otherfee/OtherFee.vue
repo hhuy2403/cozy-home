@@ -121,8 +121,7 @@
 <script>
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
-
-const API_ENDPOINT = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
+import crudApi from '@/apis/crudApi';
 
 export default {
   data() {
@@ -203,20 +202,21 @@ export default {
         });
 
         // Lấy danh sách nhà theo landlordId
-        const houseResponse = await fetch(`${API_ENDPOINT}/homes?landlordId=${this.currentUser.id}`);
-        if (!houseResponse.ok) throw new Error('Không thể tải dữ liệu nhà.');
-        this.houses = await houseResponse.json();
+        const houseResponse = await crudApi.read("api::home.home", {landlordId: {id: this.currentUser.id} });
+        
+        if (houseResponse.error) throw new Error('Không thể tải dữ liệu nhà.');
+        this.houses = houseResponse.data;
 
         // Lấy danh sách phí phát sinh
-        const feeResponse = await fetch(`${API_ENDPOINT}/other-fee`);
-        if (!feeResponse.ok) throw new Error('Không thể tải dữ liệu phí phát sinh.');
-        const feeData = await feeResponse.json();
+        const feeResponse = await crudApi.read("api::other-fee.other-fee", {landlordId: {id: this.currentUser.id} });
+        
+        if (feeResponse.error) throw new Error('Không thể tải dữ liệu phí phát sinh.');
+        const feeData = feeResponse.data;
 
         // Lọc và map dữ liệu phí phát sinh theo landlordId
         this.fees = feeData
-          .filter(fee => fee.landlordId === this.currentUser.id)
           .map(fee => {
-            const house = this.houses.find(h => h.id === fee.houseId);
+            const house = this.houses.find(h => h.id === fee.houseId.id);
             return {
               ...fee,
               house: house ? house.name : 'Unknown',
@@ -255,13 +255,9 @@ export default {
           updatedAt: new Date().toISOString()
         };
 
-        const response = await fetch(`${API_ENDPOINT}/other-fee/${this.editingFee.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedFee),
-        });
+        const response = await crudApi.update("api::other-fee.other-fee", {id: this.editingFee.id}, updatedFee);
 
-        if (!response.ok) throw new Error('Không thể cập nhật phí phát sinh.');
+        if (response.error) throw new Error('Không thể cập nhật phí phát sinh.');
 
         const index = this.fees.findIndex(f => f.id === this.editingFee.id);
         if (index !== -1) {
@@ -314,9 +310,7 @@ export default {
           });
 
           for (const fee of this.selectedFees) {
-            await fetch(`${API_ENDPOINT}/other-fee/${fee.id}`, {
-              method: 'DELETE'
-            });
+            await crudApi.delete("api::other-fee.other-fee", {id: fee.id});
           }
 
           this.fees = this.fees.filter(fee => !this.selectedFees.includes(fee));

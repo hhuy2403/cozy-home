@@ -187,6 +187,7 @@
 
 <script>
 import Swal from 'sweetalert2';
+import crudApi from '@/apis/crudApi';
 
 export default {
   name: 'CustomerReport',
@@ -282,46 +283,30 @@ export default {
         }
 
         // Fetch all data in parallel
-        const [housesRes, roomsRes, customersRes, billsRes] = await Promise.all([
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes'),
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms'),
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers'),
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills')
-        ]);
 
-        // Check for response errors
-        if (!housesRes.ok || !roomsRes.ok || !customersRes.ok || !billsRes.ok) {
-          throw new Error('Lỗi khi tải dữ liệu từ server');
-        }
-
-        // Parse JSON responses
-        const [allHouses, allRooms, allCustomers, allBills] = await Promise.all([
-          housesRes.json(),
-          roomsRes.json(),
-          customersRes.json(),
-          billsRes.json()
-        ]);
-
-        // Lọc houses theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === currentUser.id);
+        const housesRes = await crudApi.read("api::home.home", {landlordId: {id: currentUser.id}});
+        const allHouses = housesRes.data;
+        this.houses = allHouses;
         const landlordHouseIds = this.houses.map(house => house.id);
 
-        // Lọc rooms theo houses của landlord
-        this.rooms = allRooms.filter(room => landlordHouseIds.includes(room.houseId));
+        const roomsRes = await crudApi.read("api::room.room", {houseId: {id: landlordHouseIds}});
+        const allRooms = roomsRes.data;
+        this.rooms = allRooms;
         const landlordRoomIds = this.rooms.map(room => room.id);
 
-        // Lọc bills theo rooms của landlord
-        this.bills = allBills.filter(bill => landlordRoomIds.includes(bill.roomId));
+        const billsRes = await crudApi.read("api::bill.bill", {room: {id: landlordRoomIds}});
+        const allBills = billsRes.data;
+        this.bills = allBills;
 
-        // Process customer data - chỉ lấy customers thuộc rooms của landlord
-        const filteredCustomers = allCustomers.filter(customer =>
-          landlordRoomIds.includes(customer.roomId)
-        );
+
+        const customersRes = await crudApi.read("api::customer.customer", {rooms: {id: landlordRoomIds}});
+        const allCustomers = customersRes.data;
+        const filteredCustomers = allCustomers;
 
         this.customers = filteredCustomers.map(customer => {
-          const house = this.houses.find(h => h.id === customer.houseId);
-          const room = this.rooms.find(r => r.id === customer.roomId);
-          const customerBills = this.bills.filter(b => b.customerId === customer.id);
+          const room = this.rooms.find(r => r.customers.find(c=>c.id===customer.id));
+          const house = this.houses.find(h => h.roomId.find(r=>r.id === room?.id));
+          const customerBills = this.bills.filter(b => b.customerId.find(c=>c.id===customer.id));
 
           const totalAmount = customerBills.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0);
           const paidAmount = customerBills.reduce((sum, bill) => sum + (bill.paidAmount || 0), 0);

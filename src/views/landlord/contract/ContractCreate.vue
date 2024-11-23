@@ -151,8 +151,7 @@
 
 <script>
 import Swal from 'sweetalert2';
-
-const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
+import crudApi from '@/apis/crudApi';
 
 export default {
   data() {
@@ -190,13 +189,14 @@ export default {
   computed: {
     filteredRooms() {
       if (!this.contract.houseId) return [];
-      return this.rooms.filter(room => room.houseId === this.contract.houseId);
+      return this.rooms.filter(room => room.houseId.id === this.contract.houseId);
     }
   },
 
   async created() {
     const contractId = this.$route.params.id;
     this.isEditing = !!contractId;
+    console.log("contractId", contractId, this.isEditing);
 
     await this.loadInitialData(contractId);
   },
@@ -252,10 +252,10 @@ export default {
         }
 
         // Lấy thông tin chi tiết từ landlord-info endpoint
-        const response = await fetch(`${API_URL}/landlord-info?userId=${currentUser.id}`);
-        if (!response.ok) throw new Error('Failed to load landlord info');
+        const response = await crudApi.read("api::landlord-info.landlord-info", {userId: {id: currentUser.id}});
+        if (response.error) throw new Error('Failed to load landlord info');
 
-        const landlordInfoList = await response.json();
+        const landlordInfoList = response.data;
         const landlordInfo = landlordInfoList[0]; // Lấy thông tin đầu tiên từ array
 
         if (!landlordInfo) {
@@ -286,9 +286,9 @@ export default {
 
     async loadHouses() {
       try {
-        const response = await fetch(`${API_URL}/homes?landlordId=${this.contract.userId}`);
-        if (!response.ok) throw new Error('Failed to load houses');
-        this.houses = await response.json();
+        const response = await crudApi.read("api::home.home", {landlordId: {id: this.contract.userId}});
+        if (response.error) throw new Error('Failed to load houses');
+        this.houses = response.data;
       } catch (error) {
         console.error('Error loading houses:', error);
         throw error;
@@ -297,9 +297,9 @@ export default {
 
     async loadRooms(houseId) {
       try {
-        const response = await fetch(`${API_URL}/rooms?houseId=${houseId}&isRented=false`);
-        if (!response.ok) throw new Error('Failed to load rooms');
-        this.rooms = await response.json();
+        const response = await crudApi.read("api::room.room", {houseId: {id: houseId}, isRented: false});
+        if (response.error) throw new Error('Failed to load rooms');
+        this.rooms = response.data;
       } catch (error) {
         console.error('Error loading rooms:', error);
         throw error;
@@ -308,9 +308,9 @@ export default {
 
     async loadContract(contractId) {
       try {
-        const response = await fetch(`${API_URL}/contracts/${contractId}`);
-        if (!response.ok) throw new Error('Failed to load contract');
-        const contractData = await response.json();
+        const response = await crudApi.read("api::contract.contract", {id: contractId});
+        if (response.error) throw new Error('Failed to load contract');
+        const contractData = response.data[0];
 
         // Merge contract data with current contract state
         this.contract = { ...this.contract, ...contractData };
@@ -327,6 +327,7 @@ export default {
 
     async updateRooms() {
       try {
+        console.log(this.contract.houseId);
         this.contract.roomNumber = '';
         this.contract.rentalCost = ''; // Reset giá thuê
 
@@ -384,25 +385,17 @@ export default {
           contractData.createdAt = new Date().toISOString();
         }
 
-        const url = this.isEditing
-          ? `${API_URL}/contracts/${this.contract.id}`
-          : `${API_URL}/contracts`;
+        const contractResponse = this.isEditng
+          ? await crudApi.update("api::contract.contract", {id: this.contract.id}, contractData)
+          : await crudApi.create("api::contract.contract", contractData);
 
-        const contractResponse = await fetch(url, {
-          method: this.isEditing ? 'PUT' : 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(contractData)
-        });
+        if (contractResponse.error) throw new Error('Failed to save contract');
 
-        if (!contractResponse.ok) throw new Error('Failed to save contract');
-
-        const savedContract = await contractResponse.json();
+        const savedContract = contractResponse.data;
 
         // Tìm room ID từ roomNumber và houseId
         const room = this.rooms.find(r => r.roomNumber === this.contract.roomNumber
-          && r.houseId === this.contract.houseId);
+          && r.houseId.id === this.contract.houseId);
 
         if (!room) throw new Error('Room not found');
 
@@ -446,31 +439,19 @@ export default {
           lastUpdated: new Date().toISOString()
         };
 
-        const customerResponse = await fetch(`${API_URL}/customers`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(customerData)
-        });
+        const customerResponse = await crudApi.create("api::customer.customer", customerData);
 
-        if (!customerResponse.ok) throw new Error('Failed to save customer');
+        if (customerResponse.error) throw new Error('Failed to save customer');
 
         // Update room status
-        const roomUpdateResponse = await fetch(`${API_URL}/rooms/${room.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const roomUpdateResponse = await crudApi.update("api::room.room", {id: room.id}, {
             ...room,
             isRented: true,
             currentContract: savedContract.id,
             currentTenant: this.contract.tenantName
-          })
-        });
+          });
 
-        if (!roomUpdateResponse.ok) throw new Error('Failed to update room status');
+        if (roomUpdateResponse.error) throw new Error('Failed to update room status');
 
         await Swal.fire({
           icon: 'success',
@@ -499,12 +480,7 @@ export default {
           && r.houseId === this.contract.houseId);
         if (!room) throw new Error('Room not found');
 
-        const response = await fetch(`${API_URL}/rooms/${room.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const response = await crudApi.update("api::room.room", {id: room.id}, {
             isRented: true,
             customer: {
               fullName: this.contract.tenantName,
@@ -520,10 +496,9 @@ export default {
               deposit: this.contract.deposit,
               terms: this.contract.terms
             }]
-          })
-        });
+          });
 
-        if (!response.ok) throw new Error('Failed to update room status');
+        if (response.error) throw new Error('Failed to update room status');
       } catch (error) {
         console.error('Error updating room status:', error);
         throw error;

@@ -73,8 +73,8 @@
 
 <script>
 import Swal from 'sweetalert2';
+import crudApi from '@/apis/crudApi';
 
-const API_ENDPOINT = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
 
 export default {
   data() {
@@ -92,7 +92,7 @@ export default {
   },
   computed: {
     filteredRooms() {
-      return this.rooms.filter(room => room.houseId === this.selectedHouse);
+      return this.rooms.filter(room => room.houseId.id === this.selectedHouse);
     },
   },
   async mounted() {
@@ -126,18 +126,18 @@ export default {
         });
 
         // Lấy danh sách nhà theo landlordId
-        const houseResponse = await fetch(`${API_ENDPOINT}/homes?landlordId=${this.currentUser.id}`);
-        if (!houseResponse.ok) throw new Error('Không thể tải dữ liệu nhà.');
-        this.houses = await houseResponse.json();
+        const houseResponse = await crudApi.read("api::home.home", {landlordId: {id: this.currentUser.id} });
+        if (houseResponse.error) throw new Error('Không thể tải dữ liệu nhà.');
+        this.houses = houseResponse.data;
+        const houseIds = this.houses.map(house => house.id);
 
         // Lấy danh sách phòng và lọc theo houses của landlord
-        const roomResponse = await fetch(`${API_ENDPOINT}/rooms`);
-        if (!roomResponse.ok) throw new Error('Không thể tải dữ liệu phòng.');
-        const allRooms = await roomResponse.json();
-
+        const roomResponse = await crudApi.read("api::room.room", {houseId: {id: houseIds} });
+        if (roomResponse.error) throw new Error('Không thể tải dữ liệu phòng.');
+        
         // Lọc rooms theo houses của landlord
-        const landlordHouseIds = this.houses.map(h => h.id);
-        this.rooms = allRooms.filter(room => landlordHouseIds.includes(room.houseId));
+        const allRooms = roomResponse.data;
+        this.rooms = allRooms;
 
         Swal.close();
       } catch (error) {
@@ -209,13 +209,8 @@ export default {
           }
         });
 
-        const response = await fetch(`${API_ENDPOINT}/other-fee`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(feeData),
-        });
-
-        if (!response.ok) throw new Error('Không thể lưu phí phát sinh.');
+        const response = await crudApi.create("api::other-fee.other-fee", feeData);
+        if (response.error) throw new Error('Không thể lưu phí phát sinh.');
 
         await Swal.fire({
           icon: 'success',

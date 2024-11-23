@@ -35,7 +35,7 @@
           </div>
 
           <button class="search-button" @click="fetchReport" :disabled="isLoading">
-            <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+            <!-- <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i> -->
             {{ isLoading ? 'Đang tải...' : 'Tìm kiếm' }}
           </button>
         </div>
@@ -107,6 +107,7 @@
 
 <script>
 import Swal from 'sweetalert2';
+import crudApi from '@/apis/crudApi';
 
 export default {
   name: 'ReportCustomerDeposit',
@@ -134,8 +135,8 @@ export default {
     filteredCustomers() {
       return this.customers.filter((customer) => {
         // Chỉ lấy những booking thuộc nhà và phòng của landlord
-        const house = this.houses.find(h => h.id === customer.houseId);
-        const room = this.rooms.find(r => r.id === customer.roomId);
+        const house = this.houses.find(h => h.id === customer.houseId.id);
+        const room = this.rooms.find(r => r.id === customer.roomId.id);
 
         if (!house || !room) return false;
 
@@ -159,26 +160,14 @@ export default {
         }
 
         // Fetch houses và rooms
-        const [housesResponse, roomsResponse] = await Promise.all([
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes'),
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms')
-        ]);
-
-        if (!housesResponse.ok || !roomsResponse.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [allHouses, allRooms] = await Promise.all([
-          housesResponse.json(),
-          roomsResponse.json()
-        ]);
-
-        // Lọc houses theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === currentUser.id);
+        const housesRes = await crudApi.read("api::home.home", {landlordId: {id: currentUser.id}});
+        const allHouses = housesRes.data;
+        this.houses = allHouses;
         const landlordHouseIds = this.houses.map(house => house.id);
 
-        // Lọc rooms theo houses của landlord
-        this.rooms = allRooms.filter(room => landlordHouseIds.includes(room.houseId));
+        const roomsRes = await crudApi.read("api::room.room", {houseId: {id: landlordHouseIds}});
+        const allRooms = roomsRes.data;
+        this.rooms = allRooms;
 
         await this.fetchReport();
       } catch (error) {
@@ -203,21 +192,20 @@ export default {
         }
 
         // Fetch bookings
-        const bookingsResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-bookings');
-        if (!bookingsResponse.ok) {
+        const landlordRoomIds = this.rooms.map(room => room.id);
+        const bookingsResponse = await crudApi.read("api::landlord-booking.landlord-booking", {roomId: {id: landlordRoomIds}});
+        if (bookingsResponse.error) {
           throw new Error('Failed to fetch bookings');
         }
-        const allBookings = await bookingsResponse.json();
+        const allBookings = bookingsResponse.data;
 
         // Lấy danh sách houseIds của landlord
-        const landlordHouseIds = this.houses.map(house => house.id);
 
         // Lọc và transform bookings data
         this.customers = allBookings
-          .filter(booking => landlordHouseIds.includes(booking.houseId))
           .map(booking => {
-            const house = this.houses.find(h => h.id === booking.houseId);
-            const room = this.rooms.find(r => r.id === booking.roomId);
+            const room = this.rooms.find(r => r.id === booking.roomId?.id);
+            const house = this.houses.find(h => h.id === booking.houseId?.id);
 
             return {
               customerName: booking.customerName,
@@ -231,7 +219,6 @@ export default {
               roomId: booking.roomId
             };
           });
-
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu báo cáo:", error);
         Swal.fire({

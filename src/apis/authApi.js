@@ -20,9 +20,16 @@ const authApi = {
     });
   },
   
-  updateUser: (id, data) => {
+  updateUser: (id, data, config) => {
     const url = `api/users/${id}`;
-    return baseApi.put(url, data);
+    return baseApi.put(url, data, config);
+  },
+
+  updateDetailLandlordInfo: (source, data, config) => {
+    return baseApi.post(`/api/create?source=${source}`, {
+      source: source,
+      data: data,
+    }, config);
   },
 };
 
