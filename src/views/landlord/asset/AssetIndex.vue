@@ -242,13 +242,12 @@ export default {
 
     async loadHouses(landlordId) {
       try {
-        const response = await crudApi.read('api::home.home');
+        const response = await crudApi.read('api::home.home', {landlordId: {id: landlordId}});
         if (!response.isSuccess) throw new Error('Failed to load houses');
         const allHouses = response.data;
+        
         // Lọc nhà theo landlordId
-        this.houses = allHouses.filter(
-          (house) => house.landlordId.id === landlordId
-        );
+        this.houses = allHouses;
       } catch (error) {
         console.error('Error loading houses:', error);
         this.houses = [];
@@ -262,13 +261,11 @@ export default {
           // Nếu chọn tất cả, load rooms của tất cả nhà thuộc landlord
           const houseIds = this.houses.map((house) => house.id);
 
-          const response = await crudApi.read('api::room.room');
+          const response = await crudApi.read('api::room.room', {houseId: {id: houseIds}});
           if (!response.isSuccess) throw new Error('Failed to load rooms');
           const allRooms = response.data;
 
-          this.rooms = allRooms.filter((room) =>
-            houseIds.includes(room.houseId.id)
-          );
+          this.rooms = allRooms;
         } else {
           // Load rooms của nhà được chọn
           const response = await crudApi.read('api::room.room', {
@@ -288,14 +285,13 @@ export default {
     async loadAssets(landlordId) {
       try {
         const response = await crudApi.read(
-          'api::landlord-asset.landlord-asset'
+          'api::landlord-asset.landlord-asset', {landlordId: {id: landlordId}}
         );
         if (!response.isSuccess) throw new Error('Failed to load assets');
         const allAssets = response.data;
 
         // Lọc assets theo landlordId và map với house information
         this.assets = allAssets
-          .filter((asset) => asset.userId?.id === landlordId)
           .map((asset) => {
             const house = this.houses.find((h) => h.id === asset.houseId.id);
             return {
@@ -348,7 +344,7 @@ export default {
 
       // Kiểm tra quyền xóa
       const unauthorizedAssets = this.selectedAssets.filter(
-        (asset) => asset.landlordId !== currentUser.id
+        (asset) => asset.landlordId.id !== currentUser.id
       );
 
       if (unauthorizedAssets.length > 0) {
@@ -373,7 +369,7 @@ export default {
         try {
           const response = await Promise.all(
             this.selectedAssets.map((asset) =>
-              crudApi.delete('api::landlord-asset.landlord-assets', {
+              crudApi.delete('api::landlord-asset.landlord-asset', {
                 id: asset.id,
               })
             )

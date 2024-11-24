@@ -203,6 +203,7 @@ export default {
         isDisposed: false,
         notes: '',
         status: 'active',
+        customStatus: 'active',
         createdAt: '',
         updatedAt: '',
       },
@@ -269,14 +270,12 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng!');
         }
 
-        const response = await crudApi.read('api::home.home');
+        const response = await crudApi.read('api::home.home', {landlordId: {id: this.currentUser?.id}});
         if (!response.isSuccess) throw new Error('Failed to load houses');
         const allHouses = response.data;
 
         // Lọc nhà theo landlordId
-        this.houses = allHouses.filter(
-          (house) => house.landlordId.id === this.currentUser.id
-        );
+        this.houses = allHouses;
 
         if (this.houses.length > 0 && !this.isEditMode) {
           this.asset.houseId = this.houses[0].id;
@@ -304,16 +303,14 @@ export default {
         }
 
         this.asset.houseName = selectedHouse.name;
-
-        const response = await crudApi.read('api::room.room');
+        const listHouseIds = this.houses.map((house) => house.id);
+        const response = await crudApi.read('api::room.room', {houseId: {id: listHouseIds}});
 
         if (!response.isSuccess) throw new Error('Failed to load rooms');
         const rooms = response.data;
 
         // Lọc phòng theo houseId
-        this.filteredRooms = rooms.filter(
-          (room) => room.houseId.id === houseId
-        );
+        this.filteredRooms = rooms;
 
         if (this.filteredRooms.length > 0 && !this.isEditMode) {
           this.asset.roomNumber = this.filteredRooms[0].roomNumber;
@@ -386,7 +383,7 @@ export default {
         data
       );
 
-      if (!resposne.isSuccess) {
+      if (resposne.error) {
         throw new Error('Create asset failed');
       }
 
