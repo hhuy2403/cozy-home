@@ -242,8 +242,11 @@ export default {
 
   computed: {
     filteredRooms() {
+      console.log("this.rooms", this.rooms);
+      console.log("this.contract.houseId", this.contract.houseId);
+      
       if (!this.contract.houseId) return [];
-      return this.rooms.filter(room => room.houseId.id === this.contract.houseId);
+      return this.rooms.filter(room => room.houseId === this.contract.houseId);
     }
   },
 
@@ -366,14 +369,19 @@ export default {
       }
     },
 
-    async loadRooms(houseId) {
+    async loadRooms(houseId, currentRoomNumber) {
       try {
         const response = await crudApi.read('api::room.room', {
           houseId: houseId,
           isRented: false,
         });
 
-        if (!response.isSuccess) throw new Error('Failed to load rooms');
+        if (response.error) throw new Error('Failed to load rooms');
+
+        if(currentRoomNumber){
+          const response2 = await crudApi.read('api::room.room', {roomNumber: currentRoomNumber, houseId: houseId});
+          response.data.push(response2.data[0]);
+        }
 
         this.rooms = response.data.map((f) => ({
           ...f,
@@ -408,7 +416,7 @@ export default {
 
         // Load related rooms after loading house
         if (this.contract.houseId) {
-          await this.loadRooms(this.contract.houseId);
+          await this.loadRooms(this.contract.houseId, this.contract.roomNumber);
         }
       } catch (error) {
         console.error('Error loading contract:', error);
@@ -520,9 +528,9 @@ export default {
         let savedContract = {};
 
         if (!this.isEditing) {
-          savedContract = this.createContract(contractData);
+          savedContract = await this.createContract(contractData);
         } else {
-          savedContract = this.updateContract(contractData);
+          savedContract = await this.updateContract(contractData);
         }
 
         if (!savedContract) {
@@ -532,20 +540,20 @@ export default {
         // Tìm room ID từ roomNumber và houseId
         const room = this.rooms.find(
           (r) =>
-            r.roomNumber === this.contract.roomNumber &&
-            r.houseId === this.contract.houseId
+            r.roomNumber == this.contract.roomNumber &&
+            r.houseId == this.contract.houseId
         );
 
         if (!room) throw new Error('Room not found');
 
         // Tính số tháng hợp đồng
-        // const contractDuration = this.contract.endDate
-        //   ? Math.ceil(
-        //       (new Date(this.contract.endDate) -
-        //         new Date(this.contract.startDate)) /
-        //         (1000 * 60 * 60 * 24 * 30)
-        //     )
-        //   : 12;
+        const contractDuration = this.contract.endDate
+          ? Math.ceil(
+              (new Date(this.contract.endDate) -
+                new Date(this.contract.startDate)) /
+                (1000 * 60 * 60 * 24 * 30)
+            )
+          : 12;
 
         // Lưu customer
         const customerData = {
@@ -569,14 +577,24 @@ export default {
           referral: '',
           notes: '',
           image: '',
+          rooms: room.id,
+          contracts: [{
+            contractNumber: savedContract.id,
+            contractDate: savedContract.startDate,
+            contractDuration: contractDuration,
+            contractEndDate: savedContract.endDate
+          }]
         };
+
+        console.log("customerData", customerData, savedContract);
+        
 
         const customerResponse = await crudApi.create(
           'api::customer.customer',
           customerData
         );
 
-        if (!customerResponse.isSuccess)
+        if (customerResponse.error)
           throw new Error('Failed to save customer');
 
         const roomUpdateResponse = await crudApi.update(
@@ -587,11 +605,12 @@ export default {
             isRented: true,
             currentContract: savedContract.id,
             currentTenant: this.contract.tenantName,
+            customers: customerResponse.data.id,
           }
         );
 
         // Update room status
-        if (!roomUpdateResponse.isSuccess)
+        if (roomUpdateResponse.error)
           throw new Error('Failed to update room status');
 
         await Swal.fire({
