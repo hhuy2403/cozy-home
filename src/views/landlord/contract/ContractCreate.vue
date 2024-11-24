@@ -7,11 +7,20 @@
         <h1>{{ isEditing ? 'Sửa hợp đồng' : 'Thêm hợp đồng' }}</h1>
       </div>
       <div class="header-actions">
-        <button class="action-btn back-btn" @click="goBack" :disabled="isSaving">
+        <button
+          class="action-btn back-btn"
+          @click="goBack"
+          :disabled="isSaving"
+        >
           <i class="fas fa-arrow-left"></i>
           <span>Quay về</span>
         </button>
-        <button class="action-btn save-btn" type="submit" form="contractForm" :disabled="isSaving || isLoading">
+        <button
+          class="action-btn save-btn"
+          type="submit"
+          form="contractForm"
+          :disabled="isSaving || isLoading"
+        >
           <template v-if="isSaving">
             <div class="spinner"></div>
             <span>{{ isEditing ? 'Đang cập nhật...' : 'Đang lưu...' }}</span>
@@ -31,7 +40,12 @@
     </div>
 
     <!-- Form Content -->
-    <form v-else id="contractForm" @submit.prevent="saveContract" class="form-content">
+    <form
+      v-else
+      id="contractForm"
+      @submit.prevent="saveContract"
+      class="form-content"
+    >
       <div class="form-grid">
         <!-- Landlord Info Section -->
         <div class="form-section">
@@ -41,15 +55,15 @@
           </h2>
           <div class="input-group">
             <label>Họ tên chủ trọ</label>
-            <input type="text" v-model="contract.landlordName" disabled>
+            <input type="text" v-model="contract.landlordName" disabled />
           </div>
           <div class="input-group">
             <label>Địa chỉ</label>
-            <input type="text" v-model="contract.landlordAddress" disabled>
+            <input type="text" v-model="contract.landlordAddress" disabled />
           </div>
           <div class="input-group">
             <label>Số điện thoại</label>
-            <input type="text" v-model="contract.landlordPhone" disabled>
+            <input type="text" v-model="contract.landlordPhone" disabled />
           </div>
         </div>
 
@@ -61,20 +75,36 @@
           </h2>
           <div class="input-group required">
             <label>Họ tên người thuê</label>
-            <input type="text" v-model="contract.tenantName" placeholder="Nhập họ tên người thuê">
+            <input
+              type="text"
+              v-model="contract.tenantName"
+              placeholder="Nhập họ tên người thuê"
+            />
           </div>
           <div class="input-group required">
             <label>CMND/CCCD</label>
-            <input type="text" v-model="contract.tenantIdentityCard" placeholder="Nhập số CMND/CCCD">
+            <input
+              type="text"
+              v-model="contract.tenantIdentityCard"
+              placeholder="Nhập số CMND/CCCD"
+            />
           </div>
           <div class="input-grid">
             <div class="input-group required">
               <label>Số điện thoại</label>
-              <input type="tel" v-model="contract.tenantPhone" placeholder="Nhập số điện thoại">
+              <input
+                type="tel"
+                v-model="contract.tenantPhone"
+                placeholder="Nhập số điện thoại"
+              />
             </div>
             <div class="input-group required">
               <label>Địa chỉ thường trú</label>
-              <input type="text" v-model="contract.tenantAddress" placeholder="Nhập địa chỉ">
+              <input
+                type="text"
+                v-model="contract.tenantAddress"
+                placeholder="Nhập địa chỉ"
+              />
             </div>
           </div>
         </div>
@@ -90,16 +120,27 @@
               <label>Nhà</label>
               <select v-model="contract.houseId" @change="updateRooms">
                 <option value="">Chọn nhà</option>
-                <option v-for="house in houses" :key="house.id" :value="house.id">
+                <option
+                  v-for="house in houses"
+                  :key="house.id"
+                  :value="house.id"
+                >
                   {{ house.name }}
                 </option>
               </select>
             </div>
             <div class="input-group required">
               <label>Phòng</label>
-              <select v-model="contract.roomNumber" :disabled="!contract.houseId">
+              <select
+                v-model="contract.roomNumber"
+                :disabled="!contract.houseId"
+              >
                 <option value="">Chọn phòng</option>
-                <option v-for="room in filteredRooms" :key="room.id" :value="room.roomNumber">
+                <option
+                  v-for="room in filteredRooms"
+                  :key="room.id"
+                  :value="room.roomNumber"
+                >
                   {{ room.roomNumber }}
                 </option>
               </select>
@@ -109,23 +150,32 @@
           <div class="input-grid">
             <div class="input-group required">
               <label>Ngày bắt đầu</label>
-              <input type="date" v-model="contract.startDate">
+              <input type="date" v-model="contract.startDate" />
             </div>
             <div class="input-group">
               <label>Ngày kết thúc</label>
-              <input type="date" v-model="contract.endDate">
+              <input type="date" v-model="contract.endDate" />
             </div>
           </div>
 
           <div class="input-grid">
             <div class="input-group required">
               <label>Tiền thuê hàng tháng (VND)</label>
-              <input type="number" v-model="contract.rentalCost" placeholder="Tự động cập nhật theo phòng"
-                :readonly="!contract.roomNumber" disabled>
+              <input
+                type="number"
+                v-model="contract.rentalCost"
+                placeholder="Tự động cập nhật theo phòng"
+                :readonly="!contract.roomNumber"
+                disabled
+              />
             </div>
             <div class="input-group required">
               <label>Tiền đặt cọc (VND)</label>
-              <input type="number" v-model="contract.deposit" placeholder="Nhập số tiền">
+              <input
+                type="number"
+                v-model="contract.deposit"
+                placeholder="Nhập số tiền"
+              />
             </div>
           </div>
         </div>
@@ -137,7 +187,11 @@
             Điều khoản hợp đồng
           </h2>
           <div class="input-group">
-            <textarea v-model="contract.terms" rows="5" placeholder="Nhập nội dung điều khoản..."></textarea>
+            <textarea
+              v-model="contract.terms"
+              rows="5"
+              placeholder="Nhập nội dung điều khoản..."
+            ></textarea>
           </div>
         </div>
       </div>
@@ -150,6 +204,7 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 import crudApi from '@/apis/crudApi';
 
@@ -179,10 +234,10 @@ export default {
         status: 'active',
         userId: '',
         createdAt: '',
-        updatedAt: ''
+        updatedAt: '',
       },
       houses: [],
-      rooms: []
+      rooms: [],
     };
   },
 
@@ -207,16 +262,16 @@ export default {
         if (newRoomNumber && this.contract.houseId) {
           await this.updateRoomPrice(newRoomNumber);
         }
-      }
-    }
+      },
+    },
   },
 
   methods: {
     async updateRoomPrice(roomNumber) {
       try {
-        const room = this.rooms.find(r =>
-          r.roomNumber === roomNumber &&
-          r.houseId === this.contract.houseId
+        const room = this.rooms.find(
+          (r) =>
+            r.roomNumber === roomNumber && r.houseId === this.contract.houseId
         );
 
         if (room) {
@@ -251,12 +306,18 @@ export default {
           throw new Error('User not found');
         }
 
-        // Lấy thông tin chi tiết từ landlord-info endpoint
-        const response = await crudApi.read("api::landlord-info.landlord-info", {userId: {id: currentUser.id}});
-        if (response.error) throw new Error('Failed to load landlord info');
+        const response = await crudApi.read(
+          'api::landlord-info.landlord-info',
+          {
+            userId: currentUser.id,
+          }
+        );
 
-        const landlordInfoList = response.data;
-        const landlordInfo = landlordInfoList[0]; // Lấy thông tin đầu tiên từ array
+        if (!response.isSuccess) {
+          throw new Error('Failed to load landlord info');
+        }
+
+        const landlordInfo = response.data[0];
 
         if (!landlordInfo) {
           throw new Error('Landlord info not found');
@@ -264,11 +325,11 @@ export default {
 
         // Cập nhật thông tin contract từ landlordInfo
         this.contract.userId = currentUser.id;
-        this.contract.landlordName = landlordInfo.personalInfo.name;
-        this.contract.landlordPhone = landlordInfo.personalInfo.phone;
+        this.contract.landlordName = landlordInfo.userId.username;
+        this.contract.landlordPhone = landlordInfo.userId.phone;
 
         // Tạo địa chỉ đầy đủ từ thông tin trong personalInfo
-        this.contract.landlordAddress = landlordInfo.personalInfo.address;
+        this.contract.landlordAddress = landlordInfo.userId.address;
 
         // Load houses sau khi có userId
         await this.loadHouses();
@@ -278,7 +339,7 @@ export default {
           icon: 'error',
           title: 'Lỗi',
           text: 'Không thể tải thông tin chủ trọ. Vui lòng đăng nhập lại.',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
         this.$router.push('/login');
       }
@@ -286,9 +347,20 @@ export default {
 
     async loadHouses() {
       try {
-        const response = await crudApi.read("api::home.home", {landlordId: {id: this.contract.userId}});
-        if (response.error) throw new Error('Failed to load houses');
-        this.houses = response.data;
+        const response = await crudApi.read('api::home.home', {
+          landlordId: this.contract.userId,
+        });
+
+        if (!response.isSuccess) {
+          throw new Error('Failed to load houses');
+        }
+
+        // Lấy danh sách nhà của landlord hiện tại
+        this.houses = response.data.map((f) => ({
+          ...f,
+          landlordId: f.landlordId.id,
+          landlord: f.landlordId,
+        }));
       } catch (error) {
         console.error('Error loading houses:', error);
         throw error;
@@ -297,9 +369,18 @@ export default {
 
     async loadRooms(houseId) {
       try {
-        const response = await crudApi.read("api::room.room", {houseId: {id: houseId}, isRented: false});
-        if (response.error) throw new Error('Failed to load rooms');
-        this.rooms = response.data;
+        const response = await crudApi.read('api::room.room', {
+          houseId: houseId,
+          isRented: false,
+        });
+
+        if (!response.isSuccess) throw new Error('Failed to load rooms');
+
+        this.rooms = response.data.map((f) => ({
+          ...f,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
       } catch (error) {
         console.error('Error loading rooms:', error);
         throw error;
@@ -308,12 +389,23 @@ export default {
 
     async loadContract(contractId) {
       try {
-        const response = await crudApi.read("api::contract.contract", {id: contractId});
-        if (response.error) throw new Error('Failed to load contract');
-        const contractData = response.data[0];
+        // Lấy tất cả contracts
+        const response = await crudApi.read('api::contract.contract', {
+          id: contractId,
+        });
+        if (!response.isSuccess) {
+          throw new Error('Failed to fetch contracts');
+        }
+        const contracts = response.data.map((f) => ({
+          ...f,
+          userId: f.userId.id,
+          user: f.userId,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
 
         // Merge contract data with current contract state
-        this.contract = { ...this.contract, ...contractData };
+        this.contract = { ...this.contract, ...contracts[0] };
 
         // Load related rooms after loading house
         if (this.contract.houseId) {
@@ -340,7 +432,7 @@ export default {
           icon: 'error',
           title: 'Lỗi',
           text: 'Không thể cập nhật danh sách phòng',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
       }
     },
@@ -369,6 +461,47 @@ export default {
       return true;
     },
 
+    async createContract(data) {
+      try {
+        const response = await crudApi.create('api::contract.contract', data);
+
+        if (!response.error) {
+          return response.data;
+        } else {
+          this.errors.general = 'Lỗi khi lưu. Vui lòng thử lại.';
+        }
+      } catch (error) {
+        console.error('Lỗi khi lưu:', error);
+        this.errors.general =
+          'Không thể kết nối với máy chủ. Vui lòng thử lại sau.';
+      }
+
+      this.errors.general = 'Lỗi khi lưu. Vui lòng thử lại.';
+      return null;
+    },
+
+    async updateContract(data) {
+      try {
+        const response = await crudApi.update(
+          'api::contract.contract',
+          { id: data.id },
+          data
+        );
+
+        if (!response.error) {
+          return response.data;
+        } else {
+          this.errors.general = 'Lỗi khi lưu. Vui lòng thử lại.';
+        }
+      } catch (error) {
+        console.error('Lỗi khi lưu:', error);
+        this.errors.general =
+          'Không thể kết nối với máy chủ. Vui lòng thử lại sau.';
+      }
+      this.errors.general = 'Lỗi khi lưu. Vui lòng thử lại.';
+      return null;
+    },
+
     async saveContract() {
       if (!this.validateForm()) return;
 
@@ -378,30 +511,42 @@ export default {
         // Lưu contract
         const contractData = {
           ...this.contract,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
 
         if (!this.isEditing) {
           contractData.createdAt = new Date().toISOString();
         }
 
-        const contractResponse = this.isEditng
-          ? await crudApi.update("api::contract.contract", {id: this.contract.id}, contractData)
-          : await crudApi.create("api::contract.contract", contractData);
+        let savedContract = {};
 
-        if (contractResponse.error) throw new Error('Failed to save contract');
+        if (!this.isEditing) {
+          savedContract = this.createContract(contractData);
+        } else {
+          savedContract = this.updateContract(contractData);
+        }
 
-        const savedContract = contractResponse.data;
+        if (!savedContract) {
+          throw new Error('Save contract failed!!!');
+        }
 
         // Tìm room ID từ roomNumber và houseId
-        const room = this.rooms.find(r => r.roomNumber === this.contract.roomNumber
-          && r.houseId.id === this.contract.houseId);
+        const room = this.rooms.find(
+          (r) =>
+            r.roomNumber === this.contract.roomNumber &&
+            r.houseId === this.contract.houseId
+        );
 
         if (!room) throw new Error('Room not found');
 
         // Tính số tháng hợp đồng
-        const contractDuration = this.contract.endDate ?
-          Math.ceil((new Date(this.contract.endDate) - new Date(this.contract.startDate)) / (1000 * 60 * 60 * 24 * 30)) : 12;
+        // const contractDuration = this.contract.endDate
+        //   ? Math.ceil(
+        //       (new Date(this.contract.endDate) -
+        //         new Date(this.contract.startDate)) /
+        //         (1000 * 60 * 60 * 24 * 30)
+        //     )
+        //   : 12;
 
         // Lưu customer
         const customerData = {
@@ -413,12 +558,7 @@ export default {
           startDate: this.contract.startDate,
           rentalCost: Number(this.contract.rentalCost),
           deposit: Number(this.contract.deposit),
-          contracts: [{
-            contractNumber: savedContract.id,
-            contractDate: this.contract.startDate,
-            contractDuration: contractDuration,
-            contractEndDate: this.contract.endDate || ''
-          }],
+
           // Các trường mặc định theo schema
           gender: '',
           phoneNumber2: '',
@@ -430,34 +570,36 @@ export default {
           referral: '',
           notes: '',
           image: '',
-          members: [],
-          services: [],
-          // Thông tin liên kết
-          roomId: room.id,
-          houseId: this.contract.houseId,
-          phoneNumber: this.contract.tenantPhone,
-          lastUpdated: new Date().toISOString()
         };
 
-        const customerResponse = await crudApi.create("api::customer.customer", customerData);
+        const customerResponse = await crudApi.create(
+          'api::customer.customer',
+          customerData
+        );
 
-        if (customerResponse.error) throw new Error('Failed to save customer');
+        if (!customerResponse.isSuccess)
+          throw new Error('Failed to save customer');
 
-        // Update room status
-        const roomUpdateResponse = await crudApi.update("api::room.room", {id: room.id}, {
+        const roomUpdateResponse = await crudApi.update(
+          'api::room.room',
+          { id: room.id },
+          {
             ...room,
             isRented: true,
             currentContract: savedContract.id,
-            currentTenant: this.contract.tenantName
-          });
+            currentTenant: this.contract.tenantName,
+          }
+        );
 
-        if (roomUpdateResponse.error) throw new Error('Failed to update room status');
+        // Update room status
+        if (!roomUpdateResponse.isSuccess)
+          throw new Error('Failed to update room status');
 
         await Swal.fire({
           icon: 'success',
           title: 'Thành công!',
           text: `Hợp đồng đã được ${this.isEditing ? 'cập nhật' : 'lưu'}!`,
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
         });
 
         this.$router.push('/landlord/contract-index');
@@ -466,8 +608,10 @@ export default {
         Swal.fire({
           icon: 'error',
           title: 'Lỗi',
-          text: `Không thể ${this.isEditing ? 'cập nhật' : 'lưu'} hợp đồng. ${error.message}`,
-          confirmButtonText: 'OK'
+          text: `Không thể ${this.isEditing ? 'cập nhật' : 'lưu'} hợp đồng. ${
+            error.message
+          }`,
+          confirmButtonText: 'OK',
         });
       } finally {
         this.isSaving = false;
@@ -476,8 +620,11 @@ export default {
 
     async updateRoomStatus() {
       try {
-        const room = this.rooms.find(r => r.roomNumber === this.contract.roomNumber
-          && r.houseId === this.contract.houseId);
+        const room = this.rooms.find(
+          (r) =>
+            r.roomNumber === this.contract.roomNumber &&
+            r.houseId === this.contract.houseId
+        );
         if (!room) throw new Error('Room not found');
 
         const response = await crudApi.update("api::room.room", {id: room.id}, {
@@ -486,17 +633,20 @@ export default {
               fullName: this.contract.tenantName,
               identityCard: this.contract.tenantIdentityCard,
               phoneNumber1: this.contract.tenantPhone,
-              address: this.contract.tenantAddress
+              address: this.contract.tenantAddress,
             },
-            contracts: [{
-              contractNumber: this.contract.id,
-              contractDate: this.contract.startDate,
-              contractEndDate: this.contract.endDate,
-              rentalCost: this.contract.rentalCost,
-              deposit: this.contract.deposit,
-              terms: this.contract.terms
-            }]
-          });
+            contracts: [
+              {
+                contractNumber: this.contract.id,
+                contractDate: this.contract.startDate,
+                contractEndDate: this.contract.endDate,
+                rentalCost: this.contract.rentalCost,
+                deposit: this.contract.deposit,
+                terms: this.contract.terms,
+              },
+            ],
+          }),
+        });
 
         if (response.error) throw new Error('Failed to update room status');
       } catch (error) {
@@ -507,8 +657,8 @@ export default {
 
     goBack() {
       this.$router.go(-1);
-    }
-  }
+    },
+  },
 };
 </script>
 

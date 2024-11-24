@@ -14,9 +14,17 @@
             <label class="filter-label">
               <i class="fas fa-home"></i> Nhà
             </label>
-            <select class="modern-select" v-model="selectedHouse" :disabled="isLoading">
+            <select
+              class="modern-select"
+              v-model="selectedHouse"
+              :disabled="isLoading"
+            >
               <option value="">Tất cả nhà</option>
-              <option v-for="house in houses" :key="house.id" :value="house.name">
+              <option
+                v-for="house in houses"
+                :key="house.id"
+                :value="house.name"
+              >
                 {{ house.name }}
               </option>
             </select>
@@ -26,9 +34,17 @@
             <label class="filter-label">
               <i class="fas fa-door-open"></i> Phòng
             </label>
-            <select class="modern-select" v-model="selectedRoom" :disabled="isLoading">
+            <select
+              class="modern-select"
+              v-model="selectedRoom"
+              :disabled="isLoading"
+            >
               <option value="">Tất cả phòng</option>
-              <option v-for="room in filteredRooms" :key="room.roomNumber" :value="room.roomNumber">
+              <option
+                v-for="room in filteredRooms"
+                :key="room.roomNumber"
+                :value="room.roomNumber"
+              >
                 Phòng {{ room.roomNumber }}
               </option>
             </select>
@@ -38,7 +54,11 @@
             <label class="filter-label">
               <i class="fas fa-venus-mars"></i> Giới tính
             </label>
-            <select class="modern-select" v-model="selectedStatus" :disabled="isLoading">
+            <select
+              class="modern-select"
+              v-model="selectedStatus"
+              :disabled="isLoading"
+            >
               <option value="">Tất cả</option>
               <option value="Nam">Nam</option>
               <option value="Nữ">Nữ</option>
@@ -49,8 +69,15 @@
             <label class="filter-label">
               <i></i>
             </label>
-            <button class="search-button" @click="fetchReport" :disabled="isLoading">
-              <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"></i>
+            <button
+              class="search-button"
+              @click="fetchReport"
+              :disabled="isLoading"
+            >
+              <i
+                class="fas"
+                :class="isLoading ? 'fa-spinner fa-spin' : 'fa-search'"
+              ></i>
               {{ isLoading ? 'Đang tải...' : 'Tìm kiếm' }}
             </button>
           </div>
@@ -95,7 +122,11 @@
                 <div class="member-info">
                   <div class="member-name">{{ member.fullName }}</div>
                   <div class="member-gender">
-                    <i :class="member.gender === 'Nam' ? 'fas fa-mars' : 'fas fa-venus'"></i>
+                    <i
+                      :class="
+                        member.gender === 'Nam' ? 'fas fa-mars' : 'fas fa-venus'
+                      "
+                    ></i>
                     {{ member.gender }}
                   </div>
                   <div class="member-birth">
@@ -106,8 +137,13 @@
               </td>
               <td>
                 <div class="contact-info">
-                  <div><i class="fas fa-map-marker-alt"></i> {{ member.address }}</div>
-                  <div><i class="fas fa-phone"></i> {{ member.phoneNumber1 || member.phoneNumber }}</div>
+                  <div>
+                    <i class="fas fa-map-marker-alt"></i> {{ member.address }}
+                  </div>
+                  <div>
+                    <i class="fas fa-phone"></i>
+                    {{ member.phoneNumber1 || member.phoneNumber }}
+                  </div>
                 </div>
               </td>
               <td>
@@ -151,14 +187,15 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 
 export default {
   data() {
     return {
-      selectedHouse: "",
-      selectedRoom: "",
-      selectedStatus: "",
+      selectedHouse: '',
+      selectedRoom: '',
+      selectedStatus: '',
       houses: [],
       rooms: [],
       members: [],
@@ -168,8 +205,8 @@ export default {
   computed: {
     filteredRooms() {
       if (!this.selectedHouse || !this.rooms) return this.rooms || [];
-      return this.rooms.filter(room => {
-        const house = this.houses?.find(h => h.id === room.houseId);
+      return this.rooms.filter((room) => {
+        const house = this.houses?.find((h) => h.id === room.houseId);
         return house && house.name === this.selectedHouse;
       });
     },
@@ -179,14 +216,16 @@ export default {
         // Kiểm tra null/undefined
         if (!member) return false;
 
-        const house = this.houses?.find(h => h.id === member.houseId);
-        const room = this.rooms?.find(r => r.id === member.roomId);
+        const room = this.rooms?.find((r) => r.roomNumber == member.roomNumber);
 
-        if (!house || !room) return false;
+        if (!room) return false;
 
-        const matchHouse = !this.selectedHouse || member.houseName === this.selectedHouse;
-        const matchRoom = !this.selectedRoom || member.roomNumber === this.selectedRoom;
-        const matchStatus = !this.selectedStatus || member.gender === this.selectedStatus;
+        const matchHouse =
+          !this.selectedHouse || member.houseName === this.selectedHouse;
+        const matchRoom =
+          !this.selectedRoom || member.roomNumber === this.selectedRoom;
+        const matchStatus =
+          !this.selectedStatus || member.gender === this.selectedStatus;
 
         return matchHouse && matchRoom && matchStatus;
       });
@@ -206,38 +245,48 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng!');
         }
 
+        // Fetch houses và rooms
         const [housesResponse, roomsResponse] = await Promise.all([
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes'),
-          fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms')
+          crudApi.read('api::home.home', null),
+          crudApi.read('api::room.room', null),
         ]);
 
-        if (!housesResponse.ok || !roomsResponse.ok) {
+        if (!housesResponse.isSuccess || !roomsResponse.isSuccess) {
           throw new Error('Failed to fetch data');
         }
 
-        const [allHouses, allRooms] = await Promise.all([
-          housesResponse.json(),
-          roomsResponse.json()
-        ]);
+        const allHouses = housesResponse.data.map((f) => ({
+          ...f,
+          landlordId: f.landlordId.id,
+          landlord: f.landlordId,
+        }));
+        const allRooms = roomsResponse.data.map((f) => ({
+          ...f,
+          houseId: f.houseId.id,
+          house: f.houseId,
+        }));
 
         // Lọc houses theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === currentUser.id) || [];
+        this.houses =
+          allHouses.filter((house) => house.landlordId === currentUser.id) ||
+          [];
 
         // Lọc rooms theo houses của landlord
-        this.rooms = allRooms.filter(room =>
-          this.houses.some(house => house.id === room.houseId)
-        ) || [];
+        this.rooms =
+          allRooms.filter((room) =>
+            this.houses.some((house) => house.id === room.houseId)
+          ) || [];
 
         await this.fetchReport();
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu:", error);
+        console.error('Lỗi khi tải dữ liệu:', error);
         this.houses = [];
         this.rooms = [];
         this.members = [];
         Swal.fire({
           icon: 'error',
           title: 'Lỗi!',
-          text: 'Không thể tải dữ liệu. Vui lòng thử lại sau!'
+          text: 'Không thể tải dữ liệu. Vui lòng thử lại sau!',
         });
       } finally {
         this.isLoading = false;
@@ -249,26 +298,29 @@ export default {
         this.isLoading = true;
         this.members = []; // Reset về mảng rỗng
 
-        const customersResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers');
-        if (!customersResponse.ok) {
+        const customersResponse = await crudApi.read('api::customer.customer');
+
+        if (!customersResponse.isSuccess) {
           throw new Error('Failed to fetch customers');
         }
-        const customersData = await customersResponse.json();
+        const customersData = customersResponse.data;
 
         // Transform và lọc data
         this.members = (customersData || [])
-          .filter(customer => {
+          .filter((customer) => {
             if (!customer) return false;
-            const house = this.houses?.find(h => h.id === customer.houseId);
-            const room = this.rooms?.find(r => r.id === customer.roomId);
-            return house && room;
+            const room = this.rooms?.find(
+              (r) => r.roomNumber == customer.roomNumber
+            );
+            return room;
           })
-          .map(customer => {
-            const house = this.houses?.find(h => h.id === customer.houseId);
-            const room = this.rooms?.find(r => r.id === customer.roomId);
+          .map((customer) => {
+            const room = this.rooms?.find(
+              (r) => r.roomNumber == customer.roomNumber
+            );
 
             return {
-              houseName: house ? house.name : 'Không xác định',
+              //houseName: house ? house.name : 'Không xác định',
               roomNumber: room ? room.roomNumber : 'Không xác định',
               fullName: customer.fullName || 'Không có',
               address: customer.address || 'Không có',
@@ -280,17 +332,16 @@ export default {
               startDate: customer.startDate || null,
               licensePlate: customer.licensePlate || 'Không có',
               houseId: customer.houseId,
-              roomId: customer.roomId
+              roomId: customer.roomId,
             };
           });
-
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu báo cáo:", error);
+        console.error('Lỗi khi tải dữ liệu báo cáo:', error);
         this.members = [];
         Swal.fire({
           icon: 'error',
           title: 'Lỗi!',
-          text: 'Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau!'
+          text: 'Không thể tải dữ liệu báo cáo. Vui lòng thử lại sau!',
         });
       } finally {
         this.isLoading = false;
@@ -305,7 +356,7 @@ export default {
       } catch {
         return dateString;
       }
-    }
+    },
   },
   async mounted() {
     await this.fetchData();
