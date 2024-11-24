@@ -26,6 +26,17 @@
             </div>
             <p v-if="errors.password" class="text-danger">{{ errors.password }}</p>
           </div>
+          <div class="mb-3 password-field">
+            <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+            <div class="input-group">
+              <input :type="showConfirmPassword ? 'text' : 'password'" v-model="user.confirmPassword"
+                id="confirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+              <button type="button" @click="toggleConfirmPassword" class="toggle-password-btn">
+                <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <p v-if="errors.confirmPassword" class="text-danger">{{ errors.confirmPassword }}</p>
+          </div>
           <div class="mb-3">
             <label for="role" class="form-label">Vai trò</label>
             <select v-model="user.role" id="role" class="form-control" required>
@@ -64,27 +75,34 @@ export default {
         name: '',
         email: '',
         password: '',
+        confirmPassword: '',
         role: 'tenant',
         status: 'active'
       },
       errors: {},
       errorMessage: '',
       showPassword: false, // Trạng thái ẩn/hiện mật khẩu
+      showConfirmPassword: false,
     };
   },
   methods: {
     togglePassword() {
       this.showPassword = !this.showPassword;
     },
+    toggleConfirmPassword() {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    },
     validateForm() {
       this.errors = {};
 
-      // Kiểm tra tên
+      // Validate name
       if (!this.user.name) {
         this.errors.name = 'Vui lòng nhập tên.';
+      } else if (this.user.name.length < 2) {
+        this.errors.name = 'Tên phải có ít nhất 2 ký tự.';
       }
 
-      // Kiểm tra email hợp lệ
+      // Validate email
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!this.user.email) {
         this.errors.email = 'Vui lòng nhập email.';
@@ -92,23 +110,29 @@ export default {
         this.errors.email = 'Email không hợp lệ.';
       }
 
-      // Kiểm tra mật khẩu
-      const passwordPattern =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      // Validate password
+      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       if (!this.user.password) {
         this.errors.password = 'Vui lòng nhập mật khẩu.';
       } else if (!passwordPattern.test(this.user.password)) {
-        this.errors.password =
-          'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.';
+        this.errors.password = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.';
       }
 
-      // Kiểm tra vai trò
+      // Validate confirm password
+      if (!this.user.confirmPassword) {
+        this.errors.confirmPassword = 'Vui lòng xác nhận mật khẩu.';
+      } else if (this.user.password !== this.user.confirmPassword) {
+        this.errors.confirmPassword = 'Mật khẩu xác nhận không khớp.';
+      }
+
+      // Validate role
       if (!this.user.role) {
         this.errors.role = 'Vui lòng chọn vai trò.';
       }
 
       return Object.keys(this.errors).length === 0;
     },
+
     hashPassword(password) {
       return btoa(password); // Encode to Base64 (chỉ dùng cho demo)
     },
@@ -124,7 +148,7 @@ export default {
           email: this.user.email,
           password: this.user.password
         });
-        if(response.error){
+        if (response.error) {
           Swal.fire({
             icon: 'error',
             title: "Đăng ký thất bại!",
@@ -146,7 +170,7 @@ export default {
           },
         });
 
-        
+
 
         const resUpdateLandInfo = await authApi.updateDetailLandlordInfo("api::landlord-info.landlord-info", {
           userId: response.user.id,
@@ -161,8 +185,8 @@ export default {
             Authorization: `Bearer ${response.jwt}`,
           },
         });
-        
-        if(resUpdate.error || resUpdateLandInfo.error){
+
+        if (resUpdate.error || resUpdateLandInfo.error) {
           Swal.fire({
             icon: 'error',
             title: "Đăng ký thất bại!",
@@ -189,12 +213,12 @@ export default {
       } catch (error) {
         this.errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
         Swal.fire({
-            icon: 'error',
-            title: 'Đăng ký thất bại!',
-            text: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.',
-            confirmButtonText: 'OK',
-            timer: 3000,
-            timerProgressBar: true,
+          icon: 'error',
+          title: 'Đăng ký thất bại!',
+          text: 'Đã có lỗi xảy ra. Vui lòng thử lại sau.',
+          confirmButtonText: 'OK',
+          timer: 3000,
+          timerProgressBar: true,
         })
       }
     },

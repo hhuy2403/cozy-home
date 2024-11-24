@@ -4,32 +4,20 @@
     <div class="login-container">
       <div class="login-box">
         <h2 class="login-title">Đăng Nhập</h2>
-        
+
         <!-- Login Form -->
         <form @submit.prevent="login">
           <label for="email" class="form-label">Email</label>
           <div class="mb-3">
-            <input
-              v-model="email"
-              id="email"
-              type="email"
-              class="form-control"
-              placeholder="Nhập email"
-              @blur="validateEmail"
-            />
+            <input v-model="email" id="email" type="email" class="form-control" placeholder="Nhập email"
+              @blur="validateEmail" />
           </div>
           <small v-if="emailError" class="text-danger">{{ emailError }}</small>
 
           <label for="password" class="form-label">Mật khẩu</label>
           <div class="mb-3 password-wrapper">
-            <input
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              id="password"
-              placeholder="Nhập mật khẩu"
-              class="login-input form-control"
-              @blur="validatePassword"
-            />
+            <input v-model="password" :type="showPassword ? 'text' : 'password'" id="password"
+              placeholder="Nhập mật khẩu" class="login-input form-control" @blur="validatePassword" />
             <button type="button" @click="togglePassword" class="toggle-password-btn">
               <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
             </button>
@@ -81,7 +69,7 @@ export default {
     };
   },
 
-  
+
 
   created() {
     localStorage.removeItem('currentUser');
@@ -103,66 +91,85 @@ export default {
     },
     validateEmail() {
       if (!this.email) {
-        this.emailError = 'Email không được để trống.';
+        this.emailError = 'Email không được để trống';
         return false;
       }
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailPattern.test(this.email)) {
-        this.emailError = 'Địa chỉ email không hợp lệ.';
+        this.emailError = 'Email không đúng định dạng';
+        return false;
+      }
+      if (this.email.length > 50) {
+        this.emailError = 'Email không được vượt quá 50 ký tự';
         return false;
       }
       this.emailError = '';
       return true;
     },
+
     validatePassword() {
       if (!this.password) {
-        this.passwordError = 'Mật khẩu không được để trống.';
+        this.passwordError = 'Mật khẩu không được để trống';
         return false;
       }
-      if (this.password.length < 6) {
-        this.passwordError = 'Mật khẩu phải có ít nhất 6 ký tự.';
+      if (this.password.length < 8) {
+        this.passwordError = 'Mật khẩu phải có ít nhất 8 ký tự';
+        return false;
+      }
+      if (this.password.length > 32) {
+        this.passwordError = 'Mật khẩu không được vượt quá 32 ký tự';
+        return false;
+      }
+      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordPattern.test(this.password)) {
+        this.passwordError = 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt';
         return false;
       }
       this.passwordError = '';
       return true;
     },
+
     validateForm() {
       return this.validateEmail() && this.validatePassword();
     },
     async login() {
-      if (!this.validateForm()) return;
-      this.isLoading = true; // Start loading
+      this.error = '';
+      this.emailError = '';
+      this.passwordError = '';
+
+      if (!this.validateForm()) {
+        return;
+      }
+
+      this.isLoading = true;
 
       try {
-        const response  = await authApi.login({
-          identifier: this.email,
+        const response = await authApi.login({
+          identifier: this.email.trim(),
           password: this.password,
         });
 
-        if(response.error) {
-          this.error = response.error;
-          this.isLoading = false; // Stop loading
-          return;
-        }
-        
-        const user = response.user; // MockAPI returns an array, so get the first element
-        user.role = user.customRole;
-        user.status = user.customStatus;
-        user.name = user.username;
-
-        // Check account status
-        if (user.status === 'inactive') {
-          this.error = 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.';
+        if (response.error) {
+          this.error = 'Email hoặc mật khẩu không chính xác';
           this.isLoading = false;
           return;
         }
 
-        // Store user login information and redirect
+        const user = response.user;
+        user.role = user.customRole;
+        user.status = user.customStatus;
+        user.name = user.username;
+
+        if (user.status === 'inactive') {
+          this.error = 'Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên';
+          this.isLoading = false;
+          return;
+        }
+
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('userRole', user.role);
         localStorage.setItem('token', response.jwt);
 
-        // Redirect based on role
         switch (user.role) {
           case 'admin':
             this.$router.push('/admin/dashboard');
@@ -175,9 +182,9 @@ export default {
             break;
         }
       } catch (error) {
-        this.error = 'Đăng nhập thất bại. Vui lòng thử lại.';
+        this.error = 'Đăng nhập thất bại. Vui lòng thử lại sau';
       } finally {
-        this.isLoading = false; // Stop loading when request finishes
+        this.isLoading = false;
       }
     }
   },
@@ -185,7 +192,6 @@ export default {
 </script>
 
 <style scoped>
-
 .login-container {
   display: flex;
   align-items: center;
