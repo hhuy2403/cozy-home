@@ -11,7 +11,12 @@
           <i class="fas fa-arrow-left"></i>
           <span>Quay về</span>
         </button>
-        <button type="submit" form="assetForm" class="action-btn save-btn" :disabled="isSaving || isLoading">
+        <button
+          type="submit"
+          form="assetForm"
+          class="action-btn save-btn"
+          :disabled="isSaving || isLoading"
+        >
           <template v-if="isSaving">
             <div class="spinner"></div>
             <span>{{ isEditMode ? 'Đang cập nhật...' : 'Đang lưu...' }}</span>
@@ -31,18 +36,33 @@
     </div>
 
     <!-- Form Content -->
-    <form v-else id="assetForm" @submit.prevent="saveAsset" class="form-content">
+    <form
+      v-else
+      id="assetForm"
+      @submit.prevent="saveAsset"
+      class="form-content"
+    >
       <div class="form-grid">
         <!-- Asset Basic Info -->
         <div class="form-section">
           <h2 class="section-title">Thông tin cơ bản</h2>
           <div class="input-group">
             <label for="assetCode">Mã tài sản</label>
-            <input type="text" id="assetCode" v-model="asset.assetCode" placeholder="Nhập mã tài sản">
+            <input
+              type="text"
+              id="assetCode"
+              v-model="asset.assetCode"
+              placeholder="Nhập mã tài sản"
+            />
           </div>
           <div class="input-group required">
             <label for="assetName">Tên tài sản</label>
-            <input type="text" id="assetName" v-model="asset.assetName" placeholder="Nhập tên tài sản">
+            <input
+              type="text"
+              id="assetName"
+              v-model="asset.assetName"
+              placeholder="Nhập tên tài sản"
+            />
           </div>
         </div>
 
@@ -51,7 +71,12 @@
           <h2 class="section-title">Vị trí</h2>
           <div class="input-group">
             <label for="house">Nhà</label>
-            <select id="house" v-model="asset.houseId" @change="loadRooms(asset.houseId)" :disabled="isLoading">
+            <select
+              id="house"
+              v-model="asset.houseId"
+              @change="loadRooms(asset.houseId)"
+              :disabled="isLoading"
+            >
               <option value="">Chọn nhà</option>
               <option v-for="house in houses" :key="house.id" :value="house.id">
                 {{ house.name }}
@@ -60,9 +85,17 @@
           </div>
           <div class="input-group">
             <label for="room">Phòng</label>
-            <select id="room" v-model="asset.roomNumber" :disabled="!asset.houseId || isLoading">
+            <select
+              id="room"
+              v-model="asset.roomNumber"
+              :disabled="!asset.houseId || isLoading"
+            >
               <option value="">Chọn phòng</option>
-              <option v-for="room in filteredRooms" :key="room.id" :value="room.roomNumber">
+              <option
+                v-for="room in filteredRooms"
+                :key="room.id"
+                :value="room.roomNumber"
+              >
                 {{ room.roomNumber }}
               </option>
             </select>
@@ -74,11 +107,21 @@
           <h2 class="section-title">Số lượng & Giá</h2>
           <div class="input-group required">
             <label for="quantity">Số lượng</label>
-            <input type="number" id="quantity" v-model="asset.quantity" min="1">
+            <input
+              type="number"
+              id="quantity"
+              v-model="asset.quantity"
+              min="1"
+            />
           </div>
           <div class="input-group">
             <label for="price">Đơn giá (VND)</label>
-            <input type="number" id="price" v-model="asset.price" placeholder="Nhập đơn giá">
+            <input
+              type="number"
+              id="price"
+              v-model="asset.price"
+              placeholder="Nhập đơn giá"
+            />
           </div>
         </div>
 
@@ -88,19 +131,28 @@
           <div class="dates-grid">
             <div class="input-group">
               <label for="purchaseDate">Ngày mua</label>
-              <input type="date" id="purchaseDate" v-model="asset.purchaseDate">
+              <input
+                type="date"
+                id="purchaseDate"
+                v-model="asset.purchaseDate"
+              />
             </div>
             <div class="input-group">
               <label for="usageDate">Ngày sử dụng</label>
-              <input type="date" id="usageDate" v-model="asset.usageDate">
+              <input type="date" id="usageDate" v-model="asset.usageDate" />
             </div>
             <div class="input-group">
               <label for="disposalDate">Ngày thanh lý</label>
-              <input type="date" id="disposalDate" v-model="asset.disposalDate" :disabled="!asset.isDisposed">
+              <input
+                type="date"
+                id="disposalDate"
+                v-model="asset.disposalDate"
+                :disabled="!asset.isDisposed"
+              />
             </div>
           </div>
           <div class="checkbox-group">
-            <input type="checkbox" id="disposed" v-model="asset.isDisposed">
+            <input type="checkbox" id="disposed" v-model="asset.isDisposed" />
             <label for="disposed">Đã thanh lý</label>
           </div>
         </div>
@@ -109,7 +161,11 @@
         <div class="form-section full-width">
           <h2 class="section-title">Ghi chú</h2>
           <div class="input-group">
-            <textarea id="notes" v-model="asset.notes" placeholder="Nhập ghi chú (nếu có)"></textarea>
+            <textarea
+              id="notes"
+              v-model="asset.notes"
+              placeholder="Nhập ghi chú (nếu có)"
+            ></textarea>
           </div>
         </div>
       </div>
@@ -123,9 +179,10 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 
-const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
+//const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
 
 export default {
   name: 'AssetCreate',
@@ -147,21 +204,21 @@ export default {
         notes: '',
         status: 'active',
         createdAt: '',
-        updatedAt: ''
+        updatedAt: '',
       },
       houses: [],
       filteredRooms: [],
       isLoading: false,
       isSaving: false,
       isEditMode: false,
-      currentUser: null
+      currentUser: null,
     };
   },
 
   computed: {
     pageTitle() {
       return this.isEditMode ? 'Sửa tài sản' : 'Thêm tài sản';
-    }
+    },
   },
 
   async mounted() {
@@ -212,12 +269,14 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng!');
         }
 
-        const response = await fetch(`${API_URL}/homes`);
-        if (!response.ok) throw new Error('Failed to load houses');
-        const allHouses = await response.json();
+        const response = await crudApi.read('api::home.home');
+        if (!response.isSuccess) throw new Error('Failed to load houses');
+        const allHouses = response.data;
 
         // Lọc nhà theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === this.currentUser.id);
+        this.houses = allHouses.filter(
+          (house) => house.landlordId.id === this.currentUser.id
+        );
 
         if (this.houses.length > 0 && !this.isEditMode) {
           this.asset.houseId = this.houses[0].id;
@@ -239,19 +298,22 @@ export default {
         }
 
         // Kiểm tra xem nhà có thuộc về landlord không
-        const selectedHouse = this.houses.find(h => h.id === houseId);
+        const selectedHouse = this.houses.find((h) => h.id === houseId);
         if (!selectedHouse) {
           throw new Error('Không có quyền truy cập vào nhà này!');
         }
 
         this.asset.houseName = selectedHouse.name;
 
-        const response = await fetch(`${API_URL}/rooms?houseId=${houseId}`);
-        if (!response.ok) throw new Error('Failed to load rooms');
+        const response = await crudApi.read('api::room.room');
 
-        const rooms = await response.json();
+        if (!response.isSuccess) throw new Error('Failed to load rooms');
+        const rooms = response.data;
+
         // Lọc phòng theo houseId
-        this.filteredRooms = rooms.filter(room => room.houseId === houseId);
+        this.filteredRooms = rooms.filter(
+          (room) => room.houseId.id === houseId
+        );
 
         if (this.filteredRooms.length > 0 && !this.isEditMode) {
           this.asset.roomNumber = this.filteredRooms[0].roomNumber;
@@ -266,15 +328,21 @@ export default {
     async loadAssetDetails(assetId) {
       try {
         this.isLoading = true;
-        const response = await fetch(`${API_URL}/landlord-assets/${assetId}`);
+        const response = await crudApi.read(
+          'api::landlord-asset.landlord-asset',
+          { id: assetId }
+        );
 
-        if (!response.ok) {
+        if (!response.isSuccess) {
           throw new Error('Failed to load asset details');
         }
 
-        const assetData = await response.json();
-        this.asset = { ...assetData };
-
+        const assetData = response.data[0] ?? {};
+        this.asset = {
+          ...assetData,
+          houseId: assetData.houseId.id,
+          house: assetData.houseId,
+        };
         // Load related data
         await this.loadHouses();
         if (this.asset.houseId) {
@@ -312,6 +380,33 @@ export default {
       return true;
     },
 
+    async createAsset(data) {
+      const resposne = await crudApi.create(
+        'api::landlord-asset.landlord-asset',
+        data
+      );
+
+      if (!resposne.isSuccess) {
+        throw new Error('Create asset failed');
+      }
+
+      return resposne.data;
+    },
+
+    async updateAsset(data) {
+      const resposne = await crudApi.update(
+        'api::landlord-asset.landlord-asset',
+        { id: data.id },
+        data
+      );
+
+      if (!resposne.isSuccess) {
+        throw new Error('Update asset failed');
+      }
+
+      return resposne.data;
+    },
+
     async saveAsset() {
       if (!this.validateForm()) return;
 
@@ -323,7 +418,9 @@ export default {
         }
 
         // Kiểm tra quyền truy cập
-        const selectedHouse = this.houses.find(h => h.id === this.asset.houseId);
+        const selectedHouse = this.houses.find(
+          (h) => h.id === this.asset.houseId
+        );
         if (!selectedHouse) {
           throw new Error('Không có quyền thêm tài sản cho nhà này!');
         }
@@ -331,40 +428,38 @@ export default {
         const assetData = {
           ...this.asset,
           landlordId: this.currentUser.id,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          houseId: selectedHouse.id,
         };
 
         if (!this.isEditMode) {
           assetData.createdAt = new Date().toISOString();
         }
 
-        const url = this.isEditMode
-          ? `${API_URL}/landlord-assets/${this.asset.id}`
-          : `${API_URL}/landlord-assets`;
-
-        const response = await fetch(url, {
-          method: this.isEditMode ? 'PUT' : 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(assetData)
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to save asset');
+        if (!this.isEditMode) {
+          await this.createAsset(assetData);
+        } else {
+          await this.updateAsset(assetData);
         }
 
         await Swal.fire({
           icon: 'success',
           title: 'Thành công!',
-          text: `Tài sản đã được ${this.isEditMode ? 'cập nhật' : 'thêm'} thành công.`,
-          confirmButtonText: 'OK'
+          text: `Tài sản đã được ${
+            this.isEditMode ? 'cập nhật' : 'thêm'
+          } thành công.`,
+          confirmButtonText: 'OK',
         });
 
         this.goBack();
       } catch (error) {
         console.error('Error saving asset:', error);
-        Swal.fire('Lỗi', error.message || `Không thể ${this.isEditMode ? 'cập nhật' : 'thêm'} tài sản`, 'error');
+        Swal.fire(
+          'Lỗi',
+          error.message ||
+            `Không thể ${this.isEditMode ? 'cập nhật' : 'thêm'} tài sản`,
+          'error'
+        );
       } finally {
         this.isSaving = false;
       }
@@ -372,8 +467,8 @@ export default {
 
     goBack() {
       this.$router.go(-1);
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -397,7 +492,6 @@ export default {
 }
 
 .header-title {
-
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -533,7 +627,7 @@ export default {
   animation: spin 0.8s linear infinite;
 }
 
-.required-star{
+.required-star {
   color: red;
 }
 

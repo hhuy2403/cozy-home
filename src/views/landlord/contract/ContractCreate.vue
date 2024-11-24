@@ -242,18 +242,17 @@ export default {
 
   computed: {
     filteredRooms() {
-      console.log("this.rooms", this.rooms);
-      console.log("this.contract.houseId", this.contract.houseId);
-      
       if (!this.contract.houseId) return [];
-      return this.rooms.filter(room => room.houseId === this.contract.houseId);
-    }
+      return this.rooms.filter(
+        (room) => room.houseId === this.contract.houseId
+      );
+    },
   },
 
   async created() {
     const contractId = this.$route.params.id;
     this.isEditing = !!contractId;
-    console.log("contractId", contractId, this.isEditing);
+    console.log('contractId', contractId, this.isEditing);
 
     await this.loadInitialData(contractId);
   },
@@ -645,7 +644,10 @@ export default {
         );
         if (!room) throw new Error('Room not found');
 
-        const response = await crudApi.update("api::room.room", {id: room.id}, {
+        const response = await crudApi.update(
+          'api::room.room',
+          { id: room.id },
+          {
             isRented: true,
             customer: {
               fullName: this.contract.tenantName,
@@ -663,7 +665,8 @@ export default {
                 terms: this.contract.terms,
               },
             ],
-          });
+          }
+        );
 
         if (response.error) throw new Error('Failed to update room status');
       } catch (error) {

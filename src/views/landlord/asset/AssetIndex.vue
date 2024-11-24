@@ -32,14 +32,21 @@
         <label for="house-select">Nhà</label>
         <select id="house-select" class="form-control" v-model="selectedHouse">
           <option value="all">Tất cả</option>
-          <option v-for="house in houses" :key="house.id" :value="house.id">{{ house.name }}</option>
+          <option v-for="house in houses" :key="house.id" :value="house.id">
+            {{ house.name }}
+          </option>
         </select>
       </div>
       <div class="col-md-3">
         <label for="room-select">Phòng</label>
         <select id="room-select" class="form-control" v-model="selectedRoom">
           <option value="all">Tất cả</option>
-          <option v-for="room in filteredRooms" :key="room.roomNumber" :value="room.roomNumber">{{ room.roomNumber }}
+          <option
+            v-for="room in filteredRooms"
+            :key="room.roomNumber"
+            :value="room.roomNumber"
+          >
+            {{ room.roomNumber }}
           </option>
         </select>
       </div>
@@ -59,7 +66,9 @@
       <table class="table table-bordered table-hover">
         <thead class="thead-light">
           <tr>
-            <th><input type="checkbox" v-model="selectAll" @change="toggleAll"></th>
+            <th>
+              <input type="checkbox" v-model="selectAll" @change="toggleAll" />
+            </th>
             <th>Nhà</th>
             <th>Phòng</th>
             <th>Mã TS</th>
@@ -73,8 +82,10 @@
         </thead>
         <tbody>
           <tr v-for="asset in paginatedAssets" :key="asset.id">
-            <td><input type="checkbox" v-model="selectedAssets" :value="asset"></td>
-            <td>{{ asset.houseName }}</td>
+            <td>
+              <input type="checkbox" v-model="selectedAssets" :value="asset" />
+            </td>
+            <td>{{ asset.houseId.name }}</td>
             <td>{{ asset.roomNumber }}</td>
             <td>{{ asset.assetCode }}</td>
             <td>{{ asset.assetName }}</td>
@@ -83,7 +94,10 @@
             <td>{{ asset.price }}</td>
             <td>{{ asset.isDisposed ? 'Có' : 'Không' }}</td>
             <td>
-              <button class="btn btn-sm btn-primary me-2" @click="editAsset(asset)">
+              <button
+                class="btn btn-sm btn-primary me-2"
+                @click="editAsset(asset)"
+              >
                 <i class="fas fa-edit"></i> Sửa
               </button>
             </td>
@@ -95,9 +109,7 @@
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </template>
-              <template v-else>
-                Không tìm thấy dòng nào phù hợp
-              </template>
+              <template v-else> Không tìm thấy dòng nào phù hợp </template>
             </td>
           </tr>
         </tbody>
@@ -107,13 +119,18 @@
     <!-- Pagination -->
     <div class="pagination-section">
       <div class="pagination-info">
-        Đang xem {{ startItem }} đến {{ endItem }} trong tổng số {{ totalItems }} mục
+        Đang xem {{ startItem }} đến {{ endItem }} trong tổng số
+        {{ totalItems }} mục
       </div>
       <div class="pagination-buttons">
         <button class="btn" :disabled="currentPage === 1" @click="previousPage">
           <i class="fas fa-chevron-left me-1"></i> Trước
         </button>
-        <button class="btn" :disabled="currentPage === totalPages" @click="nextPage">
+        <button
+          class="btn"
+          :disabled="currentPage === totalPages"
+          @click="nextPage"
+        >
           Tiếp <i class="fas fa-chevron-right ms-1"></i>
         </button>
       </div>
@@ -122,10 +139,11 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 
-const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
+//const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
 
 export default {
   data() {
@@ -139,27 +157,29 @@ export default {
       houses: [],
       rooms: [],
       assets: [],
-      isLoading: false
+      isLoading: false,
     };
   },
   computed: {
     filteredRooms() {
       return this.selectedHouse === 'all'
         ? this.rooms
-        : this.rooms.filter(room => room.houseId === this.selectedHouse);
+        : this.rooms.filter((room) => room.houseId.id === this.selectedHouse);
     },
     filteredAssets() {
       let filtered = [...this.assets];
 
       if (this.selectedHouse !== 'all') {
-        filtered = filtered.filter(asset => {
-          const house = this.houses.find(h => h.id === asset.houseId);
+        filtered = filtered.filter((asset) => {
+          const house = this.houses.find((h) => h.id === asset.houseId.id);
           return house && house.id === this.selectedHouse;
         });
       }
 
       if (this.selectedRoom !== 'all') {
-        filtered = filtered.filter(asset => asset.roomNumber === this.selectedRoom);
+        filtered = filtered.filter(
+          (asset) => asset.roomNumber === this.selectedRoom
+        );
       }
 
       return filtered;
@@ -175,11 +195,13 @@ export default {
       return Math.ceil(this.totalItems / this.itemsPerPage);
     },
     startItem() {
-      return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.itemsPerPage + 1;
+      return this.totalItems === 0
+        ? 0
+        : (this.currentPage - 1) * this.itemsPerPage + 1;
     },
     endItem() {
       return Math.min(this.currentPage * this.itemsPerPage, this.totalItems);
-    }
+    },
   },
   async mounted() {
     await this.loadInitialData();
@@ -188,7 +210,7 @@ export default {
     editAsset(asset) {
       this.$router.push({
         path: `/landlord/asset-create/${asset.id}`,
-        query: { mode: 'edit' }
+        query: { mode: 'edit' },
       });
     },
 
@@ -205,7 +227,7 @@ export default {
         // Load houses và assets song song
         await Promise.all([
           this.loadHouses(currentUser.id),
-          this.loadAssets(currentUser.id)
+          this.loadAssets(currentUser.id),
         ]);
 
         // Load rooms sau khi có houses
@@ -220,12 +242,13 @@ export default {
 
     async loadHouses(landlordId) {
       try {
-        const response = await fetch(`${API_URL}/homes`);
-        if (!response.ok) throw new Error('Failed to load houses');
-        const allHouses = await response.json();
-
+        const response = await crudApi.read('api::home.home');
+        if (!response.isSuccess) throw new Error('Failed to load houses');
+        const allHouses = response.data;
         // Lọc nhà theo landlordId
-        this.houses = allHouses.filter(house => house.landlordId === landlordId);
+        this.houses = allHouses.filter(
+          (house) => house.landlordId.id === landlordId
+        );
       } catch (error) {
         console.error('Error loading houses:', error);
         this.houses = [];
@@ -237,16 +260,23 @@ export default {
       try {
         if (this.selectedHouse === 'all') {
           // Nếu chọn tất cả, load rooms của tất cả nhà thuộc landlord
-          const houseIds = this.houses.map(house => house.id);
-          const response = await fetch(`${API_URL}/rooms`);
-          if (!response.ok) throw new Error('Failed to load rooms');
-          const allRooms = await response.json();
-          this.rooms = allRooms.filter(room => houseIds.includes(room.houseId));
+          const houseIds = this.houses.map((house) => house.id);
+
+          const response = await crudApi.read('api::room.room');
+          if (!response.isSuccess) throw new Error('Failed to load rooms');
+          const allRooms = response.data;
+
+          this.rooms = allRooms.filter((room) =>
+            houseIds.includes(room.houseId.id)
+          );
         } else {
           // Load rooms của nhà được chọn
-          const response = await fetch(`${API_URL}/rooms?houseId=${this.selectedHouse}`);
-          if (!response.ok) throw new Error('Failed to load rooms');
-          this.rooms = await response.json();
+          const response = await crudApi.read('api::room.room', {
+            houseId: this.selectedHouse,
+          });
+          if (!response.isSuccess) throw new Error('Failed to load rooms');
+
+          this.rooms = response.data;
         }
       } catch (error) {
         console.error('Error loading rooms:', error);
@@ -257,18 +287,20 @@ export default {
 
     async loadAssets(landlordId) {
       try {
-        const response = await fetch(`${API_URL}/landlord-assets`);
-        if (!response.ok) throw new Error('Failed to load assets');
-        const allAssets = await response.json();
+        const response = await crudApi.read(
+          'api::landlord-asset.landlord-asset'
+        );
+        if (!response.isSuccess) throw new Error('Failed to load assets');
+        const allAssets = response.data;
 
         // Lọc assets theo landlordId và map với house information
         this.assets = allAssets
-          .filter(asset => asset.landlordId === landlordId)
-          .map(asset => {
-            const house = this.houses.find(h => h.id === asset.houseId);
+          .filter((asset) => asset.userId?.id === landlordId)
+          .map((asset) => {
+            const house = this.houses.find((h) => h.id === asset.houseId.id);
             return {
               ...asset,
-              houseName: house ? house.name : 'Không xác định'
+              houseName: house ? house.name : 'Không xác định',
             };
           });
       } catch (error) {
@@ -296,23 +328,35 @@ export default {
 
     async deleteSelectedAssets() {
       if (this.selectedAssets.length === 0) {
-        Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một tài sản để xóa.', 'warning');
+        Swal.fire(
+          'Thông báo',
+          'Vui lòng chọn ít nhất một tài sản để xóa.',
+          'warning'
+        );
         return;
       }
 
       const currentUser = JSON.parse(localStorage.getItem('currentUser'));
       if (!currentUser?.id) {
-        Swal.fire('Lỗi', 'Vui lòng đăng nhập để thực hiện chức năng này!', 'error');
+        Swal.fire(
+          'Lỗi',
+          'Vui lòng đăng nhập để thực hiện chức năng này!',
+          'error'
+        );
         return;
       }
 
       // Kiểm tra quyền xóa
       const unauthorizedAssets = this.selectedAssets.filter(
-        asset => asset.landlordId !== currentUser.id
+        (asset) => asset.landlordId !== currentUser.id
       );
 
       if (unauthorizedAssets.length > 0) {
-        Swal.fire('Lỗi', 'Bạn không có quyền xóa một số tài sản đã chọn!', 'error');
+        Swal.fire(
+          'Lỗi',
+          'Bạn không có quyền xóa một số tài sản đã chọn!',
+          'error'
+        );
         return;
       }
 
@@ -322,24 +366,32 @@ export default {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Xóa',
-        cancelButtonText: 'Hủy'
+        cancelButtonText: 'Hủy',
       });
 
       if (result.isConfirmed) {
         try {
-          await Promise.all(
-            this.selectedAssets.map(asset =>
-              fetch(`${API_URL}/landlord-assets/${asset.id}`, {
-                method: 'DELETE'
+          const response = await Promise.all(
+            this.selectedAssets.map((asset) =>
+              crudApi.delete('api::landlord-asset.landlord-assets', {
+                id: asset.id,
               })
             )
           );
+
+          if (response.some((f) => !f.isSuccess)) {
+            throw new Error('Error to delete landlord-asset');
+          }
 
           this.selectedAssets = [];
           this.selectAll = false;
           await this.loadAssets(currentUser.id);
 
-          Swal.fire('Đã xóa!', 'Các tài sản đã được xóa thành công.', 'success');
+          Swal.fire(
+            'Đã xóa!',
+            'Các tài sản đã được xóa thành công.',
+            'success'
+          );
         } catch (error) {
           console.error('Error deleting assets:', error);
           Swal.fire('Lỗi', 'Không thể xóa tài sản', 'error');
@@ -348,31 +400,31 @@ export default {
     },
 
     exportToExcel() {
-      const exportData = this.assets.map(asset => ({
-        'Nhà': asset.houseName,
-        'Phòng': asset.roomNumber,
+      const exportData = this.assets.map((asset) => ({
+        Nhà: asset.houseName,
+        Phòng: asset.roomNumber,
         'Mã TS': asset.assetCode,
         'Tên TS': asset.assetName,
         'Ngày sử dụng': asset.usageDate,
         'Số lượng': asset.quantity,
         'Đơn giá': asset.price,
-        'Đã thanh lý': asset.isDisposed ? 'Có' : 'Không'
+        'Đã thanh lý': asset.isDisposed ? 'Có' : 'Không',
       }));
 
       const worksheet = XLSX.utils.json_to_sheet(exportData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Assets');
       XLSX.writeFile(workbook, 'Danh_sach_tai_san.xlsx');
-    }
+    },
   },
   watch: {
     selectedHouse: {
       async handler() {
         this.selectedRoom = 'all';
         await this.loadRooms();
-      }
-    }
-  }
+      },
+    },
+  },
 };
 </script>
 
@@ -385,7 +437,6 @@ export default {
   border-radius: 1rem;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
-
 
 /* Header Section */
 .header-section {
