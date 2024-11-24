@@ -469,7 +469,9 @@ export default {
 
     async createContract(data) {
       try {
-        const response = await crudApi.create('api::contract.contract', data);
+        let _data = {...data};
+        delete _data.id;
+        const response = await crudApi.create('api::contract.contract', _data);
 
         if (!response.error) {
           return response.data;
