@@ -124,6 +124,7 @@
 <script>
 import * as XLSX from 'xlsx';
 import Swal from 'sweetalert2';
+import crudApi from '@/apis/crudApi';
 
 export default {
   data() {
@@ -211,16 +212,13 @@ export default {
         this.isLoading = true;
 
         // 1. Lấy thông tin phòng hiện tại
-        const roomResponse = await fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms/${booking.roomId}`);
-        const roomData = await roomResponse.json();
+        const roomResponse = await crudApi.read("api::room.room", {id: booking.roomId.id});
+        const roomData = roomResponse.data[0];
 
         // 2. Xóa booking
-        const bookingResponse = await fetch(
-          `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-bookings/${booking.id}`,
-          { method: 'DELETE' }
-        );
+        const bookingResponse = await crudApi.delete("api::landlord-booking.landlord-booking", {id: booking.id});
 
-        if (!bookingResponse.ok) {
+        if (bookingResponse.error) {
           throw new Error('Không thể xóa đặt cọc');
         }
 
@@ -228,21 +226,13 @@ export default {
         const updatedRoomData = {
           ...roomData,
           hasBooking: false,
-          currentBooking: null
+          currentBooking: null,
+          landlordBokingId: null
         };
 
-        const updateRoomResponse = await fetch(
-          `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms/${booking.roomId}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedRoomData)
-          }
-        );
+        const updateRoomResponse = await crudApi.update("api::room.room", {id: roomData.id}, updatedRoomData);
 
-        if (!updateRoomResponse.ok) {
+        if (updateRoomResponse.error) {
           throw new Error('Không thể cập nhật trạng thái phòng');
         }
 
@@ -274,13 +264,11 @@ export default {
         }
 
         // 2. Fetch houses của chủ trọ
-        const housesResponse = await fetch(
-          `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes?landlordId=${currentUser.id}`
-        );
-        if (!housesResponse.ok) {
+        const housesResponse = await crudApi.read("api::home.home", {landlordId: {id: currentUser.id}});
+        if (housesResponse.error) {
           throw new Error('Không thể tải danh sách nhà');
         }
-        const housesData = await housesResponse.json();
+        const housesData = housesResponse.data;
         this.houses = housesData.map(home => ({
           id: home.id,
           name: home.name,
@@ -291,17 +279,20 @@ export default {
         const landlordHouseIds = this.houses.map(house => house.id);
 
         // 4. Fetch rooms thuộc các nhà của chủ trọ
-        const roomsResponse = await fetch(
-          'https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms'
-        );
-        if (!roomsResponse.ok) {
+        const roomsResponse = await crudApi.read("api::room.room", {
+            houseId: {
+              $in: landlordHouseIds
+            }
+          });
+        
+        if (roomsResponse.error) {
           throw new Error('Không thể tải danh sách phòng');
         }
-        const roomsData = await roomsResponse.json();
+        const roomsData = roomsResponse.data;
+        const listRoomId = roomsData.map(room => room.id);
 
         // Lọc phòng theo houses của landlord
         this.rooms = roomsData
-          .filter(room => landlordHouseIds.includes(room.houseId))
           .map(room => ({
             id: room.id,
             roomNumber: room.roomNumber,
@@ -309,21 +300,14 @@ export default {
           }));
 
         // 5. Fetch bookings
-        const bookingsResponse = await fetch(
-          'https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-bookings'
-        );
-        if (!bookingsResponse.ok) {
+        const bookingsResponse = await crudApi.read("api::landlord-booking.landlord-booking", {roomId: {id: {$in: listRoomId}}});
+        if (bookingsResponse.error) {
           throw new Error('Không thể tải danh sách đặt cọc');
         }
-        const bookingsData = await bookingsResponse.json();
+        const bookingsData = bookingsResponse.data;
 
         // 6. Lọc bookings theo nhà của chủ trọ
-        this.bookings = Array.isArray(bookingsData)
-          ? bookingsData.filter(booking =>
-            landlordHouseIds.includes(booking.houseId) &&
-            booking.landlordId === currentUser.id
-          )
-          : [];
+        this.bookings = bookingsData;
 
       } catch (error) {
         console.error('Error fetching data:', error);
