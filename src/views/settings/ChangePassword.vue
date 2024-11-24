@@ -221,6 +221,7 @@
 
 <script>
 import Swal from 'sweetalert2';
+import authApi from '@/apis/authApi';
 
 export default {
   name: 'ChangePassword',
@@ -363,45 +364,51 @@ export default {
         this.isLoading = true;
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-        const userResponse = await fetch(
-          `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/users/${currentUser.id}`
-        );
+        // const userResponse = await fetch(
+        //   `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/users/${currentUser.id}`
+        // );
 
-        if (!userResponse.ok) {
-          throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau!');
-        }
+        // if (!userResponse.ok) {
+        //   throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau!');
+        // }
 
-        const userData = await userResponse.json();
-        const decodedPassword = atob(userData.password);
+        // const userData = await userResponse.json();
+        // const decodedPassword = atob(userData.password);
 
-        if (this.currentPassword !== decodedPassword) {
-          this.currentPasswordError = 'Mật khẩu hiện tại không chính xác';
-          return;
-        }
+        // if (this.currentPassword !== decodedPassword) {
+        //   this.currentPasswordError = 'Mật khẩu hiện tại không chính xác';
+        //   return;
+        // }
 
-        if (this.newPassword === this.currentPassword) {
-          this.newPasswordError = 'Mật khẩu mới không được trùng với mật khẩu hiện tại';
-          return;
-        }
+        // if (this.newPassword === this.currentPassword) {
+        //   this.newPasswordError = 'Mật khẩu mới không được trùng với mật khẩu hiện tại';
+        //   return;
+        // }
 
-        const encodedNewPassword = btoa(this.newPassword);
-        const updateResponse = await fetch(
-          `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/users/${currentUser.id}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...userData,
-              password: encodedNewPassword
-            })
-          }
-        );
+        // const encodedNewPassword = btoa(this.newPassword);
+        // const updateResponse = await fetch(
+        //   `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/users/${currentUser.id}`,
+        //   {
+        //     method: 'PUT',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({
+        //       ...userData,
+        //       password: encodedNewPassword
+        //     })
+        //   }
+        // );
 
-        if (!updateResponse.ok) {
+        const updateResponse = await authApi.changePassword({
+          "currentPassword": this.currentPassword,
+          "password": this.newPassword,
+          "passwordConfirmation": this.newPassword
+        });
+
+        if (updateResponse.error) {
           throw new Error('Không thể cập nhật mật khẩu. Vui lòng thử lại!');
         }
 
-        currentUser.password = encodedNewPassword;
+        currentUser.password = this.newPassword;
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
         await Swal.fire({

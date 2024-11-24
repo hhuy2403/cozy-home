@@ -421,7 +421,7 @@ export default {
           }
 
           const water = waterData?.find(w => w.roomId.id === room.id);
-          const customer = customers.find(c => c.roomId.id === room.id);
+          const customer = customers.find(c => c.rooms.id === room.id);
 
           let oldWaterIndex = 0;
           let newWaterIndex = 0;

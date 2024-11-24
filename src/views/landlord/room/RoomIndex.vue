@@ -421,37 +421,26 @@ export default {
           await crudApi.delete("api::electric-data.electric-data", {roomId: {id: room.id}});
           await crudApi.delete("api::water-data.water-data", {roomId: {id: room.id}});
           await crudApi.delete("api::other-fee.other-fee", {roomNumber: room.roomNumber});
-          await crudApi.delete("api::customer.customer", {rooms: {id: room.id}});
           delete this.roomCustomers[room.id];
 
-          // TODO: xoa contact
           
           // Kiểm tra và xóa customer data
-          // const customersResponse = await fetch(
-          //   `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers`
-          // );
-          // if (customersResponse.ok) {
-          //   const allCustomers = await customersResponse.json();
-          //   const roomCustomer = allCustomers.find(c => c.roomId === room.id);
+          const customersResponse = await crudApi.read("api::customer.customer", {rooms: {id: room.id}});
+          if (!customersResponse.error) {
+            const roomCustomer = customersResponse.data[0];
+            
+            if (roomCustomer) {
+              // Xóa customer
+              await crudApi.delete("api::customer.customer", {id: roomCustomer.id});
 
-          //   if (roomCustomer) {
-          //     // Xóa customer
-          //     await fetch(
-          //       `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers/${roomCustomer.id}`,
-          //       { method: 'DELETE' }
-          //     );
-
-          //     // Xóa contracts nếu có
-          //     if (roomCustomer.contracts && roomCustomer.contracts.length > 0) {
-          //       await Promise.all(roomCustomer.contracts.map(contract =>
-          //         fetch(
-          //           `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/contracts/${contract.contractNumber}`,
-          //           { method: 'DELETE' }
-          //         )
-          //       ));
-          //     }
-          //   }
-          // }
+              // Xóa contracts nếu có
+              if (roomCustomer.contracts && roomCustomer.contracts.length > 0) {
+                await Promise.all(roomCustomer.contracts.map(contract =>
+                  crudApi.delete("api::contract.contract", {id: contract.contractNumber})
+                ));
+              }
+            }
+          }
 
           // Cập nhật trạng thái phòng
           await crudApi.update("api::room.room", {id: room.id}, {
@@ -511,6 +500,97 @@ export default {
     },
 
     async fetchHouses() {
+      try {
+        this.isLoading = true;
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (!currentUser?.id || currentUser.role !== 'landlord') {
+          throw new Error('Invalid user or not a landlord');
+        }
+
+        // 1. Fetch tất cả houses
+        const resHouses = await crudApi.read('api::home.home', { landlordId: { id: currentUser.id }});
+        if (resHouses.error) {
+          throw new Error('Failed to fetch houses');
+        }
+
+        // 2. Process each house
+        const allHouses = resHouses.data;
+
+        // Lọc houses theo landlordId
+        const houses = allHouses;
+
+        // 2. Process each house
+        const processedHouses = await Promise.all(houses.map(async (house) => {
+          try {
+            // Fetch tất cả rooms
+            const roomResponse = await crudApi.read('api::room.room', {houseId: {id: { $eq: house.id }}});
+             
+            if (roomResponse.error) {
+              throw new Error(`Failed to fetch rooms`);
+            }
+            const allRooms = roomResponse.data;
+
+            // Lọc rooms theo houseId
+            const rooms = allRooms;
+
+            // Add rooms to loadingRooms Set
+            rooms.forEach(room => this.loadingRooms.add(room.id));
+
+            // Fetch customer info for rented rooms
+            const rentedRooms = rooms.filter(room => room.isRented);
+            await Promise.all(rentedRooms.map(async (room) => {
+              try {
+                const customerResponse = await crudApi.read('api::customer.customer', { rooms: { id: room.id } });
+                 
+                if (customerResponse.error) {
+                  throw new Error(`Failed to fetch customers`);
+                }
+                const allCustomers = customerResponse.data;
+
+                // Lọc customer theo roomId và houseId
+                const customer = allCustomers[0];
+
+                if (customer) {
+                  this.roomCustomers[room.id] = customer;
+                }
+              } catch (error) {
+                console.error(`Error fetching customer for room ${room.id}:`, error);
+              } finally {
+                this.loadingRooms.delete(room.id);
+              }
+            }));
+
+            return {
+              ...house,
+              rooms: rooms
+            };
+          } catch (error) {
+            console.error(`Error processing house ${house.id}:`, error);
+            return {
+              ...house,
+              rooms: []
+            };
+          }
+        }));
+
+        this.houses = processedHouses;
+
+      } catch (error) {
+        console.error('Error fetching houses:', error);
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi!",
+          text: "Không thể tải dữ liệu. Vui lòng thử lại!"
+        });
+      } finally {
+        setTimeout(() => {
+          this.isLoading = false;
+        }, 500);
+      }
+    },
+
+    async fetchHouses1() {
       try {
         this.isLoading = true;
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));

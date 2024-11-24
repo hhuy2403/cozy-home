@@ -6,6 +6,16 @@ const authApi = {
     return baseApi.post(url, data);
   },
 
+  
+  changePassword: (data) => {
+    const url = "/api/auth/change-password";
+    return baseApi.post(url, data, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+  },
+
   login: (data) => {
     const url = "/api/auth/local";
     return baseApi.post(url, data);

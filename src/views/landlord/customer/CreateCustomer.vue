@@ -443,8 +443,10 @@ export default {
         if (customers.length > 0) {
           const customerData = customers[0];
           this.customer = { ...this.customer, ...customerData };
+
           this.members = customerData.members || [];
           this.contract = customerData.contracts?.[0] || this.contract;
+
 
           // Update services selection
           if (customerData.services) {

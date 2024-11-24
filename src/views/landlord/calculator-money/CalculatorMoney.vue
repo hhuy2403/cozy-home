@@ -429,9 +429,7 @@ export default {
           }
 
           // Thực hiện xóa
-          await fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills/${bill.id}`, {
-            method: 'DELETE'
-          });
+          await crudApi.delete("api::bill.bill", {id: bill.id});
 
           // Cập nhật dữ liệu local
           await this.loadBills();
