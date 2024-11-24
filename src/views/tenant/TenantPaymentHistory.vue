@@ -124,6 +124,7 @@
 
 <script>
 import * as XLSX from 'xlsx';
+import { crudApi } from '../../apis/crudApi';
 
 export default {
   data() {
@@ -197,7 +198,8 @@ export default {
     async loadPaymentHistory() {
       try {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills');
+        const response = await crudApi.read('api::bill.bill');
+        // const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills');
         const bills = await response.json();
         
         this.paymentHistory = bills

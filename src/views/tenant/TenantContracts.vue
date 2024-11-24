@@ -77,6 +77,7 @@
 
 <script>
 import jsPDF from 'jspdf';
+import {crudApi} from "../../apis/crudApi";
 
 export default {
   name: 'TenantContract',
@@ -85,8 +86,7 @@ export default {
     return {
       loading: true,
       contractData: null,
-      houseData: null,
-      apiBaseUrl: 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1'
+      houseData: null
     };
   },
 
@@ -101,13 +101,15 @@ export default {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
         // Fetch customer data
-        const customersResponse = await fetch(`${this.apiBaseUrl}/customers`);
+        const customersResponse = await crudApi.read("api::customer.customer")
+        // const customersResponse = await fetch(`${this.apiBaseUrl}/customers`);
         const customers = await customersResponse.json();
         const customerData = customers.find(c => c.email === currentUser.email);
 
         if (customerData) {
           // Fetch contract data
-          const contractsResponse = await fetch(`${this.apiBaseUrl}/contracts`);
+          const contractsResponse = await crudApi.read("api::contract.contract")
+          // const contractsResponse = await fetch(`${this.apiBaseUrl}/contracts`);
           const contracts = await contractsResponse.json();
           const contract = contracts.find(c => 
             c.tenantName === customerData.fullName && 
@@ -116,7 +118,8 @@ export default {
 
           if (contract) {
             // Fetch house data
-            const homesResponse = await fetch(`${this.apiBaseUrl}/homes`);
+            const homesResponse = await crudApi.read("api::home.home")
+            // const homesResponse = await fetch(`${this.apiBaseUrl}/homes`);
             const homes = await homesResponse.json();
             this.houseData = homes.find(h => h.id === contract.houseId);
             

@@ -107,6 +107,9 @@
 </template>
 
 <script>
+
+import { crudApi } from '../../apis/crudApi';
+
 export default {
   name: 'TenantMyRoom',
   
@@ -137,7 +140,8 @@ export default {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         
         // Fetch customers data
-        const customersResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers');
+        const customersResponse = await crudApi.read('api::customer.customer');
+        // const customersResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers');
         const customers = await customersResponse.json();
         
         // Find customer by email
@@ -145,7 +149,8 @@ export default {
         
         if (customerData) {
           // Fetch homes data
-          const homesResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes');
+          const homesResponse = await crudApi.read('api::home.home');
+          // const homesResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes');
           const homes = await homesResponse.json();
           
           // Find home by houseId
