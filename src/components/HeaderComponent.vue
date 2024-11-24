@@ -109,8 +109,6 @@ export default {
         { text: 'Hợp Đồng', link: '/tenant/contracts', icon: 'fas fa-file-contract' },
         { text: 'Lịch Sử', link: '/tenant/payment-history', icon: 'fas fa-history' },
         { text: 'Thanh Toán', link: '/tenant/payments', icon: 'fas fa-credit-card' },
-        { text: 'Hỗ Trợ', link: '/tenant/support', icon: 'fas fa-life-ring' },
-        { text: 'Thông Báo', link: '/tenant/notification', icon: 'fas fa-bell' },
       ],
       guestLinks: [
         { text: 'Đăng Nhập', link: '/login', icon: 'fas fa-sign-in-alt' },

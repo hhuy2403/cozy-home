@@ -43,22 +43,22 @@
                   </router-link>
                 </li>
                 <li>
-                  <router-link to="/about">
+                  <router-link to="">
                     <i class="fas fa-chevron-right"></i>&nbsp; Giới Thiệu
                   </router-link>
                 </li>
                 <li>
-                  <router-link to="/services">
+                  <router-link to="">
                     <i class="fas fa-chevron-right"></i>&nbsp; Dịch Vụ
                   </router-link>
                 </li>
                 <li>
-                  <router-link to="/pricing">
+                  <router-link to="">
                     <i class="fas fa-chevron-right"></i>&nbsp; Bảng Giá
                   </router-link>
                 </li>
                 <li>
-                  <router-link to="/contact">
+                  <router-link to="">
                     <i class="fas fa-chevron-right"></i>&nbsp; Liên Hệ
                   </router-link>
                 </li>
@@ -144,13 +144,13 @@
           <div class="col-md-6">
             <ul class="footer-bottom-links">
               <li>
-                <router-link to="/privacy">Chính sách bảo mật</router-link>
+                <router-link to="">Chính sách bảo mật</router-link>
               </li>
               <li>
-                <router-link to="/terms">Điều khoản sử dụng</router-link>
+                <router-link to="">Điều khoản sử dụng</router-link>
               </li>
               <li>
-                <router-link to="/faq">FAQ</router-link>
+                <router-link to="">FAQ</router-link>
               </li>
             </ul>
           </div>
