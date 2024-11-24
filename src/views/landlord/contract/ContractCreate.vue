@@ -206,7 +206,6 @@
 <script>
 import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
-import crudApi from '@/apis/crudApi';
 
 export default {
   data() {
@@ -645,8 +644,7 @@ export default {
                 terms: this.contract.terms,
               },
             ],
-          }),
-        });
+          });
 
         if (response.error) throw new Error('Failed to update room status');
       } catch (error) {
