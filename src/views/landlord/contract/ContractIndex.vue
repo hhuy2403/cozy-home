@@ -281,7 +281,7 @@
 import crudApi from '@/apis/crudApi';
 import Swal from 'sweetalert2';
 
-const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
+//const API_URL = 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1';
 
 export default {
   name: 'ContractIndex',
@@ -609,62 +609,62 @@ export default {
         if (result.isConfirmed) {
           this.isLoading = true;
 
+          const roomResponse = await crudApi.read('api::room.room', {
+            houseId: contract.houseId,
+            roomNumber: contract.roomNumber,
+          });
+
           // Tìm room trước khi xóa contract
-          const roomResponse = await fetch(
-            `${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`
-          );
-          if (!roomResponse.ok) throw new Error('Failed to find room');
-          const rooms = await roomResponse.json();
-          const room = rooms[0];
+
+          if (!roomResponse.isSuccess) throw new Error('Failed to find room');
+          //const rooms = await roomResponse.json();
+          const room = roomResponse.data[0];
 
           if (!room) throw new Error('Room not found');
 
           // Xóa contract
-          const contractResponse = await fetch(
-            `${API_URL}/contracts/${contract.id}`,
-            {
-              method: 'DELETE',
-            }
+          const contractResponse = await crudApi.delete(
+            'api::contract.contract',
+            { id: contract.id }
           );
 
-          if (!contractResponse.ok)
+          if (!contractResponse.isSuccess)
             throw new Error('Failed to delete contract');
 
           // Cập nhật trạng thái phòng
-          const updateRoomResponse = await fetch(
-            `${API_URL}/rooms/${room.id}`,
+          const updateRoomResponse = await crudApi.update(
+            'api::room.room',
+            { id: room.id },
             {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                ...room,
-                isRented: false,
-                currentContract: null,
-                currentTenant: null,
-                customer: null,
-              }),
+              ...room,
+              isRented: false,
+              currentContract: null,
+              currentTenant: null,
+              customer: null,
             }
           );
 
-          if (!updateRoomResponse.ok)
+          if (!updateRoomResponse.isSuccess)
             throw new Error('Failed to update room status');
 
           // Xóa customer tương ứng
-          const customerResponse = await fetch(
-            `${API_URL}/customers?contractNumber=${contract.id}`
+
+          const customerResponse = await crudApi.read(
+            'api::customer.customer',
+            {
+              contractNumber: contract.id,
+            }
           );
-          if (customerResponse.ok) {
-            const customers = await customerResponse.json();
+          if (customerResponse.isSuccess) {
+            const customers = customerResponse.data;
             if (customers.length > 0) {
-              const deleteCustomerResponse = await fetch(
-                `${API_URL}/customers/${customers[0].id}`,
+              const deleteCustomerResponse = await crudApi.delete(
+                'api::customer.customer',
                 {
-                  method: 'DELETE',
+                  id: customers[0].id,
                 }
               );
-              if (!deleteCustomerResponse.ok) {
+              if (!deleteCustomerResponse.isSuccess) {
                 console.error('Failed to delete customer');
               }
             }
@@ -684,11 +684,14 @@ export default {
     async viewContract(contract) {
       try {
         const house = this.houses.find((h) => h.id === contract.houseId);
-        const roomResponse = await fetch(
-          `${API_URL}/rooms?houseId=${contract.houseId}&roomNumber=${contract.roomNumber}`
-        );
-        if (!roomResponse.ok) throw new Error('Failed to load room details');
-        const rooms = await roomResponse.json();
+
+        const roomResponse = await crudApi.read('api::contract.contract', {
+          houseId: contract.houseId,
+          roomNumber: contract.roomNumber,
+        });
+        if (!roomResponse.isSuccess)
+          throw new Error('Failed to load room details');
+        const rooms = roomResponse.data;
         const room = rooms[0];
 
         this.selectedContract = {

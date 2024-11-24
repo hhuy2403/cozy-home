@@ -14,9 +14,17 @@
             <label class="filter-label">
               <i class="fas fa-home"></i> Nhà
             </label>
-            <select class="modern-select" v-model="selectedHouse" @change="updateRooms">
+            <select
+              class="modern-select"
+              v-model="selectedHouse"
+              @change="updateRooms"
+            >
               <option value="">Tất cả nhà</option>
-              <option v-for="house in houses" :key="house.id" :value="house.name">
+              <option
+                v-for="house in houses"
+                :key="house.id"
+                :value="house.name"
+              >
                 {{ house.name }}
               </option>
             </select>
@@ -28,7 +36,11 @@
             </label>
             <select class="modern-select" v-model="selectedRoom">
               <option value="">Tất cả phòng</option>
-              <option v-for="room in filteredRooms" :key="room.roomNumber" :value="room.roomNumber">
+              <option
+                v-for="room in filteredRooms"
+                :key="room.roomNumber"
+                :value="room.roomNumber"
+              >
                 Phòng {{ room.roomNumber }}
               </option>
             </select>
@@ -99,15 +111,21 @@
                 <div class="total-group">
                   <div class="total-item">
                     <span>Tổng tiền:</span>
-                    <strong class="total-amount">{{ formatCurrency(invoice.totalAmount) }}</strong>
+                    <strong class="total-amount">{{
+                      formatCurrency(invoice.totalAmount)
+                    }}</strong>
                   </div>
                   <div class="total-item">
                     <span>Đã trả:</span>
-                    <strong class="paid-amount">{{ formatCurrency(invoice.paidAmount) }}</strong>
+                    <strong class="paid-amount">{{
+                      formatCurrency(invoice.paidAmount)
+                    }}</strong>
                   </div>
                   <div class="total-item">
                     <span>Còn lại:</span>
-                    <strong class="remaining-amount">{{ formatCurrency(invoice.remainingAmount) }}</strong>
+                    <strong class="remaining-amount">{{
+                      formatCurrency(invoice.remainingAmount)
+                    }}</strong>
                   </div>
                 </div>
               </td>
@@ -126,18 +144,20 @@
 </template>
 
 <script>
+import crudApi from '@/apis/crudApi';
+
 export default {
   data() {
-  return {
-    selectedHouse: "",
-    selectedRoom: "",
-    houses: [], 
-    rooms: [], 
-    bills: [], 
-    currentUser: null,
-    isLoading: false,
-  };
-},
+    return {
+      selectedHouse: '',
+      selectedRoom: '',
+      houses: [],
+      rooms: [],
+      bills: [],
+      currentUser: null,
+      isLoading: false,
+    };
+  },
 
   computed: {
     filteredRooms() {
@@ -153,24 +173,36 @@ export default {
       let filtered = this.bills;
 
       if (this.selectedHouse) {
-        filtered = filtered.filter(bill => bill.houseName === this.selectedHouse);
+        filtered = filtered.filter(
+          (bill) => bill.houseName === this.selectedHouse
+        );
       }
 
       if (this.selectedRoom) {
-        filtered = filtered.filter(bill => bill.roomNumber === this.selectedRoom);
+        filtered = filtered.filter(
+          (bill) => bill.roomNumber === this.selectedRoom
+        );
       }
 
-      return filtered.map(bill => ({
+      return filtered.map((bill) => ({
         roomNumber: bill.roomNumber,
         customerName: bill.customerName || 'Không có',
         rentalCost: bill.billDetails?.rentalCost?.amount || 0,
         electricCost: bill.billDetails?.electric?.amount || 0,
         waterCost: bill.billDetails?.water?.amount || 0,
-        serviceCost: bill.billDetails?.services?.reduce((sum, service) => sum + (service.amount || 0), 0) || 0,
-        otherCost: bill.billDetails?.otherFees?.reduce((sum, fee) => sum + (fee.amount || 0), 0) || 0,
+        serviceCost:
+          bill.billDetails?.services?.reduce(
+            (sum, service) => sum + (service.amount || 0),
+            0
+          ) || 0,
+        otherCost:
+          bill.billDetails?.otherFees?.reduce(
+            (sum, fee) => sum + (fee.amount || 0),
+            0
+          ) || 0,
         totalAmount: bill.totalAmount || 0,
         paidAmount: bill.paidAmount || 0,
-        remainingAmount: bill.remainingAmount || 0
+        remainingAmount: bill.remainingAmount || 0,
       }));
     },
   },
@@ -184,71 +216,82 @@ export default {
           throw new Error('Không tìm thấy thông tin người dùng!');
         }
 
-        const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes');
-        const homes = await response.json();
+        const response = await crudApi.read('api::home.home', null);
+        if (!response.isSuccess) {
+          throw new Error('Error to fetch home');
+        }
+        const homes = response.data;
 
         // Lọc nhà theo landlordId
         this.houses = homes
-          .filter(home => home.landlordId === this.currentUser.id)
-          .map(home => ({
+          .filter((home) => home.landlordId.id === this.currentUser.id)
+          .map((home) => ({
             id: home.id,
-            name: home.name
+            name: home.name,
           }));
       } catch (error) {
-        console.error("Lỗi khi tải danh sách nhà:", error);
+        console.error('Lỗi khi tải danh sách nhà:', error);
         this.houses = [];
       }
     },
 
     async fetchRooms() {
       try {
-        const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms');
-        const allRooms = await response.json();
+        const response = await crudApi.read('api::room.room', null);
+        if (!response.isSuccess) {
+          throw new Error('Error to fetch room');
+        }
+
+        const allRooms = await response.data;
 
         // Lọc phòng theo houses của landlord
-        const landlordHouseIds = this.houses.map(h => h.id);
+        const landlordHouseIds = this.houses.map((h) => h.id);
         this.rooms = allRooms
-          .filter(room => landlordHouseIds.includes(room.houseId))
-          .map(room => ({
+          .filter((room) => landlordHouseIds.includes(room.houseId.id))
+          .map((room) => ({
             id: room.id,
             roomNumber: room.roomNumber,
-            houseName: this.houses.find(h => h.id === room.houseId)?.name
+            houseName: this.houses.find((h) => h.id === room.houseId.id)?.name,
           }));
       } catch (error) {
-        console.error("Lỗi khi tải danh sách phòng:", error);
+        console.error('Lỗi khi tải danh sách phòng:', error);
         this.rooms = [];
       }
     },
 
     async fetchReport() {
       try {
-        const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills');
-        const allBills = await response.json();
+        const response = await crudApi.read('api::bill.bill');
+        if (!response.isSuccess) {
+          throw new Error('Fetch bill failed');
+        }
+        const allBills = response.data;
 
         // Lọc bills theo rooms của landlord
-        const landlordRoomIds = this.rooms.map(r => r.id);
-        this.bills = allBills.filter(bill =>
-          landlordRoomIds.includes(bill.roomId)
-        ).map(bill => ({
-          ...bill,
-          houseName: this.rooms.find(r => r.id === bill.roomId)?.houseName
-        }));
+        const landlordRoomIds = this.rooms.map((r) => r.roomNumber);
+        this.bills = allBills
+          .filter((bill) => landlordRoomIds.includes(bill.roomNumber))
+          .map((bill) => ({
+            ...bill,
+            houseName: this.rooms.find((r) => r.roomNumber === bill.roomNumber)
+              ?.houseName,
+          }));
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu hóa đơn:", error);
+        console.error('Lỗi khi tải dữ liệu hóa đơn:', error);
         this.bills = [];
       }
     },
 
     formatCurrency(value) {
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
+      return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
       }).format(value);
     },
 
     updateRooms() {
-      this.selectedRoom = "";
-    }
+      this.selectedRoom = '';
+    },
   },
 
   async mounted() {
@@ -263,12 +306,12 @@ export default {
       await this.fetchRooms();
       await this.fetchReport();
     } catch (error) {
-      console.error("Lỗi khi khởi tạo dữ liệu:", error);
+      console.error('Lỗi khi khởi tạo dữ liệu:', error);
       // Hiển thị thông báo lỗi cho người dùng
       this.$swal({
         icon: 'error',
         title: 'Lỗi!',
-        text: error.message || 'Không thể tải dữ liệu. Vui lòng thử lại sau!'
+        text: error.message || 'Không thể tải dữ liệu. Vui lòng thử lại sau!',
       });
     }
   },
