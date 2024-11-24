@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: process.env.VUE_APP_DOMAIN_BE,
+  baseURL: "https://charming-ball-a6ef7b258d.strapiapp.com",
   headers: {
     'Content-Type': 'application/json',
   },
