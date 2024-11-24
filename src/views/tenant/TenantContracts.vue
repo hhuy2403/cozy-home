@@ -77,7 +77,7 @@
 
 <script>
 import jsPDF from 'jspdf';
-import crudApi from "../../apis/crudApi";
+import crudApi from "@/apis/crudApi";
 
 export default {
   name: 'TenantContract',

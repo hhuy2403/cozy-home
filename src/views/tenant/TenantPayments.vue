@@ -139,7 +139,7 @@
 
 <script>
 
-import crudApi from '../../apis/crudApi';
+import crudApi from '@/apis/crudApi';
 
 export default {
   data() {
