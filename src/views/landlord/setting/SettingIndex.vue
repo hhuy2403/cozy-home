@@ -324,9 +324,10 @@
 </template>
 
 <script>
-import { useVuelidate } from '@vuelidate/core'
-import { required, minLength, helpers } from '@vuelidate/validators'
-import Swal from 'sweetalert2'
+import { useVuelidate } from '@vuelidate/core';
+import { required, minLength, helpers } from '@vuelidate/validators';
+import Swal from 'sweetalert2';
+import crudApi from '@/apis/crudApi';
 
 const CLOUDINARY_UPLOAD_PRESET = 'cozy-home'
 const CLOUDINARY_CLOUD_NAME = 'djnt4wlng'
@@ -413,9 +414,7 @@ export default {
         this.error = null
         this.dataLoaded = false
 
-        await Promise.all([
-          this.loadOwnerInfo(),
-        ])
+        await this.loadOwnerInfo();
 
         this.dataLoaded = true
       } catch (error) {
@@ -504,21 +503,21 @@ export default {
         }
 
         // Fetch thông tin user
-        const userResponse = await fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/users/${currentUser.id}`)
-        if (!userResponse.ok) {
+        const userResponse = await crudApi.read("plugin::users-permissions.user", {id: currentUser.id});
+        if (userResponse.error) {
           throw new Error('Failed to fetch user data')
         }
-        const userData = await userResponse.json()
+        const userData = userResponse.data[0];
 
         // Fetch tất cả landlord info
-        const landlordResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-info')
-        if (!landlordResponse.ok) {
+        const landlordResponse = await crudApi.read("api::landlord-info.landlord-info", {userId: {id: currentUser.id}});
+        if (landlordResponse.error) {
           throw new Error('Failed to fetch landlord data')
         }
-        const landlordData = await landlordResponse.json()
+        const landlordData = landlordResponse.data[0];
 
         // Tìm thông tin landlord của user hiện tại
-        const landlordInfo = landlordData.find(info => info.userId === currentUser.id)
+        const landlordInfo = landlordData;
 
         if (!landlordInfo) {
           // Nếu chưa có thông tin landlord, khởi tạo với thông tin cơ bản từ user
@@ -526,7 +525,7 @@ export default {
             ...DEFAULT_OWNER,
             personalInfo: {
               ...DEFAULT_OWNER.personalInfo,
-              name: userData.name || '',
+              name: userData.username || '',
               avatar: userData.avatar || '',
               email: userData.email || '',
               phone: userData.phone || ''
@@ -536,7 +535,7 @@ export default {
           // Nếu đã có thông tin, load đầy đủ
           this.owner = {
             personalInfo: {
-              name: userData.name || '',
+              name: userData.username || '',
               avatar: userData.avatar || '',
               email: userData.email || '',
               phone: userData.phone || '',
@@ -610,6 +609,7 @@ export default {
         // 1. Cập nhật thông tin user
         const userUpdateData = {
           name: this.owner.personalInfo.name,
+          username: this.owner.personalInfo.name,
           avatar: this.owner.personalInfo.avatar,
           email: this.owner.personalInfo.email,
           phone: this.owner.personalInfo.phone
@@ -628,32 +628,16 @@ export default {
         }
 
         // 3. Fetch tất cả landlord info để kiểm tra
-        const landlordResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-info')
-        const allLandlordData = await landlordResponse.json()
-        const existingLandlord = allLandlordData.find(info => info.userId === currentUser.id)
+        const landlordResponse = await crudApi.read("api::landlord-info.landlord-info", {userId: {id: currentUser.id}});
+        const existingLandlord = landlordResponse.data[0];
 
         // 4. Thực hiện các request cập nhật
-        const [userResponse, landlordResponse2] = await Promise.all([
-          // Cập nhật user
-          fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/users/${currentUser.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userUpdateData)
-          }),
-          // Cập nhật hoặc tạo mới landlord info
-          fetch(
-            existingLandlord
-              ? `https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-info/${existingLandlord.id}`
-              : 'https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-info',
-            {
-              method: existingLandlord ? 'PUT' : 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(landlordUpdateData)
-            }
-          )
-        ])
+        const userResponse = await crudApi.update("plugin::users-permissions.user", {id: currentUser.id}, userUpdateData);
+        const landlordResponse2 = existingLandlord
+        ? await crudApi.update("api::landlord-info.landlord-info", {id: existingLandlord.id}, landlordUpdateData)
+        : await crudApi.create("api::landlord-info.landlord-info", landlordUpdateData);
 
-        if (!userResponse.ok || !landlordResponse2.ok) {
+        if (userResponse.error || landlordResponse2.error) {
           throw new Error('Failed to update data')
         }
 
