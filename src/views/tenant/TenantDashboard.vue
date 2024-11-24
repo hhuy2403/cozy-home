@@ -238,7 +238,7 @@ export default {
       try {
         const response = await crudApi.read("api::room.room")
         // const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/rooms');
-        const rooms = await response.json();
+        const rooms = await response.data
         
         const userRoom = rooms.find(room => 
           room.currentTenant === this.currentUser.name
@@ -280,7 +280,7 @@ export default {
       try {
         const response = await crudApi.read("api::bill.bill")
         // const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills');
-        const bills = await response.json();
+        const bills = await response.data
         
         this.recentPayments = bills
           .filter(bill => bill.customerEmail === this.currentUser.email)

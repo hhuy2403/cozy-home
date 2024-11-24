@@ -142,7 +142,7 @@ export default {
         // Fetch customers data
         const customersResponse = await crudApi.read('api::customer.customer');
         // const customersResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/customers');
-        const customers = await customersResponse.json();
+        const customers = await customersResponse.data;
         
         // Find customer by email
         const customerData = customers.find(c => c.email === currentUser.email);
@@ -151,7 +151,7 @@ export default {
           // Fetch homes data
           const homesResponse = await crudApi.read('api::home.home');
           // const homesResponse = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/homes');
-          const homes = await homesResponse.json();
+          const homes = await homesResponse.data;
           
           // Find home by houseId
           const home = homes.find(h => h.id === customerData.houseId);

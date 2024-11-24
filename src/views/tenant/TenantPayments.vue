@@ -169,9 +169,8 @@ export default {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
         // Fetch bills
-        const response = await crudApi.read("api::bill.bill");
+        const bills = await crudApi.read("api::bill.bill");
         // const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills');
-        const bills = await response.json();
         this.bills = bills.filter(bill => bill.customerEmail === currentUser.email);
 
         // Get landlord info
@@ -180,7 +179,7 @@ export default {
             {id: this.bills[0].landlordId}
           );
           // const landlordResponse = await fetch(`https://6725a513c39fedae05b5670b.mockapi.io/api/v1/landlord-info?userId=${this.bills[0].landlordId}`);
-          const landlordData = await landlordResponse.json();
+          const landlordData = await landlordResponse.data
           // Lấy phần tử đầu tiên từ mảng landlordData
           this.landlordInfo = landlordData[0];
         }

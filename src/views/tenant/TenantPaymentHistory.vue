@@ -200,7 +200,7 @@ export default {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         const response = await crudApi.read('api::bill.bill');
         // const response = await fetch('https://6725a513c39fedae05b5670b.mockapi.io/api/v1/bills');
-        const bills = await response.json();
+        const bills = await response.data;
         
         this.paymentHistory = bills
           .filter(bill => bill.customerEmail === currentUser.email)

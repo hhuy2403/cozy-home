@@ -103,14 +103,14 @@ export default {
         // Fetch customer data
         const customersResponse = await crudApi.read("api::customer.customer")
         // const customersResponse = await fetch(`${this.apiBaseUrl}/customers`);
-        const customers = await customersResponse.json();
+        const customers = await customersResponse.data
         const customerData = customers.find(c => c.email === currentUser.email);
 
         if (customerData) {
           // Fetch contract data
           const contractsResponse = await crudApi.read("api::contract.contract")
           // const contractsResponse = await fetch(`${this.apiBaseUrl}/contracts`);
-          const contracts = await contractsResponse.json();
+          const contracts = await contractsResponse.data
           const contract = contracts.find(c => 
             c.tenantName === customerData.fullName && 
             c.roomNumber === customerData.roomNumber
@@ -120,7 +120,7 @@ export default {
             // Fetch house data
             const homesResponse = await crudApi.read("api::home.home")
             // const homesResponse = await fetch(`${this.apiBaseUrl}/homes`);
-            const homes = await homesResponse.json();
+            const homes = await homesResponse.data
             this.houseData = homes.find(h => h.id === contract.houseId);
             
             this.contractData = contract;
